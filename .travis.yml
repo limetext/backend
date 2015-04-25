@@ -2,6 +2,8 @@ os:
   - osx
   - linux
 
+sudo: required
+
 language: go
 
 go: 1.4
