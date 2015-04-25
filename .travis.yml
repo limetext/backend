@@ -1,0 +1,23 @@
+os:
+  - osx
+  - linux
+
+language: go
+
+go: 1.4
+
+install:
+  - ./tasks/general/ci/install.sh
+
+script:
+  - ./tasks/general/ci/run_tests.sh lib
+  - ./tasks/local/ci/check_gen.sh
+  - ./tasks/general/ci/check_fmt.sh
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/3e692a5224c8490f19bd
+    on_success: change
+    on_failure: always
+    on_start: false
