@@ -10,7 +10,6 @@ go: 1.4
 
 install:
   - ./tasks/general/ci/install.sh github.com/limetext/lime-backend/lib
-  - ./tasks/local/ci/install.sh
 
 script:
   - ./tasks/general/ci/run_tests.sh lib
