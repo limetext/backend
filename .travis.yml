@@ -7,13 +7,12 @@ language: go
 go: 1.4
 
 install:
-  - ./tasks/ci/install.sh
+  - ./tasks/general/ci/install.sh
 
 script:
-  - ./tasks/ci/run_tests.sh
-  - ./tasks/ci/build_frontends.sh
-  - ./tasks/ci/check_gen.sh
-  - ./tasks/ci/check_fmt.sh
+  - ./tasks/general/ci/run_tests.sh lib
+  - ./tasks/local/ci/check_gen.sh
+  - ./tasks/general/ci/check_fmt.sh
 
 notifications:
   webhooks:

@@ -82,9 +82,9 @@ type (
 )
 
 var (
-	LIME_USER_PACKAGES_PATH = path.Join("..", "..", "packages", "User")
-	LIME_PACKAGES_PATH      = path.Join("..", "..", "packages")
-	LIME_DEFAULTS_PATH      = path.Join("..", "..", "packages", "Default")
+	LIME_USER_PACKAGES_PATH = path.Join("..", "packages", "User")
+	LIME_PACKAGES_PATH      = path.Join("..", "packages")
+	LIME_DEFAULTS_PATH      = path.Join("..", "packages", "Default")
 )
 
 func (h *DummyFrontend) SetDefaultAction(action bool) {

@@ -152,7 +152,7 @@ func init() {
 	}
 	py.AddToPath(backend.LIME_PACKAGES_PATH)
 	py.AddToPath(backend.LIME_USER_PACKAGES_PATH)
-	py.AddToPath(path.Join("..", "..", "backend", "sublime"))
+	py.AddToPath(path.Join("..", "..", "lib", "sublime"))
 }
 
 // Wrapper for packages.Plugin and py.Module

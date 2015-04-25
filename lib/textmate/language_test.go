@@ -52,13 +52,13 @@ func TestTmLanguage(t *testing.T) {
 	}
 	tests := []test{
 		{
-			"testdata/plist2.tmlang",
-			"testdata/plist2.tmlang.res",
+			"testdata/plist.tmlang",
+			"testdata/plist.tmlang.res",
 			"text.xml.plist",
 		},
 		{
 			"testdata/Property List (XML).tmLanguage",
-			"testdata/plist.tmlang.res",
+			"testdata/Property List (XML).tmLanguage.res",
 			"text.xml.plist",
 		},
 		{
