@@ -15,6 +15,7 @@ import (
 	"github.com/limetext/lime-backend/lib/watch"
 	"os"
 	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -152,7 +153,11 @@ func init() {
 	}
 	py.AddToPath(backend.LIME_PACKAGES_PATH)
 	py.AddToPath(backend.LIME_USER_PACKAGES_PATH)
-	py.AddToPath(path.Join("..", "..", "lib", "sublime"))
+
+	gopaths := filepath.SplitList(os.ExpandEnv("$GOPATH"))
+	for _, gopath := range gopaths {
+		py.AddToPath(path.Join(gopath, "src", "github.com", "limetext", "lime-backend", "lib", "sublime"))
+	}
 }
 
 // Wrapper for packages.Plugin and py.Module
