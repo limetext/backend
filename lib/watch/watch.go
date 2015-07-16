@@ -194,6 +194,8 @@ func (w *Watcher) removeDir(name string) {
 	w.dirs = remove(w.dirs, name)
 }
 
+// Observe dispatches notifications received by the watcher. This function will
+// return when the watcher is closed.
 func (w *Watcher) Observe() {
 	for {
 		select {
