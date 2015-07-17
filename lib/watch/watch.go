@@ -194,10 +194,15 @@ func (w *Watcher) removeDir(name string) {
 	w.dirs = remove(w.dirs, name)
 }
 
+// Observe dispatches notifications received by the watcher. This function will
+// return when the watcher is closed.
 func (w *Watcher) Observe() {
 	for {
 		select {
-		case ev := <-w.wchr.Events:
+		case ev, ok := <-w.wchr.Events:
+			if !ok {
+				break
+			}
 			func() {
 				w.lock.Lock()
 				defer w.lock.Unlock()
@@ -234,7 +239,10 @@ func (w *Watcher) Observe() {
 				}
 
 			}()
-		case err := <-w.wchr.Errors:
+		case err, ok := <-w.wchr.Errors:
+			if !ok {
+				break
+			}
 			log.Errorf("Watcher error: %s", err)
 		}
 	}

@@ -51,35 +51,43 @@ func TestNewWatcher(t *testing.T) {
 type dummy struct {
 	text string
 	name string
-	wg   sync.WaitGroup
+	c    chan bool
 	lock sync.Mutex
+}
+
+func newDummy(name string) *dummy {
+	return &dummy{name: name, c: make(chan bool)}
+}
+
+func (d *dummy) done() {
+	d.c <- true
 }
 
 func (d *dummy) FileChanged(name string) {
 	d.lock.Lock()
-	defer d.lock.Unlock()
-	defer d.wg.Done()
+	defer d.done()        // make sure Unlock() is called first
+	defer d.lock.Unlock() // in order to avoid deadlocks
 	d.text = "Changed"
 }
 
 func (d *dummy) FileCreated(name string) {
 	d.lock.Lock()
+	defer d.done()
 	defer d.lock.Unlock()
-	defer d.wg.Done()
 	d.text = "Created"
 }
 
 func (d *dummy) FileRemoved(name string) {
 	d.lock.Lock()
+	defer d.done()
 	defer d.lock.Unlock()
-	defer d.wg.Done()
 	d.text = "Removed"
 }
 
 func (d *dummy) FileRenamed(name string) {
 	d.lock.Lock()
+	defer d.done()
 	defer d.lock.Unlock()
-	defer d.wg.Done()
 	d.text = "Renamed"
 }
 
@@ -87,6 +95,10 @@ func (d *dummy) Text() string {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	return d.text
+}
+
+func (d *dummy) Wait() {
+	<-d.c
 }
 
 func TestWatch(t *testing.T) {
@@ -111,11 +123,10 @@ func TestWatch(t *testing.T) {
 			[]string{"testdata"},
 		},
 	}
-	d := new(dummy)
 	for i, test := range tests {
 		watcher := newWatcher(t)
 		for _, name := range test.paths {
-			watch(t, watcher, name, d)
+			watch(t, watcher, name, newDummy(name))
 		}
 		if len(watcher.watched) != len(test.expWatched) {
 			t.Errorf("Test %d: Expected watched %v keys equal to %v", i, watcher.watched, test.expWatched)
@@ -149,7 +160,7 @@ func Testwatch(t *testing.T) {
 func TestAdd(t *testing.T) {
 	watcher := newWatcher(t)
 	defer wclose(t, watcher)
-	d := new(dummy)
+	d := newDummy("test")
 	watcher.add("test", d)
 	if cb := watcher.watched["test"][0]; cb != d {
 		t.Errorf("Expected watcher['test'][0] callback equal to %v, but got %v", d, cb)
@@ -161,7 +172,7 @@ func TestFlushDir(t *testing.T) {
 	dir := "testdata"
 	watcher := newWatcher(t)
 	defer wclose(t, watcher)
-	d := new(dummy)
+	d := newDummy(name)
 	watch(t, watcher, name, d)
 	if !reflect.DeepEqual(watcher.watchers, []string{name}) {
 		t.Errorf("Expected watchers equal to %v, but got %v", []string{name}, watcher.watchers)
@@ -179,7 +190,7 @@ func TestUnWatch(t *testing.T) {
 	name := "testdata/dummy.txt"
 	watcher := newWatcher(t)
 	defer wclose(t, watcher)
-	d := new(dummy)
+	d := newDummy(name)
 	watch(t, watcher, name, d)
 	unwatch(t, watcher, name, d)
 	if len(watcher.watched) != 0 {
@@ -212,7 +223,7 @@ func TestUnWatchDirectory(t *testing.T) {
 	dir := "testdata"
 	watcher := newWatcher(t)
 	defer wclose(t, watcher)
-	d := new(dummy)
+	d := newDummy(name)
 	watch(t, watcher, name, d)
 	watch(t, watcher, dir, nil)
 	if !reflect.DeepEqual(watcher.watchers, []string{"testdata"}) {
@@ -267,7 +278,7 @@ func TestRemoveWatch(t *testing.T) {
 	name := "testdata/dummy.txt"
 	watcher := newWatcher(t)
 	defer wclose(t, watcher)
-	d := new(dummy)
+	d := newDummy(name)
 	watch(t, watcher, name, d)
 	watcher.removeWatch(name)
 	if !reflect.DeepEqual(watcher.watchers, []string{}) {
@@ -280,7 +291,7 @@ func TestRemoveDir(t *testing.T) {
 	dir := "testdata"
 	watcher := newWatcher(t)
 	defer wclose(t, watcher)
-	d := new(dummy)
+	d := newDummy(name)
 	watch(t, watcher, dir, d)
 	watch(t, watcher, name, d)
 	if !reflect.DeepEqual(watcher.watchers, []string{dir}) {
@@ -303,15 +314,15 @@ func TestObserve(t *testing.T) {
 	watcher := newWatcher(t)
 	defer ioutil.WriteFile(name, []byte(""), 0644)
 	defer wclose(t, watcher)
-	d := &dummy{name: name}
+	d := newDummy(name)
 	watch(t, watcher, name, d)
 	go watcher.Observe()
 
-	d.wg.Add(1)
 	if err := ioutil.WriteFile(name, []byte("test"), 0644); err != nil {
 		t.Fatalf("WriteFile error: %s", err)
 	}
-	d.wg.Wait()
+
+	d.Wait()
 	if d.Text() != "Changed" {
 		t.Errorf("Expected dummy Text %s, but got %s", "Changed", d.Text())
 	}
@@ -323,18 +334,17 @@ func TestObserveDirectory(t *testing.T) {
 	watcher := newWatcher(t)
 	defer ioutil.WriteFile(name, []byte(""), 0644)
 	defer wclose(t, watcher)
-	d := &dummy{name: dir}
+	d := newDummy(name)
 	watch(t, watcher, dir, d)
 	go watcher.Observe()
 
 	if !reflect.DeepEqual(watcher.watchers, []string{"testdata"}) {
 		t.Errorf("Expected watchers be equal to %v, but got %v", []string{"testdata"}, watcher.watchers)
 	}
-	d.wg.Add(1)
 	if err := ioutil.WriteFile(name, []byte("test"), 0644); err != nil {
 		t.Fatalf("WriteFile error: %s", err)
 	}
-	d.wg.Wait()
+	d.Wait()
 	if d.Text() != "Changed" {
 		t.Errorf("Expected dummy Text %s, but got %s", "Changed", d.Text())
 	}
@@ -345,21 +355,20 @@ func TestCreateEvent(t *testing.T) {
 	defer os.Remove(name)
 	watcher := newWatcher(t)
 	defer wclose(t, watcher)
-	d := &dummy{name: name}
+	d := newDummy(name)
 	watch(t, watcher, name, d)
 	go watcher.Observe()
 
 	if !reflect.DeepEqual(watcher.watchers, []string{"testdata"}) {
 		t.Errorf("Expected watchers be equal to %v, but got %v", []string{"testdata"}, watcher.watchers)
 	}
-	d.wg.Add(1)
 
 	if f, err := os.Create(name); err != nil {
 		t.Fatalf("File creation error: %s", err)
 	} else {
 		f.Close()
 	}
-	d.wg.Wait()
+	d.Wait()
 	if d.Text() != "Created" {
 		t.Errorf("Expected dummy Text %s, but got %s", "Created", d.Text())
 	}
@@ -375,25 +384,23 @@ func TestDeleteEvent(t *testing.T) {
 	name := "testdata/dummy.txt"
 	watcher := newWatcher(t)
 	defer wclose(t, watcher)
-	d := &dummy{name: name}
+	d := newDummy(name)
 	watch(t, watcher, name, d)
 	go watcher.Observe()
 
-	d.wg.Add(1)
 	if err := os.Remove(name); err != nil {
 		t.Fatalf("Couldn't remove file %s: %s", name, err)
 	}
-	d.wg.Wait()
+	d.Wait()
 	if d.Text() != "Removed" {
 		t.Errorf("Expected dummy Text %s, but got %s", "Removed", d.Text())
 	}
-	d.wg.Add(1)
 	if f, err := os.Create(name); err != nil {
 		t.Errorf("Couldn't create file: %s", err)
 	} else {
 		f.Close()
 	}
-	d.wg.Wait()
+	d.Wait()
 	if d.Text() != "Created" {
 		t.Errorf("Expected dummy Text %s, but got %s", "Created", d.Text())
 	}
@@ -404,13 +411,12 @@ func TestRenameEvent(t *testing.T) {
 	defer os.Rename("testdata/rename.txt", name)
 	watcher := newWatcher(t)
 	defer wclose(t, watcher)
-	d := &dummy{name: name}
+	d := newDummy(name)
 	watch(t, watcher, name, d)
 	go watcher.Observe()
 
-	d.wg.Add(1)
 	os.Rename(name, "testdata/rename.txt")
-	d.wg.Wait()
+	d.Wait()
 	if d.Text() != "Renamed" {
 		t.Errorf("Expected dummy Text %s, but got %s", "Renamed", d.Text())
 	}
