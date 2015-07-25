@@ -150,7 +150,7 @@ func (v *View) parsethread() {
 		defer p.Exit()
 		defer func() {
 			if r := recover(); r != nil {
-				log.Errorf("Panic in parse thread: %v\n%s", r, string(debug.Stack()))
+				log.Error("Panic in parse thread: %v\n%s", r, string(debug.Stack()))
 				if pc > 0 {
 					panic(r)
 				}
@@ -169,13 +169,13 @@ func (v *View) parsethread() {
 		// TODO: Allow other parsers instead of this hardcoded textmate version
 		pr, err := textmate.NewLanguageParser(source, sub)
 		if err != nil {
-			log.Errorf("Couldn't parse: %v", err)
+			log.Error("Couldn't parse: %v", err)
 			return
 		}
 
 		syn, err := parser.NewSyntaxHighlighter(pr)
 		if err != nil {
-			log.Errorf("Couldn't create syntaxhighlighter: %v", err)
+			log.Error("Couldn't create syntaxhighlighter: %v", err)
 			return
 		}
 
@@ -428,7 +428,7 @@ func (v *View) EndEdit(edit *Edit) {
 	}
 	if i == -1 {
 		// TODO(.): Under what instances does this happen again?
-		log.Errorf("This edit isn't even in the stack... where did it come from? %v, %v", edit, v.editstack)
+		log.Error("This edit isn't even in the stack... where did it come from? %v, %v", edit, v.editstack)
 		return
 	}
 
@@ -436,7 +436,7 @@ func (v *View) EndEdit(edit *Edit) {
 
 	if l := len(v.editstack) - 1; i != l {
 		// TODO(.): See TODO in BeginEdit
-		log.Errorf("This edit wasn't last in the stack... %d !=  %d: %v, %v", i, l, edit, v.editstack)
+		log.Error("This edit wasn't last in the stack... %d !=  %d: %v, %v", i, l, edit, v.editstack)
 	}
 
 	// Invalidate all Edits "below" and including this Edit.
@@ -531,7 +531,7 @@ func (v *View) FileChanged(filename string) {
 	}
 
 	if d, err := ioutil.ReadFile(filename); err != nil {
-		log.Errorf("Could not read file: %s\n. Error was: %v", filename, err)
+		log.Error("Could not read file: %s\n. Error was: %v", filename, err)
 	} else {
 		edit := v.BeginEdit()
 		end := v.buffer.Size()
@@ -623,7 +623,7 @@ func (v *View) runCommand(cmd TextCommand, name string) error {
 	defer func() {
 		v.EndEdit(e)
 		if r := recover(); r != nil {
-			log.Errorf("Paniced while running text command %s %v: %v\n%s", name, cmd, r, string(debug.Stack()))
+			log.Error("Paniced while running text command %s %v: %v\n%s", name, cmd, r, string(debug.Stack()))
 		}
 	}()
 	p := Prof.Enter("view.cmd." + name)

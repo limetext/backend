@@ -43,10 +43,6 @@ func Error(arg0 interface{}, args ...interface{}) error {
 	return Global.Error(arg0, args...)
 }
 
-func Errorf(format string, args ...interface{}) {
-	Global.Errorf(format, args...)
-}
-
 func Critical(arg0 interface{}, args ...interface{}) error {
 	return Global.Critical(arg0, args...)
 }

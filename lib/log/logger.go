@@ -17,7 +17,6 @@ type Logger interface {
 	Info(arg0 interface{}, args ...interface{})
 	Warn(arg0 interface{}, args ...interface{}) error
 	Error(arg0 interface{}, args ...interface{}) error
-	Errorf(format string, args ...interface{})
 	Critical(arg0 interface{}, args ...interface{}) error
 	Logf(level Level, format string, args ...interface{})
 	Close()
