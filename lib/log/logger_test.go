@@ -6,6 +6,7 @@ package log
 
 import (
 	"github.com/limetext/log4go"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -35,20 +36,31 @@ func TestGlobalLog(t *testing.T) {
 
 func TestLogf(t *testing.T) {
 	l := NewLogger()
-
+	logs := []string{}
+	l.AddFilter("test", FINEST, testlogger(func(str string) {
+		logs = append(logs, str)
+	}))
 	// Log a message at each level. Because we cannot access the internals of the logger,
 	// we assume that this test succeeds if it does not cause an error (although we cannot
 	// actually look inside and see if the level was changed)
-	for _, test_lvl := range []Level{FINEST, FINE, DEBUG, TRACE, INFO, WARNING, ERROR, CRITICAL, 999} {
-		l.Logf(test_lvl, time.Now().String())
+	levels := []Level{FINEST, FINE, DEBUG, TRACE, INFO, WARNING, ERROR, CRITICAL, 999}
+	teststring := time.Now().String()
+	for _, lvl := range levels {
+		l.Logf(lvl, teststring)
+	}
+	if len(logs) != 9 {
+		t.Errorf("Expected 9 log entries, got %d\n", len(logs))
+	}
+	for _, log := range logs {
+		if !strings.Contains(log, teststring) {
+			t.Errorf("Expected log entry %q to contain string %q", log, teststring)
+		}
 	}
 }
 
 func TestClose(t *testing.T) {
 	l := NewLogger()
 	l.Close()
-	m := NewLogger()
-	m.Close("something wrong")
 }
 
 func TestNewLogger(t *testing.T) {
@@ -78,7 +90,5 @@ func TestLogFunctions(t *testing.T) {
 	l.Trace(time.Now().String())
 	l.Warn(time.Now().String())
 	l.Error(time.Now().String())
-	l.Errorf("%v", time.Now().String())
 	l.Critical(time.Now().String())
-
 }

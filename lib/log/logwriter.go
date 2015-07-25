@@ -10,47 +10,48 @@ import (
 	"sync"
 )
 
-type (
-	LogWriter interface {
-		log4go.LogWriter
-	}
-
-	logWriter struct {
-		LogWriter
-		log     chan string
-		handler func(string)
-		lock    sync.Mutex
-	}
-)
-
-func NewLogWriter(h func(string)) *logWriter {
-	ret := &logWriter{
-		log:     make(chan string, 100),
-		handler: h,
-	}
-	go ret.handle()
-	return ret
+type LogWriter interface {
+	log4go.LogWriter
 }
 
-func (l *logWriter) handle() {
-	for fl := range l.log {
-		l.handler(fl)
-	}
+func NewConsoleLogWriter() LogWriter {
+	return log4go.NewConsoleLogWriter()
 }
 
-// Implement LogWriter
+func NewFileLogWriter(fname string, rotate bool) LogWriter {
+	return log4go.NewFileLogWriter(fname, rotate)
+}
+
+// Implementation of a default LogWriter which takes a handler function
+
+type logWriter struct {
+	sync.Mutex
+	log chan string
+}
+
+func NewLogWriter(h func(string)) LogWriter {
+	l := &logWriter{
+		log: make(chan string, 100),
+	}
+	go func() {
+		for fl := range l.log {
+			h(fl)
+		}
+	}()
+	return l
+}
 
 func (l *logWriter) LogWrite(rec *log4go.LogRecord) {
 	p := Prof.Enter("log")
 	defer p.Exit()
-	l.lock.Lock()
-	defer l.lock.Unlock()
+	l.Lock()
+	defer l.Unlock()
 	fl := log4go.FormatLogRecord(log4go.FORMAT_DEFAULT, rec)
 	l.log <- fl
 }
 
 func (l *logWriter) Close() {
-	l.lock.Lock()
-	defer l.lock.Unlock()
+	l.Lock()
+	defer l.Unlock()
 	close(l.log)
 }
