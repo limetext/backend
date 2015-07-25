@@ -9,7 +9,7 @@ import (
 )
 
 func TestGlobalFunctions(t *testing.T) {
-	AddFilter("add filter", FINE, testlogger(func(str string) {}))
+	AddFilter("test", FINEST, testlogger(func(str string) {}))
 	Finest("testing finest")
 	Fine("testing fine")
 	Debug("testing debug")
@@ -18,5 +18,5 @@ func TestGlobalFunctions(t *testing.T) {
 	Error("testing error")
 	Critical("testing critical")
 	Logf(FINE, "testing logf")
-	Close("testing close")
+	Close()
 }

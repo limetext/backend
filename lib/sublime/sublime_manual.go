@@ -171,7 +171,7 @@ func newPlugin(pl *packages.Plugin, m *py.Module) (p *plugin) {
 	p = &plugin{pl, m}
 	p.FileChanged(p.Name())
 	if err := watcher.Watch(p.Name(), p); err != nil {
-		log.Errorf("Couldn't watch %s: %s", p.Name(), err)
+		log.Error("Couldn't watch %s: %s", p.Name(), err)
 	}
 	p.loadKeyBindings()
 	p.loadSettings()
@@ -202,7 +202,7 @@ func (p *plugin) loadPlugin() {
 
 func (p *plugin) load(pkg *packages.Packet) {
 	if err := pkg.Load(); err != nil {
-		log.Errorf("Failed to load packet %s: %s", pkg.Name(), err)
+		log.Error("Failed to load packet %s: %s", pkg.Name(), err)
 	} else {
 		log.Info("Loaded %s", pkg.Name())
 		if err := watcher.Watch(pkg.Name(), pkg); err != nil {
@@ -259,7 +259,7 @@ func onInit() {
 	}
 
 	if watcher, err = watch.NewWatcher(); err != nil {
-		log.Errorf("Couldn't create watcher: %s", err)
+		log.Error("Couldn't create watcher: %s", err)
 	}
 
 	// TODO: add all plugins after supporting all commands

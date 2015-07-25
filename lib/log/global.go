@@ -4,19 +4,11 @@
 
 package log
 
-import (
-	"github.com/limetext/log4go"
-)
-
-var (
-	Global *Logger
-)
+var Global Logger
 
 func init() {
-	log4go.Global.Close()
-	Global = &Logger{
-		logger: log4go.Global,
-	}
+	Global = NewLogger()
+	Global.AddFilter("stdout", DEBUG, NewConsoleLogWriter())
 }
 
 func AddFilter(name string, level Level, writer LogWriter) {
@@ -43,26 +35,22 @@ func Info(arg0 interface{}, args ...interface{}) {
 	Global.Info(arg0, args...)
 }
 
-func Warn(arg0 interface{}, args ...interface{}) {
-	Global.Warn(arg0, args...)
+func Warn(arg0 interface{}, args ...interface{}) error {
+	return Global.Warn(arg0, args...)
 }
 
-func Error(arg0 interface{}, args ...interface{}) {
-	Global.Error(arg0, args...)
+func Error(arg0 interface{}, args ...interface{}) error {
+	return Global.Error(arg0, args...)
 }
 
-func Errorf(format string, args ...interface{}) {
-	Global.Errorf(format, args...)
-}
-
-func Critical(arg0 interface{}, args ...interface{}) {
-	Global.Critical(arg0, args...)
+func Critical(arg0 interface{}, args ...interface{}) error {
+	return Global.Critical(arg0, args...)
 }
 
 func Logf(level Level, format string, args ...interface{}) {
 	Global.Logf(level, format, args...)
 }
 
-func Close(args ...interface{}) {
-	Global.Close(args...)
+func Close() {
+	Global.Close()
 }
