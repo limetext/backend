@@ -6,14 +6,6 @@ package backend
 
 import (
 	"fmt"
-	"github.com/limetext/lime-backend/lib/log"
-	"github.com/limetext/lime-backend/lib/packages"
-	"github.com/limetext/lime-backend/lib/parser"
-	"github.com/limetext/lime-backend/lib/render"
-	"github.com/limetext/lime-backend/lib/textmate"
-	. "github.com/limetext/lime-backend/lib/util"
-	"github.com/limetext/rubex"
-	. "github.com/limetext/text"
 	"io/ioutil"
 	"os"
 	"path"
@@ -22,6 +14,15 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
+
+	"github.com/limetext/lime-backend/lib/items"
+	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/lime-backend/lib/parser"
+	"github.com/limetext/lime-backend/lib/render"
+	"github.com/limetext/lime-backend/lib/textmate"
+	. "github.com/limetext/lime-backend/lib/util"
+	"github.com/limetext/rubex"
+	. "github.com/limetext/text"
 )
 
 type (
@@ -255,22 +256,22 @@ func (v *View) loadSettings() {
 		return
 	}
 
-	defSettings, usrSettings := &HasSettings{}, &HasSettings{}
+	defSet, usrSet := &HasSettings{}, &HasSettings{}
 
-	defSettings.Settings().SetParent(v.window)
-	usrSettings.Settings().SetParent(defSettings)
-	v.Settings().SetParent(usrSettings)
+	defSet.Settings().SetParent(v.window)
+	usrSet.Settings().SetParent(defSet)
+	v.Settings().SetParent(usrSet)
 
 	ed := GetEditor()
 	if r, err := rubex.Compile(`([A-Za-z]+?)\.(?:[^.]+)$`); err != nil {
 		log.Error(err)
 		return
 	} else if s := r.FindStringSubmatch(syntax); s != nil {
-		p := path.Join(LIME_PACKAGES_PATH, s[1], s[1]+".sublime-settings")
-		ed.load(packages.NewPacket(p, defSettings.Settings()))
+		p := path.Join(ed.PackagesPath("shipped"), s[1], s[1]+".sublime-settings")
+		items.NewSettingL(p, defSet.Settings())
 
-		p = path.Join(LIME_USER_PACKAGES_PATH, s[1]+".sublime-settings")
-		ed.load(packages.NewPacket(p, usrSettings.Settings()))
+		p = path.Join(ed.PackagesPath("user"), s[1]+".sublime-settings")
+		items.NewSettingL(p, usrSet.Settings())
 	}
 }
 

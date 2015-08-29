@@ -5,17 +5,12 @@
 package backend
 
 import (
-	"github.com/limetext/lime-backend/lib/keys"
-	"github.com/limetext/lime-backend/lib/packages"
 	"path"
 	"testing"
-)
 
-func init() {
-	LIME_PACKAGES_PATH = path.Join("..", "packages")
-	LIME_USER_PACKAGES_PATH = path.Join("..", "packages", "User")
-	LIME_DEFAULTS_PATH = path.Join("..", "packages", "Default")
-}
+	"github.com/limetext/lime-backend/lib/items"
+	"github.com/limetext/lime-backend/lib/keys"
+)
 
 func TestGetEditor(t *testing.T) {
 	editor := GetEditor()
@@ -26,8 +21,7 @@ func TestGetEditor(t *testing.T) {
 
 func TestLoadKeyBinding(t *testing.T) {
 	editor := GetEditor()
-	pkg := packages.NewPacket("testdata/Default.sublime-keymap", editor.KeyBindings())
-	editor.load(pkg)
+	items.NewKeymapL("testdata/Default.sublime-keymap", editor.KeyBindings())
 
 	kb := editor.KeyBindings().Filter(keys.KeyPress{Key: 'i'})
 	if expectedLen := 3; kb.Len() != expectedLen {
@@ -39,14 +33,14 @@ func TestLoadKeyBindings(t *testing.T) {
 	editor := GetEditor()
 	editor.loadKeyBindings()
 
-	if editor.defaultBindings.KeyBindings().Len() <= 0 {
+	if editor.defaultKB.KeyBindings().Len() <= 0 {
 		t.Errorf("Expected editor to have some keys bound, but it didn't")
 	}
 }
 
 func TestLoadSetting(t *testing.T) {
 	editor := GetEditor()
-	editor.load(packages.NewPacket("testdata/Default.sublime-settings", editor.Settings()))
+	items.NewSettingL("testdata/Default.sublime-settings", editor.Settings())
 
 	if editor.Settings().Has("tab_size") != true {
 		t.Error("Expected editor settings to have tab_size, but it didn't")
@@ -87,7 +81,7 @@ func TestInit(t *testing.T) {
 	editor := GetEditor()
 	editor.Init()
 
-	if editor.defaultBindings.KeyBindings().Len() <= 0 {
+	if editor.defaultKB.KeyBindings().Len() <= 0 {
 		t.Errorf("Expected editor to have some keys bound, but it didn't")
 	}
 
@@ -198,4 +192,11 @@ func TestHandleInput(t *testing.T) {
 	if ki := <-editor.keyInput; ki != kp {
 		t.Errorf("Expected %s to be on the input buffer, but got %s", kp, ki)
 	}
+}
+
+func init() {
+	ed := GetEditor()
+	ed.AddPackagesPath("shipped", path.Join("..", "packages"))
+	ed.AddPackagesPath("user", path.Join("..", "packages", "User"))
+	ed.AddPackagesPath("default", path.Join("..", "packages", "Default"))
 }
