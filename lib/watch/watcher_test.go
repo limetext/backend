@@ -328,28 +328,6 @@ func TestObserve(t *testing.T) {
 	}
 }
 
-func TestObserveDirectory(t *testing.T) {
-	dir := "testdata"
-	name := "testdata/test.txt"
-	watcher := newWatcher(t)
-	defer ioutil.WriteFile(name, []byte(""), 0644)
-	defer wclose(t, watcher)
-	d := newDummy(name)
-	watch(t, watcher, dir, d)
-	go watcher.Observe()
-
-	if !reflect.DeepEqual(watcher.watchers, []string{"testdata"}) {
-		t.Errorf("Expected watchers be equal to %v, but got %v", []string{"testdata"}, watcher.watchers)
-	}
-	if err := ioutil.WriteFile(name, []byte("test"), 0644); err != nil {
-		t.Fatalf("WriteFile error: %s", err)
-	}
-	d.Wait()
-	if d.Text() != "Changed" {
-		t.Errorf("Expected dummy Text %s, but got %s", "Changed", d.Text())
-	}
-}
-
 func TestCreateEvent(t *testing.T) {
 	name := "testdata/new.txt"
 	defer os.Remove(name)

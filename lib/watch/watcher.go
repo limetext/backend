@@ -208,9 +208,11 @@ func (w *Watcher) Observe() {
 				defer w.lock.Unlock()
 				w.apply(ev)
 				name := ev.Name
-				// If the name refers to a directory run all watched
-				// callbacks for wathed files under the directory
-				if exist(w.dirs, name) {
+				// currently fsnotify pushs remove event for files
+				// inside directory when a directory is removed but
+				// when the directory is renamed there is no event for
+				// files inside directory
+				if ev.Op&fsnotify.Rename != 0 && exist(w.dirs, name) {
 					for p, _ := range w.watched {
 						if filepath.Dir(p) == name {
 							ev.Name = p
@@ -228,12 +230,14 @@ func (w *Watcher) Observe() {
 					w.Watch(dir, nil)
 					w.lock.Lock()
 				}
-				// We will apply parent directory FileChanged callbacks to,
-				// if one of the files inside the directory has changed
-				if cbs, exist := w.watched[dir]; ev.Op&fsnotify.Write != 0 && exist {
+				// If the event is create we will apply FileCreated callback
+				// for the parent directory to because when new file is created
+				// inside directory we won't get any event for the watched directory.
+				// we need this feature to detect new items(plugins, settings, etc)
+				if cbs, exist := w.watched[dir]; ev.Op&fsnotify.Create != 0 && exist {
 					for _, cb := range cbs {
-						if c, ok := cb.(FileChangedCallback); ok {
-							c.FileChanged(dir)
+						if c, ok := cb.(FileCreatedCallback); ok {
+							c.FileCreated(name)
 						}
 					}
 				}
