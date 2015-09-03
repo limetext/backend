@@ -135,7 +135,7 @@ func (w *Watcher) flushDir(name string) {
 	for _, p := range w.watchers {
 		if filepath.Dir(p) == name && !exist(w.dirs, p) {
 			if err := w.removeWatch(p); err != nil {
-				log.Errorf("Couldn't unwatch file %s: %s", p, err)
+				log.Error("Couldn't unwatch file %s: %s", p, err)
 			}
 		}
 	}
@@ -186,7 +186,7 @@ func (w *Watcher) removeDir(name string) {
 	for p, _ := range w.watched {
 		if filepath.Dir(p) == name {
 			if err := w.watch(p); err != nil {
-				log.Errorf("Could not watch: %s", err)
+				log.Error("Could not watch: %s", err)
 				continue
 			}
 		}
@@ -194,10 +194,15 @@ func (w *Watcher) removeDir(name string) {
 	w.dirs = remove(w.dirs, name)
 }
 
+// Observe dispatches notifications received by the watcher. This function will
+// return when the watcher is closed.
 func (w *Watcher) Observe() {
 	for {
 		select {
-		case ev := <-w.wchr.Events:
+		case ev, ok := <-w.wchr.Events:
+			if !ok {
+				break
+			}
 			func() {
 				w.lock.Lock()
 				defer w.lock.Unlock()
@@ -234,7 +239,10 @@ func (w *Watcher) Observe() {
 				}
 
 			}()
-		case err := <-w.wchr.Errors:
+		case err, ok := <-w.wchr.Errors:
+			if !ok {
+				break
+			}
 			log.Warn("Watcher error: %s", err)
 		}
 	}

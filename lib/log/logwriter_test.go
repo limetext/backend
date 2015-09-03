@@ -7,6 +7,7 @@ package log
 import (
 	"fmt"
 	"github.com/limetext/log4go"
+	"os"
 	"testing"
 )
 
@@ -22,5 +23,23 @@ func TestLogWrite(t *testing.T) {
 	l := NewLogWriter(func(str string) { fmt.Print(str) })
 	logRecord := &log4go.LogRecord{}
 	l.LogWrite(logRecord) // Void function. Testing for coverage.
+	l.Close()
+}
+
+func TestNewConsoleLogWriter(t *testing.T) {
+	l := NewConsoleLogWriter()
+	if l == nil {
+		t.Error("NewConsoleLogWriter produced a nil")
+	}
+	l.Close()
+}
+
+func TestNewFileLogWriter(t *testing.T) {
+	file := "testfile"
+	l := NewFileLogWriter(file, true)
+	defer os.Remove(file)
+	if l == nil {
+		t.Error("NewFileLogWriter produced a nil")
+	}
 	l.Close()
 }

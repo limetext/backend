@@ -472,7 +472,7 @@ func (lp *LanguageParser) Parse() (*parser.Node, error) {
 	rn := parser.Node{P: lp, Name: lp.l.ScopeName}
 	defer func() {
 		if r := recover(); r != nil {
-			log.Errorf("Panic during parse: %v\n", r)
+			log.Error("Panic during parse: %v\n", r)
 			log.Debug("%v", rn)
 		}
 	}()

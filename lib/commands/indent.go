@@ -5,9 +5,10 @@
 package commands
 
 import (
+	"strings"
+
 	. "github.com/limetext/lime-backend/lib"
 	. "github.com/limetext/text"
-	"strings"
 )
 
 type (
@@ -29,21 +30,14 @@ func (c *IndentCommand) Run(v *View, e *Edit) error {
 	}
 	sel := v.Sel()
 
-	// Keep track of the indented lines
-	// (go has no set collections, use that instead - struct{} doesn't take up space)
-	indented_rows := map[int]struct{}{}
-
 	for i := 0; i < sel.Len(); i++ {
 		r := sel.Get(i)
 		start_row, _ := v.Buffer().RowCol(r.Begin())
 		end_row, _ := v.Buffer().RowCol(r.End())
 		for row := start_row; row <= end_row; row++ {
-			if _, ok := indented_rows[row]; !ok {
-				// Insert an indent at the beginning of the line
-				pos := v.Buffer().TextPoint(row, 0)
-				v.Insert(e, pos, indent)
-				indented_rows[row] = struct{}{}
-			}
+			// Insert an indent at the beginning of the line
+			pos := v.Buffer().TextPoint(row, 0)
+			v.Insert(e, pos, indent)
 		}
 	}
 	return nil
@@ -52,34 +46,30 @@ func (c *IndentCommand) Run(v *View, e *Edit) error {
 func (c *UnindentCommand) Run(v *View, e *Edit) error {
 	tab_size := getTabSize(v)
 	sel := v.Sel()
-	unindented_rows := map[int]struct{}{}
 	for i := 0; i < sel.Len(); i++ {
 		r := sel.Get(i)
 		start_row, _ := v.Buffer().RowCol(r.Begin())
 		end_row, _ := v.Buffer().RowCol(r.End())
 		for row := start_row; row <= end_row; row++ {
-			if _, ok := unindented_rows[row]; !ok {
-				pos := v.Buffer().TextPoint(row, 0)
-				// Get the first at the beginning of the line (as many as defined by tab_size)
-				sub := v.Buffer().Substr(Region{pos, pos + tab_size})
-				if len(sub) == 0 {
-					continue
+			pos := v.Buffer().TextPoint(row, 0)
+			// Get the first at the beginning of the line (as many as defined by tab_size)
+			sub := v.Buffer().Substr(Region{pos, pos + tab_size})
+			if len(sub) == 0 {
+				continue
+			}
+			to_remove := 0
+			if sub[0] == byte('\t') {
+				// Case 1: the first character is a tab, remove only it
+				to_remove = 1
+			} else if sub[0] == byte(' ') {
+				// Case 2: the first character is a space, we remove as much spaces as we can
+				to_remove = 1
+				for to_remove < len(sub) && sub[to_remove] == byte(' ') {
+					to_remove++
 				}
-				to_remove := 0
-				if sub[0] == byte('\t') {
-					// Case 1: the first character is a tab, remove only it
-					to_remove = 1
-				} else if sub[0] == byte(' ') {
-					// Case 2: the first character is a space, we remove as much spaces as we can
-					to_remove = 1
-					for to_remove < len(sub) && sub[to_remove] == byte(' ') {
-						to_remove++
-					}
-				}
-				if to_remove > 0 {
-					v.Buffer().Erase(pos, to_remove)
-				}
-				unindented_rows[row] = struct{}{}
+			}
+			if to_remove > 0 {
+				v.Buffer().Erase(pos, to_remove)
 			}
 		}
 	}
