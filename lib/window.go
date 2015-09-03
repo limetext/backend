@@ -61,7 +61,7 @@ func (w *Window) remove(v *View) {
 			return
 		}
 	}
-	log.Error("Wanted to remove view %+v, but it doesn't appear to be a child of this window", v)
+	log.Error("Wanted to remove view %+v, but it doesn't appear to be a child of this window", *v)
 }
 
 func (w *Window) OpenFile(filename string, flags int) *View {

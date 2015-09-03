@@ -180,6 +180,10 @@ func (e *Editor) SetClipboardFuncs(setter func(string) error, getter func() (str
 }
 
 func (e *Editor) loadKeyBindings() {
+	// Prevent running loadKeyBindings func more than once
+	if e.KeyBindings().Parent() != nil {
+		return
+	}
 	e.KeyBindings().SetParent(e.userKB)
 	e.userKB.KeyBindings().SetParent(e.platformKB)
 	e.platformKB.KeyBindings().SetParent(e.defaultKB)
@@ -198,6 +202,10 @@ func (e *Editor) loadKeyBindings() {
 }
 
 func (e *Editor) loadSettings() {
+	// Prevent running loadSettings func more than once
+	if e.Settings().Parent() != nil {
+		return
+	}
 	e.platformSet.Settings().SetParent(e.defaultSet)
 	e.Settings().SetParent(e.platformSet)
 
