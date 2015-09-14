@@ -34,8 +34,8 @@ func newPlugin(fn string) items.Item {
 }
 
 func (p *plugin) Load() error {
-	fn := p.Name()
-	s, err := py.NewUnicode(filepath.Dir(fn) + "." + fn[:len(fn)-3])
+	dir, file := filepath.Split(p.Name())
+	s, err := py.NewUnicode(filepath.Base(dir) + "." + file[:len(file)-3])
 	if err != nil {
 		return err
 	}
@@ -59,31 +59,33 @@ func (p *plugin) FileChanged(name string) {
 func (p *plugin) loadKeyBindings() {
 	ed := backend.GetEditor()
 	tmp := ed.KeyBindings().Parent()
+	dir := filepath.Dir(p.Name())
 
 	ed.KeyBindings().SetParent(p)
 	p.KeyBindings().SetParent(p.defaultKB)
 	p.defaultKB.KeyBindings().SetParent(tmp)
 
-	pt := path.Join(p.Name(), "Default.sublime-keymap")
+	pt := path.Join(dir, "Default.sublime-keymap")
 	items.NewKeymapL(pt, p.defaultKB.KeyBindings())
 
-	pt = path.Join(p.Name(), "Default ("+ed.Plat()+").sublime-keymap")
+	pt = path.Join(dir, "Default ("+ed.Plat()+").sublime-keymap")
 	items.NewKeymapL(pt, p.KeyBindings())
 }
 
 func (p *plugin) loadSettings() {
 	ed := backend.GetEditor()
 	tmp := ed.Settings().Parent()
+	dir := filepath.Dir(p.Name())
 
 	ed.Settings().SetParent(p)
 	p.Settings().SetParent(p.platformSet)
 	p.platformSet.Settings().SetParent(p.defaultSet)
 	p.defaultSet.Settings().SetParent(tmp)
 
-	pt := path.Join(p.Name(), "Preferences.sublime-settings")
+	pt := path.Join(dir, "Preferences.sublime-settings")
 	items.NewSettingL(pt, p.defaultSet.Settings())
 
-	pt = path.Join(p.Name(), "Preferences ("+ed.Plat()+").sublime-settings")
+	pt = path.Join(dir, "Preferences ("+ed.Plat()+").sublime-settings")
 	items.NewSettingL(pt, p.platformSet.Settings())
 
 	pt = path.Join(ed.PackagesPath("user"), "Preferences.sublime-settings")

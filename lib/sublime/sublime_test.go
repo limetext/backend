@@ -29,11 +29,13 @@ type consoleObserver struct {
 	T *testing.T
 }
 
-func (o *consoleObserver) Erased(changed_buffer text.Buffer, region_removed text.Region, data_removed []rune) {
+func (o *consoleObserver) Erased(changed_buffer text.Buffer,
+	region_removed text.Region, data_removed []rune) {
 	// do nothing
 }
 
-func (o *consoleObserver) Inserted(changed_buffer text.Buffer, region_inserted text.Region, data_inserted []rune) {
+func (o *consoleObserver) Inserted(changed_buffer text.Buffer,
+	region_inserted text.Region, data_inserted []rune) {
 	o.T.Logf("%s", string(data_inserted))
 }
 

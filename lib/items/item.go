@@ -6,6 +6,7 @@ package items
 
 import (
 	"io/ioutil"
+	"path"
 
 	"github.com/limetext/lime-backend/lib/log"
 )
@@ -28,16 +29,16 @@ func Register(r Record) {
 	recs = append(recs, r)
 }
 
-func Scan(path string) {
-	fis, err := ioutil.ReadDir(path)
+func Scan(dir string) {
+	fis, err := ioutil.ReadDir(dir)
 	if err != nil {
-		log.Warn("Couldn't read path %s: %s", path, err)
+		log.Warn("Couldn't read path %s: %s", dir, err)
 	}
 
-	watchDir(&pkgDir{path})
+	watchDir(&pkgDir{dir})
 
 	for _, fi := range fis {
-		record(fi.Name())
+		record(path.Join(dir, fi.Name()))
 	}
 }
 
