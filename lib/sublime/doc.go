@@ -8,4 +8,4 @@
 //
 // Most of the code here is generated (See: https://github.com/limetext/lime/blob/master/tasks/build/gen_python_api.go)
 // and should not be changed manually.
-package python
+package sublime

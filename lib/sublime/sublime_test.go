@@ -19,7 +19,6 @@ import (
 	_ "github.com/limetext/lime-backend/lib/commands"
 	"github.com/limetext/lime-backend/lib/items"
 	"github.com/limetext/lime-backend/lib/log"
-	"github.com/limetext/lime-backend/lib/sublime/python"
 	"github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/text"
 )
@@ -50,28 +49,20 @@ func TestSublime(t *testing.T) {
 
 	ed.Console().Buffer().AddObserver(&consoleObserver{T: t})
 	w := ed.NewWindow()
+
 	l := py.NewLock()
 	py.AddToPath("testdata")
 	py.AddToPath("testdata/plugins")
-	if m, err := py.Import("sublime_plugin"); err != nil {
-		t.Fatal(err)
-	} else {
-		items.Scan("testdata")
-	}
-
+	items.Scan("testdata/plugins")
 	subl, err := py.Import("sublime")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	var _windowClass = py.Class{
-		Name:    "sublime.Window",
-		Pointer: (*python.Window)(nil),
-	}
 	if w, err := _windowClass.Alloc(1); err != nil {
 		t.Fatal(err)
 	} else {
-		(w.(*python.Window)).data = &backend.Window{}
+		(w.(*Window)).data = &backend.Window{}
 		subl.AddObject("test_window", w)
 	}
 
@@ -115,38 +106,40 @@ class TestToxt(sublime_plugin.TextCommand):
 	var f func(indent string, v py.Object, buf *bytes.Buffer)
 	f = func(indent string, v py.Object, buf *bytes.Buffer) {
 		b := v.Base()
-		if dir, err := b.Dir(); err != nil {
+		dir, err := b.Dir()
+		if err != nil {
 			t.Error(err)
-		} else {
-			if l, ok := dir.(*py.List); ok {
-				sl := l.Slice()
-
-				if indent == "" {
-					for _, v2 := range sl {
-						if item, err := b.GetAttr(v2); err != nil {
-							t.Error(err)
-						} else {
-							ty := item.Type()
-							line := fmt.Sprintf("%s%s\n", indent, v2)
-							buf.WriteString(line)
-							if ty == py.TypeType {
-								f(indent+"\t", item, buf)
-							}
-							item.Decref()
-						}
-					}
-				} else {
-					for _, v2 := range sl {
-						buf.WriteString(fmt.Sprintf("%s%s\n", indent, v2))
-					}
-				}
-
-			} else {
-				ty := dir.Type()
-				t.Error("Unexpected type:", ty)
-			}
-			dir.Decref()
+			return
 		}
+		if l, ok := dir.(*py.List); ok {
+			sl := l.Slice()
+
+			if indent == "" {
+				for _, v2 := range sl {
+					item, err := b.GetAttr(v2)
+					if err != nil {
+						t.Error(err)
+						continue
+					}
+					ty := item.Type()
+					line := fmt.Sprintf("%s%s\n", indent, v2)
+					buf.WriteString(line)
+					if ty == py.TypeType {
+						f(indent+"\t", item, buf)
+					}
+					item.Decref()
+				}
+			} else {
+				for _, v2 := range sl {
+					buf.WriteString(fmt.Sprintf("%s%s\n", indent, v2))
+				}
+			}
+
+		} else {
+			ty := dir.Type()
+			t.Error("Unexpected type:", ty)
+		}
+		dir.Decref()
 	}
 	buf := bytes.NewBuffer(nil)
 	f("", subl, buf)

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-package python
+package sublime
 
 import (
 	"fmt"
@@ -66,8 +66,6 @@ func sublime_set_timeout(tu *py.Tuple, kwargs *py.Dict) (py.Object, error) {
 }
 
 func init() {
-	backend.OnInit.Add(onInit)
-
 	sublime_methods = append(sublime_methods, py.Method{Name: "console", Func: sublime_Console}, py.Method{Name: "set_timeout", Func: sublime_set_timeout})
 	backend.GetEditor()
 	l := py.InitAndLock()
@@ -158,22 +156,5 @@ func init() {
 	gopaths := filepath.SplitList(os.ExpandEnv("$GOPATH"))
 	for _, gopath := range gopaths {
 		py.AddToPath(path.Join(gopath, "src", "github.com", "limetext", "lime-backend", "lib", "sublime", "python"))
-	}
-}
-
-var Module *py.Module
-
-func onInit() {
-	l := py.NewLock()
-	defer l.Unlock()
-
-	var err error
-	if Module, err = py.Import("sublime_plugin"); err != nil {
-		panic(err)
-	}
-	if sys, err := py.Import("sys"); err != nil {
-		log.Debug(err)
-	} else {
-		defer sys.Decref()
 	}
 }

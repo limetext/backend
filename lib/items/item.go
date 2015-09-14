@@ -34,17 +34,22 @@ func Scan(path string) {
 		log.Warn("Couldn't read path %s: %s", path, err)
 	}
 
+	watchDir(&pkgDir{path})
+
 	for _, fi := range fis {
-		fn := fi.Name()
-		for _, rec := range recs {
-			if rec.CH(fn) {
-				item := rec.CB(fn)
-				if err := item.Load(); err != nil {
-					log.Warn("Failed to load plugin %s: %s", item.Name(), err)
-				}
-				watchItem(item)
-				break
+		record(fi.Name())
+	}
+}
+
+func record(fn string) {
+	for _, rec := range recs {
+		if rec.CH(fn) {
+			item := rec.CB(fn)
+			if err := item.Load(); err != nil {
+				log.Warn("Failed to load plugin %s: %s", item.Name(), err)
 			}
+			watchItem(item)
+			break
 		}
 	}
 }

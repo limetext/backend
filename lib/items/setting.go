@@ -15,7 +15,7 @@ type Setting struct {
 }
 
 func NewSetting(filename string, marshal json.Unmarshaler) *Setting {
-	s := &Setting{simple{filename, marshal}}
+	s := &Setting{simple{filename: filename, marshal: marshal}}
 	watchItem(s)
 	return s
 }

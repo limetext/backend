@@ -9,11 +9,25 @@ import (
 	"github.com/limetext/lime-backend/lib/watch"
 )
 
+type pkgDir struct {
+	path string
+}
+
+func (p *pkgDir) FileCreated(name string) {
+	record(name)
+}
+
 var watcher *watch.Watcher
 
 func watchItem(item Item) {
 	if err := watcher.Watch(item.Name(), item); err != nil {
 		log.Warn("Couldn't watch %s: %s", item.Name(), err)
+	}
+}
+
+func watchDir(p *pkgDir) {
+	if err := watcher.Watch(p.path, p); err != nil {
+		log.Warn("Couldn't watch %s: %s", p.path, err)
 	}
 }
 
