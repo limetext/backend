@@ -237,7 +237,9 @@ func (w *Watcher) Observe() {
 				if cbs, exist := w.watched[dir]; ev.Op&fsnotify.Create != 0 && exist {
 					for _, cb := range cbs {
 						if c, ok := cb.(FileCreatedCallback); ok {
+							w.lock.Unlock()
 							c.FileCreated(name)
+							w.lock.Lock()
 						}
 					}
 				}
@@ -254,6 +256,7 @@ func (w *Watcher) Observe() {
 
 func (w *Watcher) apply(ev fsnotify.Event) {
 	for _, cb := range w.watched[ev.Name] {
+		w.lock.Unlock()
 		if ev.Op&fsnotify.Create != 0 {
 			if c, ok := cb.(FileCreatedCallback); ok {
 				c.FileCreated(ev.Name)
@@ -274,5 +277,6 @@ func (w *Watcher) apply(ev fsnotify.Event) {
 				c.FileRenamed(ev.Name)
 			}
 		}
+		w.lock.Lock()
 	}
 }
