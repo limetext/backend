@@ -155,6 +155,6 @@ func init() {
 
 	gopaths := filepath.SplitList(os.ExpandEnv("$GOPATH"))
 	for _, gopath := range gopaths {
-		py.AddToPath(path.Join(gopath, "src", "github.com", "limetext", "lime-backend", "lib", "sublime", "python"))
+		py.AddToPath(path.Join(gopath, "src", "github.com", "limetext", "lime-backend", "lib", "sublime"))
 	}
 }
