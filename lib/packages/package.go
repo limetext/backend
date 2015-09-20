@@ -2,7 +2,7 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-package items
+package packages
 
 import (
 	"io/ioutil"
@@ -12,14 +12,14 @@ import (
 )
 
 type (
-	Item interface {
+	Package interface {
 		Load()
 		Name() string
 	}
 
 	Record struct {
 		Check  func(string) bool
-		Action func(string) Item
+		Action func(string) Package
 	}
 )
 
@@ -45,9 +45,9 @@ func Scan(dir string) {
 func record(fn string) {
 	for _, rec := range recs {
 		if rec.Check(fn) {
-			item := rec.Action(fn)
-			go item.Load()
-			Watch(item)
+			pkg := rec.Action(fn)
+			go pkg.Load()
+			Watch(pkg)
 			break
 		}
 	}

@@ -5,15 +5,15 @@ import (
 
 	"github.com/limetext/gopy/lib"
 	"github.com/limetext/lime-backend/lib"
-	"github.com/limetext/lime-backend/lib/items"
 	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/lime-backend/lib/packages"
 )
 
 type plugin struct {
 	filename string
 }
 
-func newPlugin(fn string) items.Item {
+func newPlugin(fn string) packages.Package {
 	return &plugin{filename: fn}
 }
 
@@ -47,7 +47,7 @@ func isPlugin(filename string) bool {
 
 func init() {
 	backend.OnInit.Add(onInit)
-	items.Register(items.Record{isPlugin, newPlugin})
+	packages.Register(packages.Record{isPlugin, newPlugin})
 }
 
 var module *py.Module

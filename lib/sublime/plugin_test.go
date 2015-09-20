@@ -17,8 +17,8 @@ import (
 	"github.com/limetext/gopy/lib"
 	"github.com/limetext/lime-backend/lib"
 	_ "github.com/limetext/lime-backend/lib/commands"
-	"github.com/limetext/lime-backend/lib/items"
 	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/lime-backend/lib/packages"
 	"github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/text"
 )
@@ -54,7 +54,7 @@ func TestSublime(t *testing.T) {
 	l := py.NewLock()
 	py.AddToPath("testdata")
 	py.AddToPath("testdata/plugins")
-	items.Scan("testdata/plugins")
+	packages.Scan("testdata/plugins")
 	subl, err := py.Import("sublime")
 	if err != nil {
 		t.Fatal(err)

@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 
 	"github.com/limetext/lime-backend/lib"
-	"github.com/limetext/lime-backend/lib/items"
 	"github.com/limetext/lime-backend/lib/keys"
 	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/lime-backend/lib/packages"
 	"github.com/limetext/text"
 )
 
@@ -23,7 +23,7 @@ type pkg struct {
 	// TODO: themes, snippets, etc more info on iss#71
 }
 
-func newPKG(dir string) items.Item {
+func newPKG(dir string) packages.Package {
 	return &pkg{
 		dir:         dir,
 		platformSet: new(text.HasSettings),
@@ -38,7 +38,7 @@ func (p *pkg) Load() {
 	p.loadKeyBindings()
 	p.loadSettings()
 	for _, plugin := range p.plugins {
-		items.Watch(plugin)
+		packages.Watch(plugin)
 		plugin.Load()
 	}
 }
@@ -59,10 +59,10 @@ func (p *pkg) loadKeyBindings() {
 	p.defaultKB.KeyBindings().SetParent(tmp)
 
 	pt := path.Join(dir, "Default.sublime-keymap")
-	items.NewKeymapL(pt, p.defaultKB.KeyBindings())
+	packages.NewKeymapL(pt, p.defaultKB.KeyBindings())
 
 	pt = path.Join(dir, "Default ("+ed.Plat()+").sublime-keymap")
-	items.NewKeymapL(pt, p.KeyBindings())
+	packages.NewKeymapL(pt, p.KeyBindings())
 }
 
 func (p *pkg) loadSettings() {
@@ -76,13 +76,13 @@ func (p *pkg) loadSettings() {
 	p.defaultSet.Settings().SetParent(tmp)
 
 	pt := path.Join(dir, "Preferences.sublime-settings")
-	items.NewSettingL(pt, p.defaultSet.Settings())
+	packages.NewSettingL(pt, p.defaultSet.Settings())
 
 	pt = path.Join(dir, "Preferences ("+ed.Plat()+").sublime-settings")
-	items.NewSettingL(pt, p.platformSet.Settings())
+	packages.NewSettingL(pt, p.platformSet.Settings())
 
 	pt = path.Join(ed.PackagesPath("user"), "Preferences.sublime-settings")
-	items.NewSettingL(pt, p.Settings())
+	packages.NewSettingL(pt, p.Settings())
 }
 
 func isPKG(dir string) bool {
@@ -94,5 +94,5 @@ func isPKG(dir string) bool {
 }
 
 func init() {
-	items.Register(items.Record{isPKG, newPKG})
+	packages.Register(packages.Record{isPKG, newPKG})
 }

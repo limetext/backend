@@ -15,8 +15,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/limetext/lime-backend/lib/items"
 	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/lime-backend/lib/packages"
 	"github.com/limetext/lime-backend/lib/parser"
 	"github.com/limetext/lime-backend/lib/render"
 	"github.com/limetext/lime-backend/lib/textmate"
@@ -268,10 +268,10 @@ func (v *View) loadSettings() {
 		return
 	} else if s := r.FindStringSubmatch(syntax); s != nil {
 		p := path.Join(ed.PackagesPath("shipped"), s[1], s[1]+".sublime-settings")
-		items.NewSettingL(p, defSet.Settings())
+		packages.NewSettingL(p, defSet.Settings())
 
 		p = path.Join(ed.PackagesPath("user"), s[1]+".sublime-settings")
-		items.NewSettingL(p, usrSet.Settings())
+		packages.NewSettingL(p, usrSet.Settings())
 	}
 }
 

@@ -8,8 +8,8 @@ import (
 	"path"
 	"testing"
 
-	"github.com/limetext/lime-backend/lib/items"
 	"github.com/limetext/lime-backend/lib/keys"
+	"github.com/limetext/lime-backend/lib/packages"
 )
 
 func TestGetEditor(t *testing.T) {
@@ -21,7 +21,7 @@ func TestGetEditor(t *testing.T) {
 
 func TestLoadKeyBinding(t *testing.T) {
 	editor := GetEditor()
-	items.NewKeymapL("testdata/Default.sublime-keymap", editor.KeyBindings())
+	packages.NewKeymapL("testdata/Default.sublime-keymap", editor.KeyBindings())
 
 	kb := editor.KeyBindings().Filter(keys.KeyPress{Key: 'i'})
 	if expectedLen := 3; kb.Len() != expectedLen {
@@ -40,7 +40,7 @@ func TestLoadKeyBindings(t *testing.T) {
 
 func TestLoadSetting(t *testing.T) {
 	editor := GetEditor()
-	items.NewSettingL("testdata/Default.sublime-settings", editor.Settings())
+	packages.NewSettingL("testdata/Default.sublime-settings", editor.Settings())
 
 	if editor.Settings().Has("tab_size") != true {
 		t.Error("Expected editor settings to have tab_size, but it didn't")

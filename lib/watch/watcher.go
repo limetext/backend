@@ -233,7 +233,7 @@ func (w *Watcher) Observe() {
 				// If the event is create we will apply FileCreated callback
 				// for the parent directory to because when new file is created
 				// inside directory we won't get any event for the watched directory.
-				// we need this feature to detect new items(plugins, settings, etc)
+				// we need this feature to detect new packages(plugins, settings, etc)
 				if cbs, exist := w.watched[dir]; ev.Op&fsnotify.Create != 0 && exist {
 					for _, cb := range cbs {
 						if c, ok := cb.(FileCreatedCallback); ok {

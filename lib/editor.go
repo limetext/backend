@@ -12,9 +12,9 @@ import (
 	"sync"
 
 	"github.com/atotto/clipboard"
-	"github.com/limetext/lime-backend/lib/items"
 	"github.com/limetext/lime-backend/lib/keys"
 	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/lime-backend/lib/packages"
 	. "github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/lime-backend/lib/watch"
 	. "github.com/limetext/text"
@@ -134,7 +134,7 @@ func GetEditor() *Editor {
 			log.Error("Couldn't create watcher: %s", err)
 		}
 
-		items.Init()
+		packages.Init()
 		ed.console.Settings().Set("is_widget", true)
 		ed.Settings() // Just to initialize it
 
@@ -168,7 +168,7 @@ func (e *Editor) Init() {
 	e.loadSettings()
 
 	for _, p := range e.pkgsPaths {
-		items.Scan(p)
+		packages.Scan(p)
 	}
 
 	OnInit.call()
@@ -189,16 +189,16 @@ func (e *Editor) loadKeyBindings() {
 	e.platformKB.KeyBindings().SetParent(e.defaultKB)
 
 	p := path.Join(e.PackagesPath("default"), "Default.sublime-keymap")
-	items.NewKeymapL(p, e.defaultKB.KeyBindings())
+	packages.NewKeymapL(p, e.defaultKB.KeyBindings())
 
 	p = path.Join(e.PackagesPath("default"), "Default ("+e.Plat()+").sublime-keymap")
-	items.NewKeymapL(p, e.platformKB.KeyBindings())
+	packages.NewKeymapL(p, e.platformKB.KeyBindings())
 
 	p = path.Join(e.PackagesPath("user"), "Default.sublime-keymap")
-	items.NewKeymapL(p, e.userKB.KeyBindings())
+	packages.NewKeymapL(p, e.userKB.KeyBindings())
 
 	p = path.Join(e.PackagesPath("user"), "Default ("+e.Plat()+").sublime-keymap")
-	items.NewKeymapL(p, e.KeyBindings())
+	packages.NewKeymapL(p, e.KeyBindings())
 }
 
 func (e *Editor) loadSettings() {
@@ -210,13 +210,13 @@ func (e *Editor) loadSettings() {
 	e.Settings().SetParent(e.platformSet)
 
 	p := path.Join(e.PackagesPath("default"), "Preferences.sublime-settings")
-	items.NewSettingL(p, e.defaultSet.Settings())
+	packages.NewSettingL(p, e.defaultSet.Settings())
 
 	p = path.Join(e.PackagesPath("default"), "Preferences ("+e.Plat()+").sublime-settings")
-	items.NewSettingL(p, e.platformSet.Settings())
+	packages.NewSettingL(p, e.platformSet.Settings())
 
 	p = path.Join(e.PackagesPath("user"), "Preferences.sublime-settings")
-	items.NewSettingL(p, e.Settings())
+	packages.NewSettingL(p, e.Settings())
 }
 
 func (e *Editor) PackagesPath(key string) string {

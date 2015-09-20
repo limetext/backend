@@ -2,7 +2,7 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-package items
+package packages
 
 import (
 	"github.com/limetext/lime-backend/lib/log"
@@ -19,9 +19,9 @@ func (p *pkgDir) FileCreated(name string) {
 
 var watcher *watch.Watcher
 
-func Watch(item Item) {
-	if err := watcher.Watch(item.Name(), item); err != nil {
-		log.Warn("Couldn't watch %s: %s", item.Name(), err)
+func Watch(pkg Package) {
+	if err := watcher.Watch(pkg.Name(), pkg); err != nil {
+		log.Warn("Couldn't watch %s: %s", pkg.Name(), err)
 	}
 }
 
