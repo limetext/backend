@@ -6,8 +6,6 @@ package items
 
 import (
 	"encoding/json"
-
-	"github.com/limetext/lime-backend/lib/log"
 )
 
 type Keymap struct {
@@ -16,19 +14,13 @@ type Keymap struct {
 
 func NewKeymap(filename string, marshal json.Unmarshaler) *Keymap {
 	k := &Keymap{simple{filename: filename, marshal: marshal}}
-	watchItem(k)
+	Watch(k)
 	return k
 }
 
 func NewKeymapL(filename string, marshal json.Unmarshaler) *Keymap {
 	k := NewKeymap(filename, marshal)
-
-	if err := k.Load(); err != nil {
-		log.Warn("Failed to load keymap %s: %s", k.Name(), err)
-	} else {
-		log.Info("Loaded keymap %s", k.Name())
-	}
-
+	k.Load()
 	return k
 }
 

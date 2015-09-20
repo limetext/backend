@@ -6,8 +6,6 @@ package items
 
 import (
 	"encoding/json"
-
-	"github.com/limetext/lime-backend/lib/log"
 )
 
 type Setting struct {
@@ -16,19 +14,13 @@ type Setting struct {
 
 func NewSetting(filename string, marshal json.Unmarshaler) *Setting {
 	s := &Setting{simple{filename: filename, marshal: marshal}}
-	watchItem(s)
+	Watch(s)
 	return s
 }
 
 func NewSettingL(filename string, marshal json.Unmarshaler) *Setting {
 	s := NewSetting(filename, marshal)
-
-	if err := s.Load(); err != nil {
-		log.Warn("Failed to load setting %s: %s", s.Name(), err)
-	} else {
-		log.Info("Loaded setting %s", s.Name())
-	}
-
+	s.Load()
 	return s
 }
 

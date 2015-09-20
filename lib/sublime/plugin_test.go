@@ -31,7 +31,6 @@ type consoleObserver struct {
 
 func (o *consoleObserver) Erased(changed_buffer text.Buffer,
 	region_removed text.Region, data_removed []rune) {
-	// do nothing
 }
 
 func (o *consoleObserver) Inserted(changed_buffer text.Buffer,

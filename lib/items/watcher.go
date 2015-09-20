@@ -19,7 +19,7 @@ func (p *pkgDir) FileCreated(name string) {
 
 var watcher *watch.Watcher
 
-func watchItem(item Item) {
+func Watch(item Item) {
 	if err := watcher.Watch(item.Name(), item); err != nil {
 		log.Warn("Couldn't watch %s: %s", item.Name(), err)
 	}

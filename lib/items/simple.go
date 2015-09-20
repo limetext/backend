@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 
 	"github.com/limetext/lime-backend/lib/loaders"
+	"github.com/limetext/lime-backend/lib/log"
 )
 
 type simple struct {
@@ -16,13 +17,17 @@ type simple struct {
 	marshal  json.Unmarshaler
 }
 
-func (s *simple) Load() error {
+func (s *simple) Load() {
+	log.Debug("Loading %s", s.Name())
 	data, err := ioutil.ReadFile(s.filename)
 	if err != nil {
-		return err
+		log.Warn(err)
+		return
 	}
 
-	return loaders.LoadJSON(data, s.marshal)
+	if err = loaders.LoadJSON(data, s.marshal); err != nil {
+		log.Warn(err)
+	}
 }
 
 func (s *simple) Name() string {

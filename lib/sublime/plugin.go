@@ -1,15 +1,12 @@
 package sublime
 
 import (
-	"path"
 	"path/filepath"
 
 	"github.com/limetext/gopy/lib"
 	"github.com/limetext/lime-backend/lib"
 	"github.com/limetext/lime-backend/lib/items"
-	"github.com/limetext/lime-backend/lib/keys"
 	"github.com/limetext/lime-backend/lib/log"
-	"github.com/limetext/text"
 )
 
 type plugin struct {
@@ -20,19 +17,20 @@ func newPlugin(fn string) items.Item {
 	return &plugin{filename: fn}
 }
 
-func (p *plugin) Load() error {
+func (p *plugin) Load() {
+	log.Debug("Loading plugin %s", p.Name())
 	dir, file := filepath.Split(p.Name())
 	s, err := py.NewUnicode(filepath.Base(dir) + "." + file[:len(file)-3])
 	if err != nil {
-		return err
+		log.Warn(err)
+		return
 	}
 	if r, err := module.Base().CallMethodObjArgs("reload_plugin", s); err != nil {
-		return err
+		log.Warn(err)
+		return
 	} else if r != nil {
 		r.Decref()
 	}
-
-	return nil
 }
 
 func (p *plugin) Name() string {

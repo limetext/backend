@@ -13,13 +13,13 @@ import (
 
 type (
 	Item interface {
-		Load() error
+		Load()
 		Name() string
 	}
 
 	Record struct {
-		CH func(string) bool
-		CB func(string) Item
+		Check  func(string) bool
+		Action func(string) Item
 	}
 )
 
@@ -44,12 +44,10 @@ func Scan(dir string) {
 
 func record(fn string) {
 	for _, rec := range recs {
-		if rec.CH(fn) {
-			item := rec.CB(fn)
-			if err := item.Load(); err != nil {
-				log.Warn("Failed to load plugin %s: %s", item.Name(), err)
-			}
-			watchItem(item)
+		if rec.Check(fn) {
+			item := rec.Action(fn)
+			go item.Load()
+			Watch(item)
 			break
 		}
 	}
