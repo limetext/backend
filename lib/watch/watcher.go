@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/lime-backend/lib/util"
 	"gopkg.in/fsnotify.v1"
 )
 
@@ -74,7 +75,7 @@ func (w *Watcher) Watch(name string, cb interface{}) error {
 		if !isDir {
 			return err
 		}
-		if exist(w.dirs, name) {
+		if util.Exists(w.dirs, name) {
 			log.Debug("%s is watched already", name)
 			return nil
 		}
@@ -84,7 +85,7 @@ func (w *Watcher) Watch(name string, cb interface{}) error {
 	// If the file is under one of watched dirs
 	//
 	// no need to create watcher
-	if exist(w.watchers, name) || (!isDir && exist(w.dirs, filepath.Dir(name))) {
+	if util.Exists(w.watchers, name) || (!isDir && util.Exists(w.dirs, filepath.Dir(name))) {
 		return nil
 	}
 	if err := w.watch(name); err != nil {
@@ -128,12 +129,12 @@ func (w *Watcher) watch(name string) error {
 // Remove watchers created on files under this directory because
 // one watcher on the parent directory is enough for all of them
 func (w *Watcher) flushDir(name string) {
-	if exist(w.dirs, name) {
+	if util.Exists(w.dirs, name) {
 		return
 	}
 	w.dirs = append(w.dirs, name)
 	for _, p := range w.watchers {
-		if filepath.Dir(p) == name && !exist(w.dirs, p) {
+		if filepath.Dir(p) == name && !util.Exists(w.dirs, p) {
 			if err := w.removeWatch(p); err != nil {
 				log.Error("Couldn't unwatch file %s: %s", p, err)
 			}
@@ -174,8 +175,8 @@ func (w *Watcher) removeWatch(name string) error {
 	if err := w.wchr.Remove(name); err != nil {
 		return err
 	}
-	w.watchers = remove(w.watchers, name)
-	if exist(w.dirs, name) {
+	w.watchers = util.Remove(w.watchers, name)
+	if util.Exists(w.dirs, name) {
 		w.removeDir(name)
 	}
 	return nil
@@ -191,7 +192,7 @@ func (w *Watcher) removeDir(name string) {
 			}
 		}
 	}
-	w.dirs = remove(w.dirs, name)
+	w.dirs = util.Remove(w.dirs, name)
 }
 
 // Observe dispatches notifications received by the watcher. This function will
@@ -212,7 +213,7 @@ func (w *Watcher) Observe() {
 				// inside directory when a directory is removed but
 				// when the directory is renamed there is no event for
 				// files inside directory
-				if ev.Op&fsnotify.Rename != 0 && exist(w.dirs, name) {
+				if ev.Op&fsnotify.Rename != 0 && util.Exists(w.dirs, name) {
 					for p, _ := range w.watched {
 						if filepath.Dir(p) == name {
 							ev.Name = p
@@ -225,7 +226,7 @@ func (w *Watcher) Observe() {
 				// so we need to watch the parent directory for when the
 				// file is created again
 				if ev.Op&fsnotify.Remove != 0 {
-					w.watchers = remove(w.watchers, name)
+					w.watchers = util.Remove(w.watchers, name)
 					w.lock.Unlock()
 					w.Watch(dir, nil)
 					w.lock.Lock()
