@@ -184,6 +184,7 @@ func (e *Editor) loadKeyBindings() {
 	if e.KeyBindings().Parent() != nil {
 		return
 	}
+	log.Fine("Loading editor keybindings")
 	e.KeyBindings().SetParent(e.userKB)
 	e.userKB.KeyBindings().SetParent(e.platformKB)
 	e.platformKB.KeyBindings().SetParent(e.defaultKB)
@@ -206,6 +207,7 @@ func (e *Editor) loadSettings() {
 	if e.Settings().Parent() != nil {
 		return
 	}
+	log.Fine("Loading editor settings")
 	e.platformSet.Settings().SetParent(e.defaultSet)
 	e.Settings().SetParent(e.platformSet)
 

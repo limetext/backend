@@ -23,8 +23,6 @@ import (
 	"github.com/limetext/text"
 )
 
-var dummyClipboard string
-
 type consoleObserver struct {
 	T *testing.T
 }
@@ -40,12 +38,6 @@ func (o *consoleObserver) Inserted(changed_buffer text.Buffer,
 
 func TestSublime(t *testing.T) {
 	ed := backend.GetEditor()
-	ed.SetClipboardFuncs(func(n string) (err error) {
-		dummyClipboard = n
-		return nil
-	}, func() (string, error) {
-		return dummyClipboard, nil
-	})
 	ed.Init()
 
 	ed.Console().Buffer().AddObserver(&consoleObserver{T: t})

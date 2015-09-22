@@ -1,6 +1,7 @@
 package sublime
 
 import (
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -19,37 +20,67 @@ type pkg struct {
 	platformSet *text.HasSettings
 	defaultSet  *text.HasSettings
 	defaultKB   *keys.HasKeyBindings
-	plugins     []*plugin
+	plugins     map[string]*plugin
 	// TODO: themes, snippets, etc more info on iss#71
 }
 
 func newPKG(dir string) packages.Package {
-	return &pkg{
+	p := &pkg{
 		dir:         dir,
 		platformSet: new(text.HasSettings),
 		defaultSet:  new(text.HasSettings),
 		defaultKB:   new(keys.HasKeyBindings),
-		plugins:     make([]*plugin, 0),
+		plugins:     make(map[string]*plugin),
 	}
+
+	return p
 }
 
 func (p *pkg) Load() {
 	log.Debug("Loading package %s", p.Name())
 	p.loadKeyBindings()
 	p.loadSettings()
-	for _, plugin := range p.plugins {
-		packages.Watch(plugin)
-		plugin.Load()
-	}
+	p.loadPlugins()
 }
 
 func (p *pkg) Name() string {
 	return p.dir
 }
 
-func (p *pkg) FileChanged(name string) {}
+func (p *pkg) FileCreated(name string) {
+	p.loadPlugin(name)
+}
+
+func (p *pkg) loadPlugins() {
+	log.Fine("Loading %s plugins", p.Name())
+	fis, err := ioutil.ReadDir(p.Name())
+	if err != nil {
+		log.Warn("Error on reading directory %s, %s", p.Name(), err)
+		return
+	}
+	for _, fi := range fis {
+		p.loadPlugin(fi.Name())
+	}
+}
+
+func (p *pkg) loadPlugin(fn string) {
+	if !isPlugin(fn) {
+		return
+	}
+	_, exist := p.plugins[fn]
+	if exist {
+		return
+	}
+
+	pl := newPlugin(fn)
+	pl.Load()
+	packages.Watch(pl)
+
+	p.plugins[fn] = pl.(*plugin)
+}
 
 func (p *pkg) loadKeyBindings() {
+	log.Fine("Loading %s keybindings", p.Name())
 	ed := backend.GetEditor()
 	tmp := ed.KeyBindings().Parent()
 	dir := filepath.Dir(p.Name())
@@ -66,6 +97,7 @@ func (p *pkg) loadKeyBindings() {
 }
 
 func (p *pkg) loadSettings() {
+	log.Fine("Loading %s settings", p.Name())
 	ed := backend.GetEditor()
 	tmp := ed.Settings().Parent()
 	dir := filepath.Dir(p.Name())

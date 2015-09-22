@@ -25,6 +25,9 @@ func (p *plugin) Load() {
 		log.Warn(err)
 		return
 	}
+
+	l := py.NewLock()
+	defer l.Unlock()
 	if r, err := module.Base().CallMethodObjArgs("reload_plugin", s); err != nil {
 		log.Warn(err)
 		return
