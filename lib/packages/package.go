@@ -4,16 +4,13 @@
 
 package packages
 
-import (
-	"io/ioutil"
-	"path"
-
-	"github.com/limetext/lime-backend/lib/log"
-)
-
 type (
+	// Defines the functionality each package needs to implement
+	// so the backend could manage the loading watching and etc
 	Package interface {
 		Load()
+
+		// Returns the path of the package
 		Name() string
 	}
 
@@ -27,19 +24,6 @@ var recs []Record
 
 func Register(r Record) {
 	recs = append(recs, r)
-}
-
-func Scan(dir string) {
-	fis, err := ioutil.ReadDir(dir)
-	if err != nil {
-		log.Warn("Couldn't read path %s: %s", dir, err)
-	}
-
-	watchDir(&pkgDir{dir})
-
-	for _, fi := range fis {
-		record(path.Join(dir, fi.Name()))
-	}
 }
 
 func record(fn string) {

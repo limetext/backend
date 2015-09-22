@@ -13,14 +13,13 @@ type Keymap struct {
 }
 
 func NewKeymap(filename string, marshal json.Unmarshaler) *Keymap {
-	k := &Keymap{simple{filename: filename, marshal: marshal}}
-	Watch(k)
-	return k
+	return &Keymap{simple{filename: filename, marshal: marshal}}
 }
 
 func NewKeymapL(filename string, marshal json.Unmarshaler) *Keymap {
 	k := NewKeymap(filename, marshal)
 	k.Load()
+	Watch(k)
 	return k
 }
 

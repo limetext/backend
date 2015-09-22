@@ -13,14 +13,13 @@ type Setting struct {
 }
 
 func NewSetting(filename string, marshal json.Unmarshaler) *Setting {
-	s := &Setting{simple{filename: filename, marshal: marshal}}
-	Watch(s)
-	return s
+	return &Setting{simple{filename: filename, marshal: marshal}}
 }
 
 func NewSettingL(filename string, marshal json.Unmarshaler) *Setting {
 	s := NewSetting(filename, marshal)
 	s.Load()
+	Watch(s)
 	return s
 }
 

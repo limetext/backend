@@ -12,6 +12,7 @@ import (
 	"github.com/limetext/lime-backend/lib/log"
 )
 
+// Helper struct for simple packages containing 1 json file(e.g keymaps settings)
 type simple struct {
 	filename string
 	marshal  json.Unmarshaler
