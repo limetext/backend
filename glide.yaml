@@ -1,4 +1,4 @@
-package: github.com/limetext/lime-backend/lib
+package: github.com/limetext/lime-backend
 import:
   - package: github.com/atotto/clipboard
     ref:     008417eea030fdbb84475ee696287a93257ef40b

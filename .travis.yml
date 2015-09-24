@@ -19,7 +19,7 @@ addons:
       - xclip
 
 install:
-  - ./tasks/general/ci/install.sh lib
+  - ./tasks/general/ci/install.sh
 
 script:
   - ./tasks/general/ci/run_tests.sh lib
