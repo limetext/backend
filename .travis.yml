@@ -6,10 +6,10 @@ sudo: required
 
 language: go
 
-go: 1.4
+go: 1.5.1
 
 install:
-  - ./tasks/general/ci/install.sh github.com/limetext/lime-backend/lib
+  - ./tasks/general/ci/install.sh lib
 
 script:
   - ./tasks/general/ci/run_tests.sh lib
