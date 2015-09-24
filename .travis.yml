@@ -2,11 +2,20 @@ os:
   - osx
   - linux
 
-sudo: required
+sudo: false
 
 language: go
 
 go: 1.5.1
+
+addons:
+  apt:
+    sources:
+      - deadsnakes
+    packages:
+      - libonig-dev
+      - python3.5
+      - python3.5-dev
 
 install:
   - ./tasks/general/ci/install.sh lib
