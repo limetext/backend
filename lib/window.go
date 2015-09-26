@@ -5,6 +5,7 @@
 package backend
 
 import (
+	"fmt"
 	"github.com/limetext/lime-backend/lib/log"
 	"github.com/limetext/text"
 	"io/ioutil"
@@ -19,6 +20,11 @@ type Window struct {
 	views       []*View
 	active_view *View
 	lock        sync.Mutex
+}
+
+// implement the fmt.Stringer interface
+func (w *Window) String() string {
+	return fmt.Sprintf("Window{id:%d}", w.Id())
 }
 
 func (w *Window) NewFile() *View {
@@ -61,7 +67,7 @@ func (w *Window) remove(v *View) {
 			return
 		}
 	}
-	log.Error("Wanted to remove view %+v, but it doesn't appear to be a child of this window", v)
+	log.Error("Wanted to remove view %s, but it doesn't appear to be a child of this window", v)
 }
 
 func (w *Window) OpenFile(filename string, flags int) *View {

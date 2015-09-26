@@ -272,7 +272,7 @@ func (e *Editor) remove(w *Window) {
 			return
 		}
 	}
-	log.Error("Wanted to remove window %+v, but it doesn't appear to be a child of this editor", w)
+	log.Error("Wanted to remove window %s, but it doesn't appear to be a child of this editor", w)
 }
 
 func (e *Editor) Arch() string {
