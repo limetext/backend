@@ -4,3 +4,24 @@
 [submodule "tasks/general"]
 	path = tasks/general
 	url = https://github.com/limetext/lime-tasks.git
+[submodule "vendor/github.com/atotto/clipboard"]
+	path = vendor/github.com/atotto/clipboard
+	url = https://github.com/atotto/clipboard
+[submodule "vendor/github.com/limetext/gopy"]
+	path = vendor/github.com/limetext/gopy
+	url = https://github.com/limetext/gopy
+[submodule "vendor/github.com/limetext/log4go"]
+	path = vendor/github.com/limetext/log4go
+	url = https://github.com/limetext/log4go
+[submodule "vendor/github.com/limetext/rubex"]
+	path = vendor/github.com/limetext/rubex
+	url = https://github.com/limetext/rubex
+[submodule "vendor/github.com/limetext/text"]
+	path = vendor/github.com/limetext/text
+	url = http://github.com/limetext/text
+[submodule "vendor/github.com/quarnster/parser"]
+	path = vendor/github.com/quarnster/parser
+	url = http://github.com/quarnster/parser
+[submodule "vendor/gopkg.in/fsnotify.v1"]
+	path = vendor/gopkg.in/fsnotify.v1
+	url = http://gopkg.in/fsnotify.v1
