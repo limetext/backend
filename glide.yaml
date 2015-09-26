@@ -9,7 +9,7 @@ import:
   - package: github.com/limetext/rubex
     ref:     3fc130e580797e3d9c6fdab36e6a961141f9fd5f
   - package: github.com/limetext/text
-    ref:     d3174abdb32395a1a44a040b2e5538d49a0590a1
+    ref:     0af086578916e0b9cedfd617ac9856e4b7cd4cb5
   - package: github.com/quarnster/parser
     ref:     8991807ce6d383a41077a642b7b381eba1df7064
   - package: gopkg.in/fsnotify.v1
