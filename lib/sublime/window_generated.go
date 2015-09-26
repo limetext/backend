@@ -80,6 +80,10 @@ func (o *Window) Py_settings() (py.Object, error) {
 	return pyret0, err
 }
 
+func (o *Window) PyStr() string {
+	return o.data.String()
+}
+
 func (o *Window) Py_views() (py.Object, error) {
 	ret0 := o.data.Views()
 	var err error
