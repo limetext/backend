@@ -414,7 +414,7 @@ func main() {
 		{path.Join(sublimepath, "settings_generated.go"), generateWrapper(reflect.TypeOf(&text.Settings{}), false, regexp.MustCompile("Parent|Set|Get|UnmarshalJSON|MarshalJSON").MatchString)},
 		{path.Join(sublimepath, "view_buffer_generated.go"), generatemethodsEx(
 			reflect.TypeOf(backend.GetEditor().Console().Buffer()),
-			regexp.MustCompile("Erase|Insert|Substr|SetFile|AddCallback|AddObserver|RemoveObserver|Data|Runes|Settings|Index|Close|Unlock|Lock").MatchString,
+			regexp.MustCompile("Erase|Insert|Substr|SetFile|AddCallback|AddObserver|RemoveObserver|Data|Runes|Settings|Index|Close|Unlock|Lock|String").MatchString,
 			"o.data.Buffer().",
 			func(t reflect.Type, m reflect.Method) string {
 				mn := ""

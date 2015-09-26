@@ -278,10 +278,6 @@ func (o *View) Py_size() (py.Object, error) {
 	return pyret0, err
 }
 
-func (o *View) PyStr() string {
-	return o.data.Buffer().String()
-}
-
 func (o *View) Py_text_point(tu *py.Tuple) (py.Object, error) {
 	var (
 		arg1 int
