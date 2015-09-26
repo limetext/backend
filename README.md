@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/limetext/lime-backend.svg?branch=master)](https://travis-ci.org/limetext/lime-backend)
+[![Go Report Card](http://goreportcard.com/badge/limetext/lime-backend)](http://goreportcard.com/report/limetext/lime-backend)
 [![Coverage Status](https://img.shields.io/coveralls/limetext/lime-backend.svg?branch=master)](https://coveralls.io/r/limetext/lime-backend?branch=master)
 [![GoDoc](https://godoc.org/github.com/limetext/lime-backend?status.svg)](https://godoc.org/github.com/limetext/lime-backend)
 [![Bountysource Bounties](https://www.bountysource.com/badge/team?team_id=8742&style=bounties_received)](https://www.bountysource.com/teams/limetext/issues?utm_source=limetext&utm_medium=shield&utm_campaign=bounties_received)
