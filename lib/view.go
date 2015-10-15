@@ -78,6 +78,11 @@ func newView(w *Window) *View {
 	return ret
 }
 
+// implement the fmt.Stringer interface
+func (v *View) String() string {
+	return fmt.Sprintf("View{id:%d, name: \"%s\", buffer: %s}", v.Id(), v.name, v.buffer)
+}
+
 func (v *View) setBuffer(b Buffer) error {
 	if v.buffer != nil {
 		return fmt.Errorf("There is already a buffer set")

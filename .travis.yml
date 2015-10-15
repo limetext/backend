@@ -2,14 +2,24 @@ os:
   - osx
   - linux
 
-sudo: required
+sudo: false
 
 language: go
 
-go: 1.4
+go: 1.5.1
+
+addons:
+  apt:
+    sources:
+      - deadsnakes
+    packages:
+      - libonig-dev
+      - python3.5
+      - python3.5-dev
+      - xclip
 
 install:
-  - ./tasks/general/ci/install.sh github.com/limetext/lime-backend/lib
+  - ./tasks/general/ci/install.sh
 
 script:
   - ./tasks/general/ci/run_tests.sh lib

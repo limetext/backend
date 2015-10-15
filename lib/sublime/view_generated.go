@@ -634,6 +634,10 @@ func (o *View) Py_settings() (py.Object, error) {
 	return pyret0, err
 }
 
+func (o *View) PyStr() string {
+	return o.data.String()
+}
+
 func (o *View) Py_window() (py.Object, error) {
 	ret0 := o.data.Window()
 	var err error

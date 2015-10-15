@@ -114,7 +114,7 @@ func TestSaveAs(t *testing.T) {
 func TestSaveAll(t *testing.T) {
 	var err error
 	holds := make(map[int][]byte)
-	views := make(map[int]View)
+	views := make(map[int]*View)
 	files := []struct {
 		file   string
 		expect string
@@ -149,7 +149,7 @@ func TestSaveAll(t *testing.T) {
 		}
 
 		v := w.OpenFile(f.file, 0)
-		views[i] = *v
+		views[i] = v
 
 		e := v.BeginEdit()
 		v.Insert(e, 0, f.expect)
