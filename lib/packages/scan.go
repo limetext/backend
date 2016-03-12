@@ -7,7 +7,8 @@ import (
 	"github.com/limetext/lime-backend/lib/log"
 )
 
-// A helper struct to watch all scaned directories for new packages
+// A helper struct to implement File*Callback interfaces and
+// watching all scaned directories for new packages
 type scanDir struct {
 	path string
 }
@@ -20,14 +21,14 @@ func (p *scanDir) FileCreated(name string) {
 func watchDir(dir string) {
 	sd := &scanDir{dir}
 	if err := watcher.Watch(sd.path, sd); err != nil {
-		log.Warn("Couldn't watch %s: %s", sd.path, err)
+		log.Error("Couldn't watch %s: %s", sd.path, err)
 	}
 }
 
-func Scan(dir string) {
+func Scan(dir string) error {
 	fis, err := ioutil.ReadDir(dir)
 	if err != nil {
-		log.Warn("Couldn't read path %s: %s", dir, err)
+		log.Error("Couldn't read path %s: %s", dir, err)
 	}
 
 	watchDir(dir)

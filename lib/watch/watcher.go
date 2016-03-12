@@ -76,7 +76,7 @@ func (w *Watcher) Watch(name string, cb interface{}) error {
 			return err
 		}
 		if util.Exists(w.dirs, name) {
-			log.Debug("%s is watched already", name)
+			log.Fine("%s is watched already", name)
 			return nil
 		}
 	}
