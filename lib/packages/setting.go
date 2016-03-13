@@ -19,7 +19,7 @@ func NewSetting(filename string, marshal json.Unmarshaler) *Setting {
 func NewSettingL(filename string, marshal json.Unmarshaler) *Setting {
 	s := NewSetting(filename, marshal)
 	s.Load()
-	Watch(s)
+	wch(s)
 	return s
 }
 

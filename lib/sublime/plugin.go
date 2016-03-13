@@ -9,6 +9,7 @@ import (
 	"github.com/limetext/lime-backend/lib/packages"
 )
 
+// Sublime plugin which is a single python file
 type plugin struct {
 	filename string
 }
@@ -48,11 +49,6 @@ func isPlugin(filename string) bool {
 	return filepath.Ext(filename) == ".py"
 }
 
-func init() {
-	backend.OnInit.Add(onInit)
-	packages.Register(packages.Record{isPlugin, newPlugin})
-}
-
 var module *py.Module
 
 func onInit() {
@@ -68,4 +64,9 @@ func onInit() {
 	} else {
 		defer sys.Decref()
 	}
+}
+
+func init() {
+	backend.OnInit.Add(onInit)
+	packages.Register(packages.Record{isPlugin, newPlugin})
 }

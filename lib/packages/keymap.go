@@ -19,7 +19,7 @@ func NewKeymap(filename string, marshal json.Unmarshaler) *Keymap {
 func NewKeymapL(filename string, marshal json.Unmarshaler) *Keymap {
 	k := NewKeymap(filename, marshal)
 	k.Load()
-	Watch(k)
+	wch(k)
 	return k
 }
 

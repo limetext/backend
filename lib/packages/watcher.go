@@ -13,7 +13,7 @@ import (
 var watcher *watch.Watcher
 
 // Helper function for watching a package
-func Watch(pkg Package) {
+func wch(pkg Package) {
 	if err := watcher.Watch(pkg.Name(), pkg); err != nil {
 		log.Warn("Couldn't watch %s: %s", pkg.Name(), err)
 	}

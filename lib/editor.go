@@ -168,7 +168,9 @@ func (e *Editor) Init() {
 	e.loadSettings()
 
 	for _, p := range e.pkgsPaths {
-		packages.Scan(p)
+		if err := packages.Scan(p); err != nil {
+			log.Error("Error while scanning %s: %s", p, err)
+		}
 	}
 
 	OnInit.call()

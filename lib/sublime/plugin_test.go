@@ -46,7 +46,10 @@ func TestSublime(t *testing.T) {
 	l := py.NewLock()
 	py.AddToPath("testdata")
 	py.AddToPath("testdata/plugins")
-	packages.Scan("testdata/plugins")
+
+	if err := packages.Scan("testdata/plugins"); err != nil {
+		t.Fatalf("Error while scanning: %s", err)
+	}
 	subl, err := py.Import("sublime")
 	if err != nil {
 		t.Fatal(err)

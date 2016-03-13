@@ -28,7 +28,7 @@ func watchDir(dir string) {
 func Scan(dir string) error {
 	fis, err := ioutil.ReadDir(dir)
 	if err != nil {
-		log.Error("Couldn't read path %s: %s", dir, err)
+		return err
 	}
 
 	watchDir(dir)
@@ -36,4 +36,5 @@ func Scan(dir string) error {
 	for _, fi := range fis {
 		record(path.Join(dir, fi.Name()))
 	}
+	return nil
 }

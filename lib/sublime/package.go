@@ -13,6 +13,7 @@ import (
 	"github.com/limetext/text"
 )
 
+// A sublime package
 type pkg struct {
 	dir string
 	text.HasSettings
@@ -25,15 +26,13 @@ type pkg struct {
 }
 
 func newPKG(dir string) packages.Package {
-	p := &pkg{
+	return &pkg{
 		dir:         dir,
 		platformSet: new(text.HasSettings),
 		defaultSet:  new(text.HasSettings),
 		defaultKB:   new(keys.HasKeyBindings),
 		plugins:     make(map[string]*plugin),
 	}
-
-	return p
 }
 
 func (p *pkg) Load() {
@@ -47,6 +46,7 @@ func (p *pkg) Name() string {
 	return p.dir
 }
 
+// TODO: how we should watch the package and the files containing?
 func (p *pkg) FileCreated(name string) {
 	p.loadPlugin(name)
 }
@@ -74,7 +74,6 @@ func (p *pkg) loadPlugin(fn string) {
 
 	pl := newPlugin(fn)
 	pl.Load()
-	packages.Watch(pl)
 
 	p.plugins[fn] = pl.(*plugin)
 }
