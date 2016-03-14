@@ -17,6 +17,7 @@ type scanDir struct {
 	path string
 }
 
+// TODO: are we checking new folders to?
 func (p *scanDir) FileCreated(name string) {
 	record(name)
 }
