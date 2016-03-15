@@ -61,12 +61,7 @@ func onInit() {
 
 	var err error
 	if module, err = py.Import("sublime_plugin"); err != nil {
-		panic(err)
-	}
-	if sys, err := py.Import("sys"); err != nil {
-		log.Debug(err)
-	} else {
-		defer sys.Decref()
+		log.Error(err)
 	}
 }
 

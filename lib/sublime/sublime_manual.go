@@ -6,9 +6,6 @@ package sublime
 
 import (
 	"fmt"
-	"os"
-	"path"
-	"path/filepath"
 	"time"
 
 	"github.com/limetext/gopy/lib"
@@ -67,7 +64,7 @@ func sublime_set_timeout(tu *py.Tuple, kwargs *py.Dict) (py.Object, error) {
 
 func init() {
 	sublime_methods = append(sublime_methods, py.Method{Name: "console", Func: sublime_Console}, py.Method{Name: "set_timeout", Func: sublime_set_timeout})
-	backend.GetEditor()
+	ed := backend.GetEditor()
 	l := py.InitAndLock()
 	defer l.Unlock()
 
@@ -76,11 +73,10 @@ func init() {
 		panic(err)
 	}
 
-	type class struct {
+	classes := []struct {
 		name string
 		c    *py.Class
-	}
-	classes := []class{
+	}{
 		{"Region", &_regionClass},
 		{"RegionSet", &_region_setClass},
 		{"View", &_viewClass},
@@ -93,11 +89,10 @@ func init() {
 		{"OnQueryContextGlue", &_onQueryContextGlueClass},
 		{"ViewEventGlue", &_viewEventGlueClass},
 	}
-	type constant struct {
+	constants := []struct {
 		name     string
 		constant int
-	}
-	constants := []constant{
+	}{
 		{"OP_EQUAL", int(util.OpEqual)},
 		{"OP_NOT_EQUAL", int(util.OpNotEqual)},
 		{"OP_REGEX_MATCH", int(util.OpRegexMatch)},
@@ -149,13 +144,7 @@ func init() {
 		}
 	}
 
-	ed := backend.GetEditor()
 	py.AddToPath(ed.PackagesPath("shipped"))
+	py.AddToPath(ed.PackagesPath("default"))
 	py.AddToPath(ed.PackagesPath("user"))
-
-	// TODO: we should do this in a better way
-	gopaths := filepath.SplitList(os.ExpandEnv("$GOPATH"))
-	for _, gopath := range gopaths {
-		py.AddToPath(path.Join(gopath, "src", "github.com", "limetext", "lime-backend", "lib", "sublime"))
-	}
 }
