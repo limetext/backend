@@ -251,13 +251,13 @@ func TestStress(t *testing.T) {
 	w := ed.NewWindow()
 	defer w.Close()
 
-	v := w.OpenFile("../frontend/termbox/main.go", 0)
+	v := w.OpenFile("./view.go", 0)
 	defer func() {
 		v.SetScratch(true)
 		v.Close()
 	}()
 
-	syntax := "../packages/go.tmbundle/Syntaxes/Go.tmLanguage"
+	syntax := "testdata/Go.tmLanguage"
 	v.Settings().Set("syntax", syntax)
 	for i := 0; i < 1000; i++ {
 		e := v.BeginEdit()
@@ -281,7 +281,7 @@ func TestTransform(t *testing.T) {
 		v.Close()
 	}()
 
-	sc, err := textmate.LoadTheme("../packages/themes/TextMate-Themes/GlitterBomb.tmTheme")
+	sc, err := textmate.LoadTheme("testdata/GlitterBomb.tmTheme")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -321,7 +321,7 @@ func BenchmarkTransformTranscribe(b *testing.B) {
 		v.Close()
 	}()
 
-	sc, err := textmate.LoadTheme("../packages/themes/TextMate-Themes/GlitterBomb.tmTheme")
+	sc, err := textmate.LoadTheme("testdata/GlitterBomb.tmTheme")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -872,7 +872,7 @@ func TestViewLoadSettings(t *testing.T) {
 		t.Error("Expected `translate_tabs_to_spaces` be false for a new view but is true")
 	}
 
-	v.Settings().Set("syntax", "../packages/python.tmbundle/Syntaxes/Python.tmLanguage")
+	v.Settings().Set("syntax", "testdata/Python.tmLanguage")
 	if v.Settings().Get("translate_tabs_to_spaces", false).(bool) != true {
 		t.Error("Expected `translate_tabs_to_spaces` be true for python syntax but is false")
 	}

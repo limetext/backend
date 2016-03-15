@@ -183,7 +183,7 @@ func TestClipboard(t *testing.T) {
 	}
 }
 
-/* TODO causing panic
+/* TODO: causing panic
 func TestHandleInput(t *testing.T) {
 	editor := GetEditor()
 	kp := keys.KeyPress{Key: 'i'}
@@ -198,7 +198,7 @@ func TestHandleInput(t *testing.T) {
 
 func init() {
 	ed := GetEditor()
-	ed.AddPackagesPath("shipped", path.Join("..", "packages"))
-	ed.AddPackagesPath("user", path.Join("..", "packages", "User"))
-	ed.AddPackagesPath("default", path.Join("..", "packages", "Default"))
+	ed.AddPackagesPath("shipped", path.Join("testdata", "shipped"))
+	ed.AddPackagesPath("default", path.Join("testdata", "default"))
+	ed.AddPackagesPath("user", path.Join("testdata", "user"))
 }
