@@ -153,6 +153,7 @@ func init() {
 	py.AddToPath(ed.PackagesPath("shipped"))
 	py.AddToPath(ed.PackagesPath("user"))
 
+	// TODO: we should do this in a better way
 	gopaths := filepath.SplitList(os.ExpandEnv("$GOPATH"))
 	for _, gopath := range gopaths {
 		py.AddToPath(path.Join(gopath, "src", "github.com", "limetext", "lime-backend", "lib", "sublime"))

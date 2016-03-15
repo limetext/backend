@@ -10,8 +10,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/limetext/lime-backend/lib"
-	"github.com/limetext/text"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -22,6 +20,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/limetext/lime-backend/lib"
+	"github.com/limetext/text"
 )
 
 var re = regexp.MustCompile(`\p{Lu}`)
@@ -369,11 +370,11 @@ func generateWrapper(ptr reflect.Type, canCreate bool, ignorefunc func(name stri
 	return
 }
 
-var keep = regexp.MustCompile(`^(.+(_test|_manual)\.go|.+\.py)|(doc\.go)$`)
+var remove = regexp.MustCompile(`^.+_generated\.go$`)
 
 func cleanup() {
 	_, filename, _, _ := runtime.Caller(0)
-	sublimepath := path.Join(path.Dir(filename), "..", "..", "..", "lib", "sublime", "python")
+	sublimepath := path.Join(path.Dir(filename), "..", "..", "..", "lib", "sublime")
 
 	f, err := os.Open(sublimepath)
 	if err != nil {
@@ -384,7 +385,7 @@ func cleanup() {
 		panic(err)
 	} else {
 		for _, f := range fi {
-			if !f.IsDir() && !keep.MatchString(f.Name()) {
+			if !f.IsDir() && remove.MatchString(f.Name()) {
 				fn := path.Join(sublimepath, f.Name())
 				fmt.Println("removing", fn)
 				os.Remove(fn)
@@ -403,7 +404,7 @@ func main() {
 	}
 
 	_, filename, _, _ := runtime.Caller(0)
-	sublimepath := path.Join(path.Dir(filename), "..", "..", "..", "lib", "sublime", "python")
+	sublimepath := path.Join(path.Dir(filename), "..", "..", "..", "lib", "sublime")
 
 	data := [][]string{
 		{path.Join(sublimepath, "region_generated.go"), generateWrapper(reflect.TypeOf(text.Region{}), true, regexp.MustCompile("Cut").MatchString)},

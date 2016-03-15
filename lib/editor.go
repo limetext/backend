@@ -45,7 +45,8 @@ type (
 		defaultKB       *keys.HasKeyBindings
 		platformKB      *keys.HasKeyBindings
 		userKB          *keys.HasKeyBindings
-		pkgsPaths       map[string]string
+		// TODO: isn't slice enough?
+		pkgsPaths map[string]string
 	}
 
 	// The Frontend interface defines the API
