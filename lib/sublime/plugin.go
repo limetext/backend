@@ -23,6 +23,11 @@ func newPlugin(fn string) packages.Package {
 }
 
 func (p *plugin) Load() {
+	// in case error ocured on running onInit function
+	if module == nil {
+		return
+	}
+
 	log.Debug("Loading plugin %s", p.Name())
 	dir, file := filepath.Split(p.Name())
 	s, err := py.NewUnicode(filepath.Base(dir) + "." + file[:len(file)-3])
@@ -59,13 +64,6 @@ func onInit() {
 	l := py.NewLock()
 	defer l.Unlock()
 
-	// TODO: this should be some event which whenever a package is added
-	// we should call AddToPath
-	ed := backend.GetEditor()
-	py.AddToPath(ed.PackagesPath("shipped"))
-	py.AddToPath(ed.PackagesPath("default"))
-	py.AddToPath(ed.PackagesPath("user"))
-
 	var err error
 	if module, err = py.Import("sublime_plugin"); err != nil {
 		log.Error(err)
@@ -74,5 +72,6 @@ func onInit() {
 
 func init() {
 	backend.OnInit.Add(onInit)
+	backend.OnPackagesPathAdd.Add(py.AddToPath)
 	packages.Register(packages.Record{isPlugin, newPlugin})
 }

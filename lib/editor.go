@@ -23,6 +23,7 @@ import (
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	GetEditor()
+	OnPackagesPathAdd.Add(packages.Scan)
 }
 
 type (
@@ -428,12 +429,20 @@ func (e *Editor) handleLog(s string) {
 }
 
 func (e *Editor) AddPackagesPath(key, p string) {
-	e.pkgsPaths[key] = p
-	if err := packages.Scan(p); err != nil {
-		log.Error("Error while scanning %s: %s", p, err)
+	if p0, ok := e.pkgsPaths[key]; ok {
+		log.Debug("Changing package path %s: %s to %s", key, p0, p)
+		e.RemovePackagesPath(key)
+	} else {
+		log.Debug("Adding package path %s: %s", key, p)
 	}
+	e.pkgsPaths[key] = p
+	OnPackagesPathAdd.call(p)
 }
 
 func (e *Editor) RemovePackagesPath(key string) {
+	if p, ok := e.pkgsPaths[key]; ok {
+		log.Debug("Removing package path %s: %s", key, p)
+		OnPackagesPathRemove.call(p)
+	}
 	delete(e.pkgsPaths, key)
 }

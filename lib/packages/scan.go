@@ -24,16 +24,17 @@ func (p *scanDir) FileCreated(name string) {
 
 // watches scaned directory
 func watchDir(dir string) {
+	log.Finest("Watching scaned dir: %s", dir)
 	sd := &scanDir{dir}
 	if err := watcher.Watch(sd.path, sd); err != nil {
 		log.Error("Couldn't watch %s: %s", sd.path, err)
 	}
 }
 
-func Scan(dir string) error {
+func Scan(dir string) {
 	fis, err := ioutil.ReadDir(dir)
 	if err != nil {
-		return err
+		log.Error("Error while scanning %s: %s", dir, err)
 	}
 
 	watchDir(dir)
@@ -41,5 +42,4 @@ func Scan(dir string) error {
 	for _, fi := range fis {
 		record(path.Join(dir, fi.Name()))
 	}
-	return nil
 }

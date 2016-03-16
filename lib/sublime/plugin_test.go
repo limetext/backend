@@ -3,3 +3,13 @@
 // BSD-style license that can be found in the LICENSE file.
 
 package sublime
+
+import "testing"
+
+func TestPlugin(t *testing.T) {
+
+}
+
+func TestReloadPlugin(t *testing.T) {
+
+}
