@@ -63,15 +63,20 @@ var module *py.Module
 func onInit() {
 	l := py.NewLock()
 	defer l.Unlock()
-
 	var err error
 	if module, err = py.Import("sublime_plugin"); err != nil {
 		log.Error(err)
 	}
 }
 
+func onPackagesPathAdd(p string) {
+	l := py.NewLock()
+	defer l.Unlock()
+	py.AddToPath(p)
+}
+
 func init() {
 	backend.OnInit.Add(onInit)
-	backend.OnPackagesPathAdd.Add(py.AddToPath)
+	backend.OnPackagesPathAdd.Add(onPackagesPathAdd)
 	packages.Register(packages.Record{isPlugin, newPlugin})
 }

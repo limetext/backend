@@ -168,8 +168,7 @@ func (e *Editor) Init() {
 	e.loadKeyBindings()
 	e.loadSettings()
 
-	w := ed.NewWindow()
-	w.NewFile()
+	e.NewWindow()
 
 	OnInit.call()
 }

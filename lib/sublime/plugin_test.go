@@ -4,12 +4,51 @@
 
 package sublime
 
-import "testing"
+import (
+	"io/ioutil"
+	"os"
+	"path"
+	"testing"
+	"time"
+
+	"github.com/limetext/gopy/lib"
+	"github.com/limetext/lime-backend/lib"
+)
 
 func TestPlugin(t *testing.T) {
+	ed := backend.GetEditor()
+	ed.AddPackagesPath("test", path.Join("testdata", "plugins"))
+	time.Sleep(time.Millisecond * 100)
 
+	l := py.NewLock()
+	defer l.Unlock()
+	if _, err := py.Import("plugin_test"); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestReloadPlugin(t *testing.T) {
+	data := []byte(`import sublime, sublime_plugin
 
+class TestToxt(sublime_plugin.TextCommand):
+    def run(self, edit):
+        self.view.insert(edit, 0, "Tada")
+		`)
+	if err := ioutil.WriteFile("testdata/plugins/reload.py", data, 0644); err != nil {
+		t.Fatalf("Couldn't write testdata/plugins/reload.py: %s", err)
+	}
+	defer os.Remove("testdata/plugins/reload.py")
+	time.Sleep(time.Millisecond * 100)
+
+	l := py.NewLock()
+	defer l.Unlock()
+	if _, err := py.Import("reload_test"); err != nil {
+		t.Error(err)
+	}
+}
+
+func init() {
+	l := py.NewLock()
+	defer l.Unlock()
+	py.AddToPath(".")
 }

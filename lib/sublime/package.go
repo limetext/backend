@@ -129,5 +129,5 @@ func isPKG(dir string) bool {
 }
 
 func init() {
-	packages.Register(packages.Record{isPKG, newPKG})
+	// packages.Register(packages.Record{isPKG, newPKG})
 }

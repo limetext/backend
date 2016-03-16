@@ -32,6 +32,7 @@ func watchDir(dir string) {
 }
 
 func Scan(dir string) {
+	log.Debug("Scanning %s for packages", dir)
 	fis, err := ioutil.ReadDir(dir)
 	if err != nil {
 		log.Error("Error while scanning %s: %s", dir, err)
