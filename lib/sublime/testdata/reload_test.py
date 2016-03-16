@@ -3,7 +3,7 @@ try:
     import sublime
     print("Testing plugin reload")
     print("new file")
-    v = sublime.test_window.new_file()
+    v = sublime.active_window().new_file()
     print("running command")
     v.run_command("test_toxt")
     print("command ran")

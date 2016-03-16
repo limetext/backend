@@ -12,8 +12,6 @@ func (d *dummyPackage) Load()        {}
 func (d *dummyPackage) Name() string { return "" }
 
 func TestRecordCheckAction(t *testing.T) {
-	Init()
-
 	count := 0
 	paths := []string{"a", "b", "c", "d"}
 	rec := Record{

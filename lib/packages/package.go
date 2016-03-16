@@ -45,7 +45,3 @@ func record(path string) {
 		// break
 	}
 }
-
-func Init() {
-	initWatcher()
-}

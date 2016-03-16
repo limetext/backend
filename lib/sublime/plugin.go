@@ -59,6 +59,13 @@ func onInit() {
 	l := py.NewLock()
 	defer l.Unlock()
 
+	// TODO: this should be some event which whenever a package is added
+	// we should call AddToPath
+	ed := backend.GetEditor()
+	py.AddToPath(ed.PackagesPath("shipped"))
+	py.AddToPath(ed.PackagesPath("default"))
+	py.AddToPath(ed.PackagesPath("user"))
+
 	var err error
 	if module, err = py.Import("sublime_plugin"); err != nil {
 		log.Error(err)

@@ -8,16 +8,21 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/limetext/gopy/lib"
+	"github.com/limetext/lime-backend/lib"
+	_ "github.com/limetext/lime-backend/lib/commands"
 	"github.com/limetext/lime-backend/lib/util"
 )
 
-// TODO: this could be much better
-// "__*__" should be omitted and it should be same as
-// https://www.sublimetext.com/docs/3/api_reference.html
+// Checking if we added necessary exported functions to sublime module
 func TestSublimeApi(t *testing.T) {
+	// TODO: this could be much better
+	// "__*__" should be omitted and it should be same as
+	// https://www.sublimetext.com/docs/3/api_reference.html
 	const expfile = "testdata/api.txt"
 	l := py.NewLock()
 	defer l.Unlock()
@@ -71,4 +76,42 @@ func printObj(indent string, v py.Object, buf *bytes.Buffer) error {
 	}
 	dir.Decref()
 	return nil
+}
+
+// basicly running "testdata/*.py" files
+func TestPythonApi(t *testing.T) {
+	l := py.NewLock()
+	defer l.Unlock()
+
+	dir, err := os.Open("testdata")
+	if err != nil {
+		t.Fatal(err)
+	}
+	files, err := dir.Readdirnames(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	skip := []string{"plugin_test.py", "reload_test.py"}
+	for _, fn := range files {
+		// TODO: better to match "*_test.py" files
+		if filepath.Ext(fn) != ".py" || util.Exists(skip, fn) {
+			continue
+		}
+
+		t.Logf("Running %s", fn)
+		if _, err := py.Import(fn[:len(fn)-3]); err != nil {
+			t.Error(err)
+		} else {
+			t.Logf("Ran %s", fn)
+		}
+	}
+}
+
+func init() {
+	l := py.NewLock()
+	defer l.Unlock()
+
+	py.AddToPath("testdata")
+	backend.GetEditor().Init()
 }

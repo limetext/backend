@@ -134,7 +134,6 @@ func GetEditor() *Editor {
 			log.Error("Couldn't create watcher: %s", err)
 		}
 
-		packages.Init()
 		ed.console.Settings().Set("is_widget", true)
 		ed.Settings() // Just to initialize it
 
@@ -163,15 +162,13 @@ func getClipboard() (string, error) {
 
 func (e *Editor) Init() {
 	log.Info("Initializing")
+	// TODO: shouldn't we move SetClipboardFuncs to frontends?
 	e.SetClipboardFuncs(setClipboard, getClipboard)
 	e.loadKeyBindings()
 	e.loadSettings()
 
-	for _, p := range e.pkgsPaths {
-		if err := packages.Scan(p); err != nil {
-			log.Error("Error while scanning %s: %s", p, err)
-		}
-	}
+	w := ed.NewWindow()
+	w.NewFile()
 
 	OnInit.call()
 }
@@ -432,6 +429,9 @@ func (e *Editor) handleLog(s string) {
 
 func (e *Editor) AddPackagesPath(key, p string) {
 	e.pkgsPaths[key] = p
+	if err := packages.Scan(p); err != nil {
+		log.Error("Error while scanning %s: %s", p, err)
+	}
 }
 
 func (e *Editor) RemovePackagesPath(key string) {

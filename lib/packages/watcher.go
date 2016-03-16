@@ -19,7 +19,7 @@ func wch(pkg Package) {
 	}
 }
 
-func initWatcher() {
+func init() {
 	if watcher != nil {
 		return
 	}

@@ -64,7 +64,6 @@ func sublime_set_timeout(tu *py.Tuple, kwargs *py.Dict) (py.Object, error) {
 
 func init() {
 	sublime_methods = append(sublime_methods, py.Method{Name: "console", Func: sublime_Console}, py.Method{Name: "set_timeout", Func: sublime_set_timeout})
-	ed := backend.GetEditor()
 	l := py.InitAndLock()
 	defer l.Unlock()
 
@@ -143,8 +142,4 @@ func init() {
 			panic(err)
 		}
 	}
-
-	py.AddToPath(ed.PackagesPath("shipped"))
-	py.AddToPath(ed.PackagesPath("default"))
-	py.AddToPath(ed.PackagesPath("user"))
 }
