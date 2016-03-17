@@ -24,10 +24,19 @@ type (
 )
 
 // Keep track of all registered records
-var recs []Record
+var recs []*Record
 
-func Register(r Record) {
+func Register(r *Record) {
 	recs = append(recs, r)
+}
+
+func Unregister(r *Record) {
+	for i, rec := range recs {
+		if rec == r {
+			recs, recs[len(recs)-1] = append(recs[:i], recs[i+1:]...), nil
+			break
+		}
+	}
 }
 
 func record(path string) {

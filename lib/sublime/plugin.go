@@ -22,20 +22,22 @@ func newPlugin(fn string) packages.Package {
 	return &plugin{filename: fn}
 }
 
+// TODO: implement unload
 func (p *plugin) Load() {
 	// in case error ocured on running onInit function
 	if module == nil {
 		return
 	}
 
-	log.Debug("Loading plugin %s", p.Name())
 	dir, file := filepath.Split(p.Name())
-	s, err := py.NewUnicode(filepath.Base(dir) + "." + file[:len(file)-3])
+	name := filepath.Base(dir) + "." + file[:len(file)-3]
+	s, err := py.NewUnicode(name)
 	if err != nil {
 		log.Warn(err)
 		return
 	}
 
+	log.Debug("Loading plugin %s", name)
 	l := py.NewLock()
 	defer l.Unlock()
 	if r, err := module.Base().CallMethodObjArgs("reload_plugin", s); err != nil {
@@ -58,7 +60,11 @@ func isPlugin(filename string) bool {
 	return filepath.Ext(filename) == ".py"
 }
 
-var module *py.Module
+var (
+	pluginRecord *packages.Record = &packages.Record{isPlugin, newPlugin}
+
+	module *py.Module
+)
 
 func onInit() {
 	l := py.NewLock()
@@ -78,5 +84,5 @@ func onPackagesPathAdd(p string) {
 func init() {
 	backend.OnInit.Add(onInit)
 	backend.OnPackagesPathAdd.Add(onPackagesPathAdd)
-	packages.Register(packages.Record{isPlugin, newPlugin})
+	packages.Register(pluginRecord)
 }

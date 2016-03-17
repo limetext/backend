@@ -148,7 +148,9 @@ func sublime_PackagesPath(tu *py.Tuple) (py.Object, error) {
 	var (
 		arg1 string
 	)
-	if v, err := tu.GetItem(0); err != nil {
+	if tu.Not() {
+		arg1 = "default"
+	} else if v, err := tu.GetItem(0); err != nil {
 		return nil, err
 	} else {
 		if v3, err2 := fromPython(v); err2 != nil {

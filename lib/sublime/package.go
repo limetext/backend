@@ -63,16 +63,14 @@ func (p *pkg) loadPlugins() {
 		return
 	}
 	for _, fi := range fis {
-		p.loadPlugin(fi.Name())
+		if isPlugin(fi.Name()) {
+			p.loadPlugin(path.Join(p.Name(), fi.Name()))
+		}
 	}
 }
 
 func (p *pkg) loadPlugin(fn string) {
-	if !isPlugin(fn) {
-		return
-	}
-	_, exist := p.plugins[fn]
-	if exist {
+	if _, exist := p.plugins[fn]; exist {
 		return
 	}
 
@@ -120,14 +118,17 @@ func (p *pkg) loadSettings() {
 	packages.NewSettingL(pt, p.Settings())
 }
 
+// Any directory in sublime is a package
 func isPKG(dir string) bool {
-	fm, err := os.Stat(dir)
+	fi, err := os.Stat(dir)
 	if err != nil {
 		return false
 	}
-	return fm.IsDir()
+	return fi.IsDir()
 }
 
+var packageRecord *packages.Record = &packages.Record{isPKG, newPKG}
+
 func init() {
-	// packages.Register(packages.Record{isPKG, newPKG})
+	packages.Register(packageRecord)
 }
