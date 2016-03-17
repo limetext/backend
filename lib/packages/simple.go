@@ -18,6 +18,8 @@ type simple struct {
 	marshal  json.Unmarshaler
 }
 
+// TODO: better errors, maybe we should introduce error type and let
+// the loader decide how to log
 func (s *simple) Load() {
 	log.Debug("Loading %s", s.Name())
 	data, err := ioutil.ReadFile(s.filename)

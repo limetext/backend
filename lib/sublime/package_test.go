@@ -8,23 +8,30 @@ import (
 	"path"
 	"testing"
 
-	"github.com/limetext/lime-backend/lib"
 	_ "github.com/limetext/lime-backend/lib/commands"
 	"github.com/limetext/lime-backend/lib/packages"
 )
 
 func TestLoadPlugin(t *testing.T) {
+	pn := path.Join("testdata", "packages", "plugin.py")
+	pkg := newPKG(path.Join("testdata", "packages")).(*pkg)
+	pkg.loadPlugin(pn)
 
+	if _, exist := pkg.plugins[pn]; !exist {
+		t.Errorf("Expected to %s exist in %s package plugins", pn, pkg.Name())
+	}
 }
 
 func TestLoadPlugins(t *testing.T) {
+	pn := path.Join("testdata", "packages", "plugin.py")
+	pkg := newPKG(path.Join("testdata", "packages")).(*pkg)
+	pkg.loadPlugins()
 
+	if _, exist := pkg.plugins[pn]; !exist {
+		t.Errorf("Expected to %s exist in %s package plugins", pn, pkg.Name())
+	}
 }
 
-func TestLoadKeyBindings(t *testing.T) {
-
-}
-
-func TestLoadSettings(t *testing.T) {
-
+func init() {
+	packages.Unregister(packageRecord)
 }
