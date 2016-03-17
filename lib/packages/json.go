@@ -13,26 +13,37 @@ import (
 )
 
 // Helper struct for simple packages containing 1 json file(e.g keymaps settings)
-type simple struct {
+type JSON struct {
 	filename string
 	marshal  json.Unmarshaler
 }
 
+func NewJSON(filename string, marshal json.Unmarshaler) *JSON {
+	return &JSON{filename: filename, marshal: marshal}
+}
+
+func NewJSONL(filename string, marshal json.Unmarshaler) *JSON {
+	j := NewJSON(filename, marshal)
+	j.Load()
+	wch(j)
+	return j
+}
+
 // TODO: better errors, maybe we should introduce error type and let
-// the loader decide how to log
-func (s *simple) Load() {
-	log.Debug("Loading %s", s.Name())
-	data, err := ioutil.ReadFile(s.filename)
+// the load caller decide how to log
+func (j *JSON) Load() {
+	log.Debug("Loading %s", j.Name())
+	data, err := ioutil.ReadFile(j.filename)
 	if err != nil {
 		log.Warn(err)
 		return
 	}
 
-	if err = loaders.LoadJSON(data, s.marshal); err != nil {
+	if err = loaders.LoadJSON(data, j.marshal); err != nil {
 		log.Warn(err)
 	}
 }
 
-func (s *simple) Name() string {
-	return s.filename
+func (j *JSON) Name() string {
+	return j.filename
 }
