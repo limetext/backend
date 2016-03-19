@@ -31,41 +31,6 @@ func sublime_ActiveWindow() (py.Object, error) {
 	return pyret0, err
 }
 
-func sublime_AddPackagesPath(tu *py.Tuple) (py.Object, error) {
-	var (
-		arg1 string
-		arg2 string
-	)
-	if v, err := tu.GetItem(0); err != nil {
-		return nil, err
-	} else {
-		if v3, err2 := fromPython(v); err2 != nil {
-			return nil, err2
-		} else {
-			if v2, ok := v3.(string); !ok {
-				return nil, fmt.Errorf("Expected type string for backend.Editor.AddPackagesPath() arg1, not %s", v.Type())
-			} else {
-				arg1 = v2
-			}
-		}
-	}
-	if v, err := tu.GetItem(1); err != nil {
-		return nil, err
-	} else {
-		if v3, err2 := fromPython(v); err2 != nil {
-			return nil, err2
-		} else {
-			if v2, ok := v3.(string); !ok {
-				return nil, fmt.Errorf("Expected type string for backend.Editor.AddPackagesPath() arg2, not %s", v.Type())
-			} else {
-				arg2 = v2
-			}
-		}
-	}
-	backend.GetEditor().AddPackagesPath(arg1, arg2)
-	return toPython(nil)
-}
-
 func sublime_Arch() (py.Object, error) {
 	ret0 := backend.GetEditor().Arch()
 	var err error
@@ -144,34 +109,6 @@ func sublime_NewWindow() (py.Object, error) {
 	return pyret0, err
 }
 
-func sublime_PackagesPath(tu *py.Tuple) (py.Object, error) {
-	var (
-		arg1 string
-	)
-	if v, err := tu.GetItem(0); err != nil {
-		return nil, err
-	} else {
-		if v3, err2 := fromPython(v); err2 != nil {
-			return nil, err2
-		} else {
-			if v2, ok := v3.(string); !ok {
-				return nil, fmt.Errorf("Expected type string for backend.Editor.PackagesPath() arg1, not %s", v.Type())
-			} else {
-				arg1 = v2
-			}
-		}
-	}
-	ret0 := backend.GetEditor().PackagesPath(arg1)
-	var err error
-	var pyret0 py.Object
-
-	pyret0, err = toPython(ret0)
-	if err != nil {
-		return nil, err
-	}
-	return pyret0, err
-}
-
 func sublime_Plat() (py.Object, error) {
 	ret0 := backend.GetEditor().Plat()
 	var err error
@@ -194,27 +131,6 @@ func sublime_Platform() (py.Object, error) {
 		return nil, err
 	}
 	return pyret0, err
-}
-
-func sublime_RemovePackagesPath(tu *py.Tuple) (py.Object, error) {
-	var (
-		arg1 string
-	)
-	if v, err := tu.GetItem(0); err != nil {
-		return nil, err
-	} else {
-		if v3, err2 := fromPython(v); err2 != nil {
-			return nil, err2
-		} else {
-			if v2, ok := v3.(string); !ok {
-				return nil, fmt.Errorf("Expected type string for backend.Editor.RemovePackagesPath() arg1, not %s", v.Type())
-			} else {
-				arg1 = v2
-			}
-		}
-	}
-	backend.GetEditor().RemovePackagesPath(arg1)
-	return toPython(nil)
 }
 
 func sublime_RunCommand(tu *py.Tuple) (py.Object, error) {
@@ -316,16 +232,13 @@ var sublime_methods = []py.Method{
 	{Name: "ok_cancel_dialog", Func: sublime_OkCancelDialog},
 	{Name: "status_message", Func: sublime_StatusMessage},
 	{Name: "active_window", Func: sublime_ActiveWindow},
-	{Name: "add_packages_path", Func: sublime_AddPackagesPath},
 	{Name: "arch", Func: sublime_Arch},
 	{Name: "get_clipboard", Func: sublime_GetClipboard},
 	{Name: "log_commands", Func: sublime_LogCommands},
 	{Name: "log_input", Func: sublime_LogInput},
 	{Name: "new_window", Func: sublime_NewWindow},
-	{Name: "packages_path", Func: sublime_PackagesPath},
 	{Name: "plat", Func: sublime_Plat},
 	{Name: "platform", Func: sublime_Platform},
-	{Name: "remove_packages_path", Func: sublime_RemovePackagesPath},
 	{Name: "run_command", Func: sublime_RunCommand},
 	{Name: "set_clipboard", Func: sublime_SetClipboard},
 	{Name: "settings", Func: sublime_Settings},

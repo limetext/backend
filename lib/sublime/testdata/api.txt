@@ -372,7 +372,6 @@ __name__
 __package__
 __spec__
 active_window
-add_packages_path
 arch
 console
 error_message
@@ -386,7 +385,6 @@ packages_path
 plat
 platform
 register
-remove_packages_path
 run_command
 set_clipboard
 set_timeout

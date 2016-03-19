@@ -118,10 +118,10 @@ func (p *pkg) loadSettings() {
 // Any directory in sublime is a package
 func isPKG(dir string) bool {
 	fi, err := os.Stat(dir)
-	if err != nil {
+	if err != nil || !fi.IsDir() {
 		return false
 	}
-	return fi.IsDir()
+	return true
 }
 
 var packageRecord *packages.Record = &packages.Record{isPKG, newPKG}
