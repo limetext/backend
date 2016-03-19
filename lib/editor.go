@@ -136,7 +136,14 @@ func GetEditor() *Editor {
 		}
 
 		ed.console.Settings().Set("is_widget", true)
-		ed.Settings() // Just to initialize it
+		// Initializing settings hierarchy
+		ed.platformSet.Settings().SetParent(ed.defaultSet)
+		ed.Settings().SetParent(ed.platformSet)
+
+		// Initializing keybidings hierarchy
+		ed.KeyBindings().SetParent(ed.userKB)
+		ed.userKB.KeyBindings().SetParent(ed.platformKB)
+		ed.platformKB.KeyBindings().SetParent(ed.defaultKB)
 
 		log.AddFilter("console", log.DEBUG, log.NewLogWriter(ed.handleLog))
 		go ed.inputthread()
@@ -186,9 +193,6 @@ func (e *Editor) loadKeyBindings() {
 		return
 	}
 	log.Fine("Loading editor keybindings")
-	e.KeyBindings().SetParent(e.userKB)
-	e.userKB.KeyBindings().SetParent(e.platformKB)
-	e.platformKB.KeyBindings().SetParent(e.defaultKB)
 
 	p := path.Join(e.PackagesPath("default"), "Default.sublime-keymap")
 	packages.NewJSONL(p, e.defaultKB.KeyBindings())
@@ -209,8 +213,6 @@ func (e *Editor) loadSettings() {
 		return
 	}
 	log.Fine("Loading editor settings")
-	e.platformSet.Settings().SetParent(e.defaultSet)
-	e.Settings().SetParent(e.platformSet)
 
 	p := path.Join(e.PackagesPath("default"), "Preferences.sublime-settings")
 	packages.NewJSONL(p, e.defaultSet.Settings())
