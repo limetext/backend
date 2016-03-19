@@ -188,10 +188,6 @@ func (e *Editor) SetClipboardFuncs(setter func(string) error, getter func() (str
 }
 
 func (e *Editor) loadKeyBindings() {
-	// Prevent running loadKeyBindings func more than once
-	if e.KeyBindings().Parent() != nil {
-		return
-	}
 	log.Fine("Loading editor keybindings")
 
 	p := path.Join(e.PackagesPath("default"), "Default.sublime-keymap")
@@ -208,10 +204,6 @@ func (e *Editor) loadKeyBindings() {
 }
 
 func (e *Editor) loadSettings() {
-	// Prevent running loadSettings func more than once
-	if e.Settings().Parent() != nil {
-		return
-	}
 	log.Fine("Loading editor settings")
 
 	p := path.Join(e.PackagesPath("default"), "Preferences.sublime-settings")

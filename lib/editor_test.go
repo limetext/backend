@@ -20,20 +20,20 @@ func TestGetEditor(t *testing.T) {
 }
 
 func TestLoadKeyBinding(t *testing.T) {
-	editor := GetEditor()
-	packages.NewJSONL("testdata/Default.sublime-keymap", editor.KeyBindings())
+	ed := GetEditor()
+	packages.NewJSONL("testdata/Default.sublime-keymap", ed.KeyBindings())
 
-	kb := editor.KeyBindings().Filter(keys.KeyPress{Key: 'i'})
+	kb := ed.KeyBindings().Filter(keys.KeyPress{Key: 'i'})
 	if expectedLen := 3; kb.Len() != expectedLen {
 		t.Errorf("Expected to have %d keys in the filter, but it had %d", expectedLen, kb.Len())
 	}
 }
 
 func TestLoadKeyBindings(t *testing.T) {
-	editor := GetEditor()
-	editor.loadKeyBindings()
+	ed := GetEditor()
+	ed.loadKeyBindings()
 
-	if editor.defaultKB.KeyBindings().Len() <= 0 {
+	if ed.defaultKB.KeyBindings().Len() <= 0 {
 		t.Errorf("Expected editor to have some keys bound, but it didn't")
 	}
 }
