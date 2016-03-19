@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"path/filepath"
 
 	"github.com/limetext/lime-backend/lib"
 	"github.com/limetext/lime-backend/lib/keys"
@@ -84,16 +83,15 @@ func (p *pkg) loadKeyBindings() {
 	log.Fine("Loading %s keybindings", p.Name())
 	ed := backend.GetEditor()
 	tmp := ed.KeyBindings().Parent()
-	dir := filepath.Dir(p.Name())
 
 	ed.KeyBindings().SetParent(p)
 	p.KeyBindings().SetParent(p.defaultKB)
 	p.defaultKB.KeyBindings().SetParent(tmp)
 
-	pt := path.Join(dir, "Default.sublime-keymap")
+	pt := path.Join(p.dir, "Default.sublime-keymap")
 	packages.NewJSONL(pt, p.defaultKB.KeyBindings())
 
-	pt = path.Join(dir, "Default ("+ed.Plat()+").sublime-keymap")
+	pt = path.Join(p.dir, "Default ("+ed.Plat()+").sublime-keymap")
 	packages.NewJSONL(pt, p.KeyBindings())
 }
 
@@ -101,17 +99,16 @@ func (p *pkg) loadSettings() {
 	log.Fine("Loading %s settings", p.Name())
 	ed := backend.GetEditor()
 	tmp := ed.Settings().Parent()
-	dir := filepath.Dir(p.Name())
 
 	ed.Settings().SetParent(p)
 	p.Settings().SetParent(p.platformSet)
 	p.platformSet.Settings().SetParent(p.defaultSet)
 	p.defaultSet.Settings().SetParent(tmp)
 
-	pt := path.Join(dir, "Preferences.sublime-settings")
+	pt := path.Join(p.dir, "Preferences.sublime-settings")
 	packages.NewJSONL(pt, p.defaultSet.Settings())
 
-	pt = path.Join(dir, "Preferences ("+ed.Plat()+").sublime-settings")
+	pt = path.Join(p.dir, "Preferences ("+ed.Plat()+").sublime-settings")
 	packages.NewJSONL(pt, p.platformSet.Settings())
 
 	pt = path.Join(ed.PackagesPath("user"), "Preferences.sublime-settings")

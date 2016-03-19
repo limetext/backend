@@ -47,3 +47,8 @@ func (j *JSON) Load() {
 func (j *JSON) Name() string {
 	return j.filename
 }
+
+// TODO(.): add actions for other events like delete
+func (j *JSON) FileChanged(name string) {
+	j.Load()
+}
