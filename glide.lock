@@ -1,5 +1,5 @@
-hash: 9e723c607513fdf5b8b2d3fd7cef91424e10746544ffa112c3f90dcd1088e088
-updated: 2016-03-24T17:19:59.662826098Z
+hash: cac6db9eb08a6766c45a9d19eaf4f730a9d74d1dc8144771cd313b5bb4284086
+updated: 2016-03-24T18:03:25.727800665Z
 imports:
 - name: github.com/atotto/clipboard
   version: 008417eea030fdbb84475ee696287a93257ef40b
@@ -17,8 +17,4 @@ imports:
   version: 8991807ce6d383a41077a642b7b381eba1df7064
 - name: gopkg.in/fsnotify.v1
   version: 96c060f6a6b7e0d6f75fddd10efeaca3e5d1bcb0
-- name: gosubli.me/something-borrowed/gocode
-  version: ""
-- name: gosubli.me/something-borrowed/types
-  version: ""
 devImports: []

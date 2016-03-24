@@ -9,6 +9,5 @@ import:
 - package: github.com/limetext/text
 - package: github.com/quarnster/parser
 - package: gopkg.in/fsnotify.v1
-ignore:
-- gosubli.me/something-borrowed/gocode
-- gosubli.me/something-borrowed/types
+excludeDirs:
+- packages
