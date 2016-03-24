@@ -14,3 +14,6 @@ import:
     ref:     8991807ce6d383a41077a642b7b381eba1df7064
   - package: gopkg.in/fsnotify.v1
     ref:     96c060f6a6b7e0d6f75fddd10efeaca3e5d1bcb0
+ignore:
+  - gosubli.me/something-borrowed/gocode
+  - gosubli.me/something-borrowed/types

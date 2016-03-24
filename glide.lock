@@ -1,0 +1,24 @@
+hash: 7e39f89d098c91b9989dc77efd43af7c8948ddb9f35dc8560c15e19bef41bea1
+updated: 2016-03-24T17:17:00.548313841Z
+imports:
+- name: github.com/atotto/clipboard
+  version: 008417eea030fdbb84475ee696287a93257ef40b
+- name: github.com/limetext/gopy
+  version: 953f768831d5f6389aacdc9c016ff2fb8c2ca579
+  subpackages:
+  - lib
+- name: github.com/limetext/log4go
+  version: 2aba105a605a9ebe476f35d7610704e4e723d4ab
+- name: github.com/limetext/rubex
+  version: 3fc130e580797e3d9c6fdab36e6a961141f9fd5f
+- name: github.com/limetext/text
+  version: d04c956e55b8b68a00c44bafe3726cecc9209fe7
+- name: github.com/quarnster/parser
+  version: 8991807ce6d383a41077a642b7b381eba1df7064
+- name: gopkg.in/fsnotify.v1
+  version: 96c060f6a6b7e0d6f75fddd10efeaca3e5d1bcb0
+- name: gosubli.me/something-borrowed/gocode
+  version: ""
+- name: gosubli.me/something-borrowed/types
+  version: ""
+devImports: []
