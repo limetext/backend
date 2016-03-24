@@ -1,5 +1,5 @@
 hash: 1278a1b1a1a0dd88e45b10d4d73be96b1c45e15a0525d627434f7a58476cce2b
-updated: 2016-03-24T18:16:25.440431505Z
+updated: 2016-03-24T18:44:16.941494156Z
 imports:
 - name: github.com/atotto/clipboard
   version: bb272b845f1112e10117e3e45ce39f690c0001ad
@@ -16,5 +16,5 @@ imports:
 - name: github.com/quarnster/parser
   version: 8991807ce6d383a41077a642b7b381eba1df7064
 - name: gopkg.in/fsnotify.v1
-  version: 96c060f6a6b7e0d6f75fddd10efeaca3e5d1bcb0
+  version: 7be54206639f256967dd82fa767397ba5f8f48f5
 devImports: []
