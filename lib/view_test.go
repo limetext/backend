@@ -251,7 +251,7 @@ func TestStress(t *testing.T) {
 	w := ed.NewWindow()
 	defer w.Close()
 
-	v := w.OpenFile("./view.go", 0)
+	v := w.OpenFile("testdata/view.go", 0)
 	defer func() {
 		v.SetScratch(true)
 		v.Close()
