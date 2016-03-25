@@ -184,8 +184,9 @@ func TestClipboard(t *testing.T) {
 }
 
 func TestHandleInput(t *testing.T) {
-	// TODO: causing panic
-	t.Skip("TODO: causing panic")
+	// FIXME: This test causes a panic.
+	t.Skip("Avoiding pointer issues causing a panic.")
+
 	editor := GetEditor()
 	kp := keys.KeyPress{Key: 'i'}
 

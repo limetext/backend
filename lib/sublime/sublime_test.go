@@ -14,7 +14,6 @@ import (
 
 	"github.com/limetext/gopy/lib"
 	"github.com/limetext/lime-backend/lib"
-	_ "github.com/limetext/lime-backend/lib/commands"
 	"github.com/limetext/lime-backend/lib/util"
 )
 
