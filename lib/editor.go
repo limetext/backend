@@ -31,22 +31,22 @@ type (
 		HasSettings
 		keys.HasKeyBindings
 		*watch.Watcher
-		windows         []*Window
-		activeWindow    *Window
-		logInput        bool
-		cmdHandler      commandHandler
-		console         *View
-		frontend        Frontend
-		keyInput        chan (keys.KeyPress)
-		clipboardSetter func(string) error
-		clipboardGetter func() (string, error)
-		clipboard       string
-		defaultSet      *HasSettings
-		platformSet     *HasSettings
-		defaultKB       *keys.HasKeyBindings
-		platformKB      *keys.HasKeyBindings
-		userKB          *keys.HasKeyBindings
-		pkgsPaths       map[string]string
+		windows          []*Window
+		activeWindow     *Window
+		logInput         bool
+		cmdHandler       commandHandler
+		console          *View
+		frontend         Frontend
+		keyInput         chan (keys.KeyPress)
+		clipboardSetter  func(string) error
+		clipboardGetter  func() (string, error)
+		clipboard        string
+		defaultSettings  *HasSettings
+		platformSettings *HasSettings
+		defaultKB        *keys.HasKeyBindings
+		platformKB       *keys.HasKeyBindings
+		userKB           *keys.HasKeyBindings
+		pkgsPaths        map[string]string
 	}
 
 	// The Frontend interface defines the API
@@ -122,13 +122,13 @@ func GetEditor() *Editor {
 				buffer:  NewBuffer(),
 				scratch: true,
 			},
-			keyInput:    make(chan keys.KeyPress, 32),
-			defaultSet:  new(HasSettings),
-			platformSet: new(HasSettings),
-			defaultKB:   new(keys.HasKeyBindings),
-			platformKB:  new(keys.HasKeyBindings),
-			userKB:      new(keys.HasKeyBindings),
-			pkgsPaths:   make(map[string]string),
+			keyInput:         make(chan keys.KeyPress, 32),
+			defaultSettings:  new(HasSettings),
+			platformSettings: new(HasSettings),
+			defaultKB:        new(keys.HasKeyBindings),
+			platformKB:       new(keys.HasKeyBindings),
+			userKB:           new(keys.HasKeyBindings),
+			pkgsPaths:        make(map[string]string),
 		}
 		var err error
 		if ed.Watcher, err = watch.NewWatcher(); err != nil {
@@ -137,8 +137,8 @@ func GetEditor() *Editor {
 
 		ed.console.Settings().Set("is_widget", true)
 		// Initializing settings hierarchy
-		ed.platformSet.Settings().SetParent(ed.defaultSet)
-		ed.Settings().SetParent(ed.platformSet)
+		ed.platformSettings.Settings().SetParent(ed.defaultSettings)
+		ed.Settings().SetParent(ed.platformSettings)
 
 		// Initializing keybidings hierarchy
 		ed.KeyBindings().SetParent(ed.userKB)
@@ -207,10 +207,10 @@ func (e *Editor) loadSettings() {
 	log.Fine("Loading editor settings")
 
 	p := path.Join(e.PackagesPath("default"), "Preferences.sublime-settings")
-	packages.NewJSONL(p, e.defaultSet.Settings())
+	packages.NewJSONL(p, e.defaultSettings.Settings())
 
 	p = path.Join(e.PackagesPath("default"), "Preferences ("+e.Plat()+").sublime-settings")
-	packages.NewJSONL(p, e.platformSet.Settings())
+	packages.NewJSONL(p, e.platformSettings.Settings())
 
 	p = path.Join(e.PackagesPath("user"), "Preferences.sublime-settings")
 	packages.NewJSONL(p, e.Settings())

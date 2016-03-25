@@ -21,20 +21,20 @@ type pkg struct {
 	dir string
 	text.HasSettings
 	keys.HasKeyBindings
-	platformSet *text.HasSettings
-	defaultSet  *text.HasSettings
-	defaultKB   *keys.HasKeyBindings
-	plugins     map[string]*plugin
+	platformSettings *text.HasSettings
+	defaultSettings  *text.HasSettings
+	defaultKB        *keys.HasKeyBindings
+	plugins          map[string]*plugin
 	// TODO: themes, snippets, etc more info on iss#71
 }
 
 func newPKG(dir string) packages.Package {
 	return &pkg{
-		dir:         dir,
-		platformSet: new(text.HasSettings),
-		defaultSet:  new(text.HasSettings),
-		defaultKB:   new(keys.HasKeyBindings),
-		plugins:     make(map[string]*plugin),
+		dir:              dir,
+		platformSettings: new(text.HasSettings),
+		defaultSettings:  new(text.HasSettings),
+		defaultKB:        new(keys.HasKeyBindings),
+		plugins:          make(map[string]*plugin),
 	}
 }
 
@@ -88,10 +88,10 @@ func (p *pkg) loadKeyBindings() {
 	p.KeyBindings().SetParent(p.defaultKB)
 	p.defaultKB.KeyBindings().SetParent(tmp)
 
-	pt := path.Join(p.dir, "Default.sublime-keymap")
+	pt := path.Join(p.Name(), "Default.sublime-keymap")
 	packages.NewJSONL(pt, p.defaultKB.KeyBindings())
 
-	pt = path.Join(p.dir, "Default ("+ed.Plat()+").sublime-keymap")
+	pt = path.Join(p.Name(), "Default ("+ed.Plat()+").sublime-keymap")
 	packages.NewJSONL(pt, p.KeyBindings())
 }
 
@@ -101,15 +101,15 @@ func (p *pkg) loadSettings() {
 	tmp := ed.Settings().Parent()
 
 	ed.Settings().SetParent(p)
-	p.Settings().SetParent(p.platformSet)
-	p.platformSet.Settings().SetParent(p.defaultSet)
-	p.defaultSet.Settings().SetParent(tmp)
+	p.Settings().SetParent(p.platformSettings)
+	p.platformSettings.Settings().SetParent(p.defaultSettings)
+	p.defaultSettings.Settings().SetParent(tmp)
 
-	pt := path.Join(p.dir, "Preferences.sublime-settings")
-	packages.NewJSONL(pt, p.defaultSet.Settings())
+	pt := path.Join(p.Name(), "Preferences.sublime-settings")
+	packages.NewJSONL(pt, p.defaultSettings.Settings())
 
-	pt = path.Join(p.dir, "Preferences ("+ed.Plat()+").sublime-settings")
-	packages.NewJSONL(pt, p.platformSet.Settings())
+	pt = path.Join(p.Name(), "Preferences ("+ed.Plat()+").sublime-settings")
+	packages.NewJSONL(pt, p.platformSettings.Settings())
 
 	pt = path.Join(ed.PackagesPath("user"), "Preferences.sublime-settings")
 	packages.NewJSONL(pt, p.Settings())

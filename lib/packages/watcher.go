@@ -20,10 +20,6 @@ func wch(pkg Package) {
 }
 
 func init() {
-	if watcher != nil {
-		return
-	}
-
 	var err error
 	if watcher, err = watch.NewWatcher(); err != nil {
 		log.Warn("Couldn't create watcher: %s", err)
