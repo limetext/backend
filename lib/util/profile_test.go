@@ -103,9 +103,6 @@ func TestLen(t *testing.T) {
 }
 
 func TestSwap(t *testing.T) {
-	// TODO: issue on go 1.6
-	t.Skip("Avoiding due to failiure on go 1.6")
-
 	pr0 := &ProfileResult{"pr1", *&ProfileEntry{}}
 	pr1 := &ProfileResult{"pr2", *&ProfileEntry{}}
 	prList := []ProfileResult{*pr0, *pr1}
