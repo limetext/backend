@@ -1,4 +1,4 @@
-// Copyright 2015 The lime Authors.
+// Copyright 2016 The lime Authors.
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
@@ -99,18 +99,6 @@ func sublime_LogInput(tu *py.Tuple) (py.Object, error) {
 
 func sublime_NewWindow() (py.Object, error) {
 	ret0 := backend.GetEditor().NewWindow()
-	var err error
-	var pyret0 py.Object
-
-	pyret0, err = toPython(ret0)
-	if err != nil {
-		return nil, err
-	}
-	return pyret0, err
-}
-
-func sublime_PackagesPath() (py.Object, error) {
-	ret0 := backend.GetEditor().PackagesPath()
 	var err error
 	var pyret0 py.Object
 
@@ -249,7 +237,6 @@ var sublime_methods = []py.Method{
 	{Name: "log_commands", Func: sublime_LogCommands},
 	{Name: "log_input", Func: sublime_LogInput},
 	{Name: "new_window", Func: sublime_NewWindow},
-	{Name: "packages_path", Func: sublime_PackagesPath},
 	{Name: "plat", Func: sublime_Plat},
 	{Name: "platform", Func: sublime_Platform},
 	{Name: "run_command", Func: sublime_RunCommand},

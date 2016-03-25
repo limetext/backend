@@ -2,7 +2,7 @@ import sys
 import traceback
 try:
     import sublime
-    v = sublime.test_window.new_file()
+    v = sublime.active_window().new_file()
     for i in range(10000):
         e = v.begin_edit()
         v.insert(e, 0, "hello world")

@@ -5,17 +5,12 @@
 package backend
 
 import (
-	"github.com/limetext/lime-backend/lib/keys"
-	"github.com/limetext/lime-backend/lib/packages"
 	"path"
 	"testing"
-)
 
-func init() {
-	LIME_PACKAGES_PATH = path.Join("..", "packages")
-	LIME_USER_PACKAGES_PATH = path.Join("..", "packages", "User")
-	LIME_DEFAULTS_PATH = path.Join("..", "packages", "Default")
-}
+	"github.com/limetext/lime-backend/lib/keys"
+	"github.com/limetext/lime-backend/lib/packages"
+)
 
 func TestGetEditor(t *testing.T) {
 	editor := GetEditor()
@@ -25,28 +20,27 @@ func TestGetEditor(t *testing.T) {
 }
 
 func TestLoadKeyBinding(t *testing.T) {
-	editor := GetEditor()
-	pkg := packages.NewPacket("testdata/Default.sublime-keymap", editor.KeyBindings())
-	editor.load(pkg)
+	ed := GetEditor()
+	packages.LoadJSON("testdata/Default.sublime-keymap", ed.KeyBindings())
 
-	kb := editor.KeyBindings().Filter(keys.KeyPress{Key: 'i'})
+	kb := ed.KeyBindings().Filter(keys.KeyPress{Key: 'i'})
 	if expectedLen := 3; kb.Len() != expectedLen {
 		t.Errorf("Expected to have %d keys in the filter, but it had %d", expectedLen, kb.Len())
 	}
 }
 
 func TestLoadKeyBindings(t *testing.T) {
-	editor := GetEditor()
-	editor.loadKeyBindings()
+	ed := GetEditor()
+	ed.loadKeyBindings()
 
-	if editor.defaultBindings.KeyBindings().Len() <= 0 {
+	if ed.defaultKB.KeyBindings().Len() <= 0 {
 		t.Errorf("Expected editor to have some keys bound, but it didn't")
 	}
 }
 
 func TestLoadSetting(t *testing.T) {
 	editor := GetEditor()
-	editor.load(packages.NewPacket("testdata/Default.sublime-settings", editor.Settings()))
+	packages.LoadJSON("testdata/Default.sublime-settings", editor.Settings())
 
 	if editor.Settings().Has("tab_size") != true {
 		t.Error("Expected editor settings to have tab_size, but it didn't")
@@ -87,7 +81,7 @@ func TestInit(t *testing.T) {
 	editor := GetEditor()
 	editor.Init()
 
-	if editor.defaultBindings.KeyBindings().Len() <= 0 {
+	if editor.defaultKB.KeyBindings().Len() <= 0 {
 		t.Errorf("Expected editor to have some keys bound, but it didn't")
 	}
 
@@ -201,4 +195,11 @@ func TestHandleInput(t *testing.T) {
 	if ki := <-editor.keyInput; ki != kp {
 		t.Errorf("Expected %s to be on the input buffer, but got %s", kp, ki)
 	}
+}
+
+func init() {
+	ed := GetEditor()
+	ed.AddPackagesPath("shipped", path.Join("testdata", "shipped"))
+	ed.AddPackagesPath("default", path.Join("testdata", "default"))
+	ed.AddPackagesPath("user", path.Join("testdata", "user"))
 }

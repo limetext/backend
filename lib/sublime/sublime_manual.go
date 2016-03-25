@@ -6,17 +6,13 @@ package sublime
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/limetext/gopy/lib"
 	"github.com/limetext/lime-backend/lib"
 	"github.com/limetext/lime-backend/lib/log"
-	"github.com/limetext/lime-backend/lib/packages"
 	"github.com/limetext/lime-backend/lib/render"
 	"github.com/limetext/lime-backend/lib/util"
-	"github.com/limetext/lime-backend/lib/watch"
-	"os"
-	"path"
-	"path/filepath"
-	"time"
 )
 
 func sublime_Console(tu *py.Tuple, kwargs *py.Dict) (py.Object, error) {
@@ -66,24 +62,69 @@ func sublime_set_timeout(tu *py.Tuple, kwargs *py.Dict) (py.Object, error) {
 	return toPython(nil)
 }
 
-func init() {
-	backend.OnInit.Add(onInit)
+func sublime_PackagesPath(tu *py.Tuple) (py.Object, error) {
+	var (
+		arg1 string
+	)
+	if tu.Size() == 0 {
+		arg1 = "shipped"
+	} else if v, err := tu.GetItem(0); err != nil {
+		return nil, err
+	} else {
+		if v3, err2 := fromPython(v); err2 != nil {
+			return nil, err2
+		} else {
+			if v2, ok := v3.(string); !ok {
+				return nil, fmt.Errorf("Expected type string for backend.Editor.PackagesPath() arg1, not %s", v.Type())
+			} else {
+				arg1 = v2
+			}
+		}
+	}
+	ret0 := backend.GetEditor().PackagesPath(arg1)
+	var err error
+	var pyret0 py.Object
 
-	sublime_methods = append(sublime_methods, py.Method{Name: "console", Func: sublime_Console}, py.Method{Name: "set_timeout", Func: sublime_set_timeout})
-	backend.GetEditor()
+	pyret0, err = toPython(ret0)
+	if err != nil {
+		return nil, err
+	}
+	return pyret0, err
+}
+
+var sublime_manual_methods = []py.Method{
+	{Name: "console", Func: sublime_Console},
+	{Name: "set_timeout", Func: sublime_set_timeout},
+	{Name: "packages_path", Func: sublime_PackagesPath},
+}
+
+func init() {
+	sublime_methods = append(sublime_methods, sublime_manual_methods...)
 	l := py.InitAndLock()
 	defer l.Unlock()
-	//	py.InitializeEx(false)
+
 	m, err := py.InitModule("sublime", sublime_methods)
 	if err != nil {
+		// TODO: we should handle this as error
 		panic(err)
 	}
 
-	type class struct {
+	if sys, err := py.Import("sys"); err != nil {
+		log.Warn(err)
+	} else {
+		if pyc, err := py.NewUnicode("dont_write_bytecode"); err != nil {
+			log.Warn(err)
+		} else {
+			// avoid pyc files
+			sys.Base().SetAttr(pyc, py.True)
+		}
+		sys.Decref()
+	}
+
+	classes := []struct {
 		name string
 		c    *py.Class
-	}
-	classes := []class{
+	}{
 		{"Region", &_regionClass},
 		{"RegionSet", &_region_setClass},
 		{"View", &_viewClass},
@@ -96,11 +137,10 @@ func init() {
 		{"OnQueryContextGlue", &_onQueryContextGlueClass},
 		{"ViewEventGlue", &_viewEventGlueClass},
 	}
-	type constant struct {
+	constants := []struct {
 		name     string
 		constant int
-	}
-	constants := []constant{
+	}{
 		{"OP_EQUAL", int(util.OpEqual)},
 		{"OP_NOT_EQUAL", int(util.OpNotEqual)},
 		{"OP_REGEX_MATCH", int(util.OpRegexMatch)},
@@ -151,123 +191,4 @@ func init() {
 			panic(err)
 		}
 	}
-	py.AddToPath(backend.LIME_PACKAGES_PATH)
-	py.AddToPath(backend.LIME_USER_PACKAGES_PATH)
-
-	gopaths := filepath.SplitList(os.ExpandEnv("$GOPATH"))
-	for _, gopath := range gopaths {
-		py.AddToPath(path.Join(gopath, "src", "github.com", "limetext", "lime-backend", "lib", "sublime"))
-	}
-}
-
-// Wrapper for packages.Plugin and py.Module
-// merges Plugin.Reload and loadPlugin for watcher
-type plugin struct {
-	*packages.Plugin
-	m *py.Module
-}
-
-func newPlugin(pl *packages.Plugin, m *py.Module) (p *plugin) {
-	p = &plugin{pl, m}
-	p.FileChanged(p.Name())
-	if err := watcher.Watch(p.Name(), p); err != nil {
-		log.Error("Couldn't watch %s: %s", p.Name(), err)
-	}
-	p.loadKeyBindings()
-	p.loadSettings()
-	return
-}
-
-func (p *plugin) FileChanged(name string) {
-	p.Reload()
-	p.loadPlugin()
-}
-
-func (p *plugin) loadPlugin() {
-	fi := p.Get().([]os.FileInfo)
-	for _, f := range fi {
-		fn := f.Name()
-		s, err := py.NewUnicode(path.Base(p.Name()) + "." + fn[:len(fn)-3])
-		if err != nil {
-			log.Error(err)
-			return
-		}
-		if r, err := p.m.Base().CallMethodObjArgs("reload_plugin", s); err != nil {
-			log.Error(err)
-		} else if r != nil {
-			r.Decref()
-		}
-	}
-}
-
-func (p *plugin) load(pkg *packages.Packet) {
-	if err := pkg.Load(); err != nil {
-		log.Error("Failed to load packet %s: %s", pkg.Name(), err)
-	} else {
-		log.Info("Loaded %s", pkg.Name())
-		if err := watcher.Watch(pkg.Name(), pkg); err != nil {
-			log.Warn("Couldn't watch %s: %s", pkg.Name(), err)
-		}
-	}
-}
-
-func (p *plugin) loadKeyBindings() {
-	ed := backend.GetEditor()
-	tmp := ed.KeyBindings().Parent()
-
-	ed.KeyBindings().SetParent(p)
-	p.KeyBindings().Parent().KeyBindings().SetParent(tmp)
-
-	pt := path.Join(p.Name(), "Default.sublime-keymap")
-	p.load(packages.NewPacket(pt, p.KeyBindings().Parent().KeyBindings()))
-
-	pt = path.Join(p.Name(), "Default ("+ed.Plat()+").sublime-keymap")
-	p.load(packages.NewPacket(pt, p.KeyBindings()))
-}
-
-func (p *plugin) loadSettings() {
-	ed := backend.GetEditor()
-	tmp := ed.Settings().Parent()
-
-	ed.Settings().SetParent(p)
-	p.Settings().Parent().Settings().Parent().Settings().SetParent(tmp)
-
-	pt := path.Join(p.Name(), "Preferences.sublime-settings")
-	p.load(packages.NewPacket(pt, p.Settings().Parent().Settings().Parent().Settings()))
-
-	pt = path.Join(p.Name(), "Preferences ("+ed.Plat()+").sublime-settings")
-	p.load(packages.NewPacket(pt, p.Settings().Parent().Settings()))
-
-	pt = path.Join(backend.LIME_USER_PACKAGES_PATH, "Preferences.sublime-settings")
-	p.load(packages.NewPacket(pt, p.Settings()))
-}
-
-var watcher *watch.Watcher
-
-func onInit() {
-	l := py.NewLock()
-	defer l.Unlock()
-	m, err := py.Import("sublime_plugin")
-	if err != nil {
-		panic(err)
-	}
-	sys, err := py.Import("sys")
-	if err != nil {
-		log.Debug(err)
-	} else {
-		defer sys.Decref()
-	}
-
-	if watcher, err = watch.NewWatcher(); err != nil {
-		log.Error("Couldn't create watcher: %s", err)
-	}
-
-	// TODO: add all plugins after supporting all commands
-	// plugins := packages.ScanPlugins(backend.LIME_PACKAGES_PATH, ".py")
-	// for _, p := range plugins {
-	// 	newPlugin(p, m)
-	// }
-	newPlugin(packages.NewPlugin(path.Join(backend.LIME_PACKAGES_PATH, "Vintageous"), ".py"), m)
-
-	go watcher.Observe()
 }

@@ -1,6 +1,3 @@
-[submodule "packages"]
-	path = packages
-	url = https://github.com/limetext/lime-packages.git
 [submodule "tasks/general"]
 	path = tasks/general
 	url = https://github.com/limetext/lime-tasks.git

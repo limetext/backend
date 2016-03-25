@@ -3,9 +3,9 @@ import sys
 import traceback
 try:
     import sublime
-    v = sublime.test_window.new_file()
-    assert v.id() != sublime.test_window.id()
-    assert sublime.test_window.id() == v.window().id()
+    v = sublime.active_window().new_file()
+    assert v.id() != sublime.active_window().id()
+    assert sublime.active_window().id() == v.window().id()
     assert v.size() == 0
     e = v.begin_edit()
     v.insert(e, 0, "hellå world")
@@ -31,7 +31,7 @@ hocus pocus
     v.run_command("move", {"by": "characters", "forward": True})
     assert v.sel()[0] == (46, 46)
 
-    v2 = sublime.test_window.new_file()
+    v2 = sublime.active_window().new_file()
     e = v2.begin_edit()
     v2.insert(e, 0, """one word { another word }
 line
@@ -46,6 +46,9 @@ after empty line""")
     assert v2.expand_by_class(sublime.Region(11, 12),
     	sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END) == sublime.Region(10, 24)
     assert v2.expand_by_class(sublime.Region(5, 6), sublime.CLASS_EMPTY_LINE) == sublime.Region(0, 31)
+
+    assert sublime.CLASS_PUNCTUATION_START == 4
+    assert sublime.CLASS_OPENING_PARENTHESIS == 4096
 
 except:
     print(sys.exc_info()[1])

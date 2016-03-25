@@ -6,6 +6,11 @@ package backend
 
 import (
 	"fmt"
+	"path"
+	"runtime"
+	"runtime/debug"
+	"sync"
+
 	"github.com/atotto/clipboard"
 	"github.com/limetext/lime-backend/lib/keys"
 	"github.com/limetext/lime-backend/lib/log"
@@ -13,15 +18,12 @@ import (
 	. "github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/lime-backend/lib/watch"
 	. "github.com/limetext/text"
-	"path"
-	"runtime"
-	"runtime/debug"
-	"sync"
 )
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	GetEditor()
+	OnPackagesPathAdd.Add(packages.Scan)
 }
 
 type (
@@ -41,9 +43,10 @@ type (
 		clipboard        string
 		defaultSettings  *HasSettings
 		platformSettings *HasSettings
-		defaultBindings  *keys.HasKeyBindings
-		platformBindings *keys.HasKeyBindings
-		userBindings     *keys.HasKeyBindings
+		defaultKB        *keys.HasKeyBindings
+		platformKB       *keys.HasKeyBindings
+		userKB           *keys.HasKeyBindings
+		pkgsPaths        map[string]string
 	}
 
 	// The Frontend interface defines the API
@@ -79,12 +82,6 @@ type (
 		// Default return value for OkCancelDialog
 		defaultAction bool
 	}
-)
-
-var (
-	LIME_USER_PACKAGES_PATH = path.Join("..", "packages", "User")
-	LIME_PACKAGES_PATH      = path.Join("..", "packages")
-	LIME_DEFAULTS_PATH      = path.Join("..", "packages", "Default")
 )
 
 func (h *DummyFrontend) SetDefaultAction(action bool) {
@@ -125,19 +122,29 @@ func GetEditor() *Editor {
 				buffer:  NewBuffer(),
 				scratch: true,
 			},
-			keyInput: make(chan keys.KeyPress, 32),
+			keyInput:         make(chan keys.KeyPress, 32),
+			defaultSettings:  new(HasSettings),
+			platformSettings: new(HasSettings),
+			defaultKB:        new(keys.HasKeyBindings),
+			platformKB:       new(keys.HasKeyBindings),
+			userKB:           new(keys.HasKeyBindings),
+			pkgsPaths:        make(map[string]string),
 		}
 		var err error
 		if ed.Watcher, err = watch.NewWatcher(); err != nil {
 			log.Error("Couldn't create watcher: %s", err)
 		}
+
 		ed.console.Settings().Set("is_widget", true)
-		ed.defaultSettings = new(HasSettings)
-		ed.platformSettings = new(HasSettings)
-		ed.Settings() // Just to initialize it
-		ed.defaultBindings = new(keys.HasKeyBindings)
-		ed.platformBindings = new(keys.HasKeyBindings)
-		ed.userBindings = new(keys.HasKeyBindings)
+		// Initializing settings hierarchy
+		ed.platformSettings.Settings().SetParent(ed.defaultSettings)
+		ed.Settings().SetParent(ed.platformSettings)
+
+		// Initializing keybidings hierarchy
+		ed.KeyBindings().SetParent(ed.userKB)
+		ed.userKB.KeyBindings().SetParent(ed.platformKB)
+		ed.platformKB.KeyBindings().SetParent(ed.defaultKB)
+
 		log.AddFilter("console", log.DEBUG, log.NewLogWriter(ed.handleLog))
 		go ed.inputthread()
 		go ed.Observe()
@@ -163,10 +170,16 @@ func getClipboard() (string, error) {
 
 func (e *Editor) Init() {
 	log.Info("Initializing")
+	// TODO: shouldn't we move SetClipboardFuncs to frontends?
 	e.SetClipboardFuncs(setClipboard, getClipboard)
 	e.loadKeyBindings()
 	e.loadSettings()
+
 	OnInit.call()
+
+	// There should be usable window and view on startup
+	w := e.NewWindow()
+	w.NewFile()
 }
 
 func (e *Editor) SetClipboardFuncs(setter func(string) error, getter func() (string, error)) {
@@ -174,58 +187,37 @@ func (e *Editor) SetClipboardFuncs(setter func(string) error, getter func() (str
 	e.clipboardGetter = getter
 }
 
-func (e *Editor) load(pkg *packages.Packet) {
-	if err := pkg.Load(); err != nil {
-		log.Error("Failed to load packet %s: %s", pkg.Name(), err)
-	} else {
-		log.Info("Loaded %s", pkg.Name())
-		if err := e.Watch(pkg.Name(), pkg); err != nil {
-			log.Warn("Couldn't watch %s: %s", pkg.Name(), err)
-		}
-	}
-}
-
 func (e *Editor) loadKeyBindings() {
-	e.KeyBindings().SetParent(e.userBindings)
-	e.userBindings.KeyBindings().SetParent(e.platformBindings)
-	e.platformBindings.KeyBindings().SetParent(e.defaultBindings)
+	log.Fine("Loading editor keybindings")
 
-	p := path.Join(LIME_DEFAULTS_PATH, "Default.sublime-keymap")
-	defPckt := packages.NewPacket(p, e.defaultBindings.KeyBindings())
-	e.load(defPckt)
+	p := path.Join(e.PackagesPath("default"), "Default.sublime-keymap")
+	packages.LoadJSON(p, e.defaultKB.KeyBindings())
 
-	p = path.Join(LIME_DEFAULTS_PATH, "Default ("+e.Plat()+").sublime-keymap")
-	platPckt := packages.NewPacket(p, e.platformBindings.KeyBindings())
-	e.load(platPckt)
+	p = path.Join(e.PackagesPath("default"), "Default ("+e.Plat()+").sublime-keymap")
+	packages.LoadJSON(p, e.platformKB.KeyBindings())
 
-	p = path.Join(LIME_USER_PACKAGES_PATH, "Default.sublime-keymap")
-	usrPckt := packages.NewPacket(p, e.userBindings.KeyBindings())
-	e.load(usrPckt)
+	p = path.Join(e.PackagesPath("user"), "Default.sublime-keymap")
+	packages.LoadJSON(p, e.userKB.KeyBindings())
 
-	p = path.Join(LIME_USER_PACKAGES_PATH, "Default ("+e.Plat()+").sublime-keymap")
-	usrPlatPckt := packages.NewPacket(p, e.KeyBindings())
-	e.load(usrPlatPckt)
+	p = path.Join(e.PackagesPath("user"), "Default ("+e.Plat()+").sublime-keymap")
+	packages.LoadJSON(p, e.KeyBindings())
 }
 
 func (e *Editor) loadSettings() {
-	e.platformSettings.Settings().SetParent(e.defaultSettings)
-	e.Settings().SetParent(e.platformSettings)
+	log.Fine("Loading editor settings")
 
-	p := path.Join(LIME_DEFAULTS_PATH, "Preferences.sublime-settings")
-	defPckt := packages.NewPacket(p, e.defaultSettings.Settings())
-	e.load(defPckt)
+	p := path.Join(e.PackagesPath("default"), "Preferences.sublime-settings")
+	packages.LoadJSON(p, e.defaultSettings.Settings())
 
-	p = path.Join(LIME_DEFAULTS_PATH, "Preferences ("+e.Plat()+").sublime-settings")
-	platPckt := packages.NewPacket(p, e.platformSettings.Settings())
-	e.load(platPckt)
+	p = path.Join(e.PackagesPath("default"), "Preferences ("+e.Plat()+").sublime-settings")
+	packages.LoadJSON(p, e.platformSettings.Settings())
 
-	p = path.Join(LIME_USER_PACKAGES_PATH, "Preferences.sublime-settings")
-	usrPckt := packages.NewPacket(p, e.Settings())
-	e.load(usrPckt)
+	p = path.Join(e.PackagesPath("user"), "Preferences.sublime-settings")
+	packages.LoadJSON(p, e.Settings())
 }
 
-func (e *Editor) PackagesPath() string {
-	return LIME_PACKAGES_PATH
+func (e *Editor) PackagesPath(key string) string {
+	return e.pkgsPaths[key]
 }
 
 func (e *Editor) Console() *View {
@@ -429,4 +421,23 @@ func (e *Editor) handleLog(s string) {
 	edit := c.BeginEdit()
 	c.Insert(edit, c.Buffer().Size(), f)
 	c.EndEdit(edit)
+}
+
+func (e *Editor) AddPackagesPath(key, p string) {
+	if p0, ok := e.pkgsPaths[key]; ok {
+		log.Debug("Changing package path %s: %s to %s", key, p0, p)
+		e.RemovePackagesPath(key)
+	} else {
+		log.Debug("Adding package path %s: %s", key, p)
+	}
+	e.pkgsPaths[key] = p
+	OnPackagesPathAdd.call(p)
+}
+
+func (e *Editor) RemovePackagesPath(key string) {
+	if p, ok := e.pkgsPaths[key]; ok {
+		log.Debug("Removing package path %s: %s", key, p)
+		OnPackagesPathRemove.call(p)
+	}
+	delete(e.pkgsPaths, key)
 }

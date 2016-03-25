@@ -2,7 +2,7 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-package watch
+package util
 
 import (
 	"reflect"
@@ -20,8 +20,8 @@ func TestExist(t *testing.T) {
 		[]bool{true, false, false},
 	}
 	for i, exp := range test.exps {
-		if exist(test.array, test.elms[i]) != exp {
-			t.Errorf("Expected in %v exist result of element %s be %v, but got %v", test.array, test.elms[i], exp, exist(test.array, test.elms[i]))
+		if Exists(test.array, test.elms[i]) != exp {
+			t.Errorf("Expected in %v exist result of element %s be %v, but got %v", test.array, test.elms[i], exp, Exists(test.array, test.elms[i]))
 		}
 	}
 }
@@ -44,7 +44,7 @@ func TestRemove(t *testing.T) {
 		},
 	}
 	for i, test := range tests {
-		if exp := remove(test.slice, test.remove); !reflect.DeepEqual(exp, test.exp) {
+		if exp := Remove(test.slice, test.remove); !reflect.DeepEqual(exp, test.exp) {
 			t.Errorf("Test %d: Expected %v be equal to %v", i, exp, test.exp)
 		}
 	}

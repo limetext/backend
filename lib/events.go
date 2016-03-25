@@ -50,6 +50,12 @@ type (
 	// is typically used by feature modules to defer heavy initialization work
 	// such as scanning for plugins, loading key bindings, macros etc.
 	InitEvent []InitCallback
+
+	// Dealing with package events
+	PackagesPathEventCallback func(string)
+
+	// A PackagesPathEvent is simply a bunch of PackagesPathEventCallbacks.
+	PackagesPathEvent []PackagesPathEventCallback
 )
 
 const (
@@ -80,6 +86,7 @@ func (ve *ViewEvent) Add(cb ViewEventCallback) {
 }
 
 // Trigger this ViewEvent by calling all the registered callbacks in order of registration.
+// TODO: should calling be exported?
 func (ve *ViewEvent) Call(v *View) {
 	log.Finest("%s(%v)", evNames[ve], v.Id())
 	for _, ev := range *ve {
@@ -95,6 +102,7 @@ func (qe *QueryContextEvent) Add(cb QueryContextCallback) {
 
 // Searches for a QueryContextCallback and returns the result of the first callback being able to deal with this
 // context, or Unknown if no such callback was found.
+// TODO: should calling be exported?
 func (qe QueryContextEvent) Call(v *View, key string, operator util.Op, operand interface{}, match_all bool) QueryContextReturn {
 	log.Fine("Query context: %s, %v, %v, %v", key, operator, operand, match_all)
 	for i := range qe {
@@ -114,10 +122,22 @@ func (we *WindowEvent) Add(cb WindowEventCallback) {
 }
 
 // Trigger this WindowEvent by calling all the registered callbacks in order of registration.
+// TODO: should calling be exported?
 func (we *WindowEvent) Call(w *Window) {
 	log.Finest("%s(%v)", wevNames[we], w.Id())
 	for _, ev := range *we {
 		ev(w)
+	}
+}
+
+func (pe *PackagesPathEvent) Add(cb PackagesPathEventCallback) {
+	*pe = append(*pe, cb)
+}
+
+func (pe *PackagesPathEvent) call(p string) {
+	log.Finest("%s(%v)", pkgPathevNames[pe], p)
+	for _, ev := range *pe {
+		ev(p)
 	}
 }
 
@@ -136,6 +156,9 @@ var (
 	OnNewWindow    WindowEvent       //< Called when a new window has been created.
 	OnQueryContext QueryContextEvent //< Called when context is being queried.
 	OnInit         InitEvent         //< Called once at program startup
+
+	OnPackagesPathAdd    PackagesPathEvent
+	OnPackagesPathRemove PackagesPathEvent
 )
 
 var (
@@ -153,6 +176,10 @@ var (
 	}
 	wevNames = map[*WindowEvent]string{
 		&OnNewWindow: "OnNewWindow",
+	}
+	pkgPathevNames = map[*PackagesPathEvent]string{
+		&OnPackagesPathAdd:    "OnPackagesPathAdd",
+		&OnPackagesPathRemove: "OnPackagesPathRemove",
 	}
 )
 

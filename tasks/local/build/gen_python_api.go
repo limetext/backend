@@ -10,8 +10,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/limetext/lime-backend/lib"
-	"github.com/limetext/text"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -22,6 +20,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/limetext/lime-backend/lib"
+	"github.com/limetext/text"
 )
 
 var re = regexp.MustCompile(`\p{Lu}`)
@@ -369,7 +370,7 @@ func generateWrapper(ptr reflect.Type, canCreate bool, ignorefunc func(name stri
 	return
 }
 
-var keep = regexp.MustCompile(`^(.+(_test|_manual)\.go|.+\.py)|(doc\.go)$`)
+var remove = regexp.MustCompile(`^.+_generated\.go$`)
 
 func cleanup() {
 	_, filename, _, _ := runtime.Caller(0)
@@ -384,7 +385,7 @@ func cleanup() {
 		panic(err)
 	} else {
 		for _, f := range fi {
-			if !f.IsDir() && !keep.MatchString(f.Name()) {
+			if !f.IsDir() && remove.MatchString(f.Name()) {
 				fn := path.Join(sublimepath, f.Name())
 				fmt.Println("removing", fn)
 				os.Remove(fn)
@@ -439,7 +440,7 @@ func main() {
 			sn),
 		},
 		{path.Join(sublimepath, "sublime_api_generated.go"), generatemethodsEx(reflect.TypeOf(backend.GetEditor()),
-			regexp.MustCompile("Info|HandleInput|CommandHandler|Frontend|Console|SetActiveWindow|Init|Watch|Observe|SetClipboardFuncs|KeyBindings").MatchString,
+			regexp.MustCompile("Info|HandleInput|CommandHandler|Frontend|Console|SetActiveWindow|Init|Watch|Observe|SetClipboardFuncs|KeyBindings|PackagesPath").MatchString,
 			"backend.GetEditor().",
 			sn),
 		},

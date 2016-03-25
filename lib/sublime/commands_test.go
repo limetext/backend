@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"testing"
 
-	// "github.com/limetext/gopy/lib"
 	"github.com/limetext/lime-backend/lib"
 )
 
@@ -19,12 +18,11 @@ func TestCommandGlueInit(t *testing.T) {
 		"testarg": true,
 	}
 
-	if err := c.Init(args); err == nil {
-		if !reflect.DeepEqual(c.args, args) {
-			t.Error("Expected args to be set, but they weren't")
-		}
-	} else {
+	if err := c.Init(args); err != nil {
 		t.Error(err)
+	}
+	if !reflect.DeepEqual(c.args, args) {
+		t.Error("Expected args to be set, but they weren't")
 	}
 }
 
