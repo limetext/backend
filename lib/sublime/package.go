@@ -89,10 +89,10 @@ func (p *pkg) loadKeyBindings() {
 	p.defaultKB.KeyBindings().SetParent(tmp)
 
 	pt := path.Join(p.Name(), "Default.sublime-keymap")
-	packages.NewJSONL(pt, p.defaultKB.KeyBindings())
+	packages.LoadJSON(pt, p.defaultKB.KeyBindings())
 
 	pt = path.Join(p.Name(), "Default ("+ed.Plat()+").sublime-keymap")
-	packages.NewJSONL(pt, p.KeyBindings())
+	packages.LoadJSON(pt, p.KeyBindings())
 }
 
 func (p *pkg) loadSettings() {
@@ -106,13 +106,13 @@ func (p *pkg) loadSettings() {
 	p.defaultSettings.Settings().SetParent(tmp)
 
 	pt := path.Join(p.Name(), "Preferences.sublime-settings")
-	packages.NewJSONL(pt, p.defaultSettings.Settings())
+	packages.LoadJSON(pt, p.defaultSettings.Settings())
 
 	pt = path.Join(p.Name(), "Preferences ("+ed.Plat()+").sublime-settings")
-	packages.NewJSONL(pt, p.platformSettings.Settings())
+	packages.LoadJSON(pt, p.platformSettings.Settings())
 
 	pt = path.Join(ed.PackagesPath("user"), "Preferences.sublime-settings")
-	packages.NewJSONL(pt, p.Settings())
+	packages.LoadJSON(pt, p.Settings())
 }
 
 // Any directory in sublime is a package

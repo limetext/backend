@@ -21,7 +21,7 @@ func TestGetEditor(t *testing.T) {
 
 func TestLoadKeyBinding(t *testing.T) {
 	ed := GetEditor()
-	packages.NewJSONL("testdata/Default.sublime-keymap", ed.KeyBindings())
+	packages.LoadJSON("testdata/Default.sublime-keymap", ed.KeyBindings())
 
 	kb := ed.KeyBindings().Filter(keys.KeyPress{Key: 'i'})
 	if expectedLen := 3; kb.Len() != expectedLen {
@@ -40,7 +40,7 @@ func TestLoadKeyBindings(t *testing.T) {
 
 func TestLoadSetting(t *testing.T) {
 	editor := GetEditor()
-	packages.NewJSONL("testdata/Default.sublime-settings", editor.Settings())
+	packages.LoadJSON("testdata/Default.sublime-settings", editor.Settings())
 
 	if editor.Settings().Has("tab_size") != true {
 		t.Error("Expected editor settings to have tab_size, but it didn't")
@@ -183,8 +183,9 @@ func TestClipboard(t *testing.T) {
 	}
 }
 
-/* TODO: causing panic
 func TestHandleInput(t *testing.T) {
+	// TODO: causing panic
+	t.Skip("TODO: causing panic")
 	editor := GetEditor()
 	kp := keys.KeyPress{Key: 'i'}
 
@@ -194,7 +195,6 @@ func TestHandleInput(t *testing.T) {
 		t.Errorf("Expected %s to be on the input buffer, but got %s", kp, ki)
 	}
 }
-*/
 
 func init() {
 	ed := GetEditor()

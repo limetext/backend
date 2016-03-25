@@ -22,7 +22,7 @@ func NewJSON(filename string, marshal json.Unmarshaler) *JSON {
 	return &JSON{filename: filename, marshal: marshal}
 }
 
-func NewJSONL(filename string, marshal json.Unmarshaler) *JSON {
+func LoadJSON(filename string, marshal json.Unmarshaler) *JSON {
 	j := NewJSON(filename, marshal)
 	j.Load()
 	wch(j)
