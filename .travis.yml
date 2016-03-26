@@ -1,13 +1,21 @@
-os:
-  - osx
-  - linux
-
 sudo: false
 
 language: go
 
-go:
-  - tip
+matrix:
+  include:
+    - go: 1.5
+      os: linux
+      env: REPORT_COVERAGE=false
+    - go: 1.5
+      os: osx
+      env: REPORT_COVERAGE=false
+    - go: tip
+      os: linux
+      env: REPORT_COVERAGE=true
+    - go: tip
+      os: osx
+      env: REPORT_COVERAGE=false
 
 addons:
   apt:
