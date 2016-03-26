@@ -2,7 +2,7 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-package sublime
+package api
 
 import (
 	"bytes"
@@ -14,11 +14,12 @@ import (
 
 	"github.com/limetext/gopy/lib"
 	"github.com/limetext/lime-backend/lib"
+	_ "github.com/limetext/lime-backend/lib/commands"
 	"github.com/limetext/lime-backend/lib/util"
 )
 
 // Checking if we added necessary exported functions to sublime module
-func TestSublimeApi(t *testing.T) {
+func TestSublimeApiMatchExpected(t *testing.T) {
 	// TODO: this could be much better
 	// "__*__" should be omitted and it should be same as
 	// https://www.sublimetext.com/docs/3/api_reference.html
@@ -79,7 +80,7 @@ func printObj(indent string, v py.Object, buf *bytes.Buffer) error {
 }
 
 // basicly running "testdata/*.py" files
-func TestPythonApi(t *testing.T) {
+func TestSublimeApi(t *testing.T) {
 	l := py.NewLock()
 	defer l.Unlock()
 
@@ -92,10 +93,9 @@ func TestPythonApi(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	skip := []string{"plugin_test.py", "reload_test.py"}
 	for _, fn := range files {
 		// TODO: better to match "*_test.py" files
-		if filepath.Ext(fn) != ".py" || util.Exists(skip, fn) {
+		if filepath.Ext(fn) != ".py" {
 			continue
 		}
 
@@ -111,7 +111,7 @@ func TestPythonApi(t *testing.T) {
 func init() {
 	l := py.NewLock()
 	defer l.Unlock()
-
 	py.AddToPath("testdata")
+
 	backend.GetEditor().Init()
 }

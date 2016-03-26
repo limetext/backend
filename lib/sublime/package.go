@@ -13,6 +13,7 @@ import (
 	"github.com/limetext/lime-backend/lib/keys"
 	"github.com/limetext/lime-backend/lib/log"
 	"github.com/limetext/lime-backend/lib/packages"
+	_ "github.com/limetext/lime-backend/lib/sublime/api"
 	"github.com/limetext/text"
 )
 

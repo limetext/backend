@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/limetext/lime-backend/lib/commands"
 	"github.com/limetext/lime-backend/lib/packages"
+	_ "github.com/limetext/lime-backend/lib/sublime/api"
 )
 
 func TestLoadPlugin(t *testing.T) {
