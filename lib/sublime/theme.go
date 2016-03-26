@@ -2,20 +2,21 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-package textmate
+package sublime
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/limetext/lime-backend/lib/loaders"
-	"github.com/limetext/lime-backend/lib/log"
-	"github.com/limetext/lime-backend/lib/render"
-	"github.com/limetext/lime-backend/lib/util"
 	"image/color"
 	"io/ioutil"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/limetext/lime-backend/lib/loaders"
+	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/lime-backend/lib/render"
+	"github.com/limetext/lime-backend/lib/util"
 )
 
 type (
@@ -40,7 +41,7 @@ type (
 func LoadTheme(filename string) (*Theme, error) {
 	var scheme Theme
 	if d, err := ioutil.ReadFile(filename); err != nil {
-		return nil, fmt.Errorf("Unable to load colorscheme definition: %s", err)
+		return nil, fmt.Errorf("Unable to read colorscheme definition: %s", err)
 	} else if err := loaders.LoadPlist(d, &scheme); err != nil {
 		return nil, fmt.Errorf("Unable to load colorscheme definition: %s", err)
 	}

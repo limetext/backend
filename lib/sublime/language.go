@@ -2,22 +2,23 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-package textmate
+package sublime
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/limetext/lime-backend/lib/loaders"
-	"github.com/limetext/lime-backend/lib/log"
-	"github.com/limetext/rubex"
-	"github.com/limetext/text"
-	"github.com/quarnster/parser"
 	"io/ioutil"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/limetext/lime-backend/lib/loaders"
+	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/rubex"
+	"github.com/limetext/text"
+	"github.com/quarnster/parser"
 )
 
 const maxiter = 10000
