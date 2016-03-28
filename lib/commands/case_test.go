@@ -39,7 +39,7 @@ func runCaseTest(command string, testsuite *[]caseTest, t *testing.T) {
 			}
 		}
 		ed.CommandHandler().RunTextCommand(v, command, nil)
-		sr := v.Buffer().Substr(Region{0, v.Buffer().Size()})
+		sr := v.Substr(Region{0, v.Size()})
 		if sr != test.exp {
 			t.Errorf("%s test %d failed: %v, %+v", command, i, sr, test)
 		}

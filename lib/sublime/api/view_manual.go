@@ -62,7 +62,7 @@ func (o *View) Py_substr(tu *py.Tuple) (py.Object, error) {
 	} else {
 		arg1 = v2.data
 	}
-	ret0 := o.data.Buffer().Substr(arg1)
+	ret0 := o.data.Substr(arg1)
 	var pyret0 py.Object
 
 	pyret0, err = py.NewUnicode(ret0)

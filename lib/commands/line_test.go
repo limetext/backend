@@ -59,7 +59,7 @@ func TestJoin(t *testing.T) {
 		v.Sel().AddAll(test.sel)
 
 		ed.CommandHandler().RunTextCommand(v, "join", nil)
-		if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != test.expect {
+		if d := v.Substr(Region{0, v.Size()}); d != test.expect {
 			t.Errorf("Test %d:\nExcepted: '%s'\nbut got: '%s'", i, test.expect, d)
 		}
 	}
@@ -200,7 +200,7 @@ func TestSwapLine(t *testing.T) {
 		v.Sel().AddAll(test.sel)
 
 		ed.CommandHandler().RunTextCommand(v, "swap_line_up", nil)
-		if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != test.expect {
+		if d := v.Substr(Region{0, v.Size()}); d != test.expect {
 			t.Errorf("Test %d:\nExcepted: '%s'\nbut got: '%s'", i, test.expect, d)
 		}
 	}
@@ -220,7 +220,7 @@ func TestSwapLine(t *testing.T) {
 		v.Sel().AddAll(test.sel)
 
 		ed.CommandHandler().RunTextCommand(v, "swap_line_down", nil)
-		if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != test.expect {
+		if d := v.Substr(Region{0, v.Size()}); d != test.expect {
 			t.Errorf("Test %d:\nExcepted: '%s'\nbut got: '%s'", i, test.expect, d)
 		}
 	}

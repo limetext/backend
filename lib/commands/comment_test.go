@@ -112,7 +112,7 @@ func TestToggleComment(t *testing.T) {
 			}
 		}
 		ed.CommandHandler().RunTextCommand(v, "toggle_comment", nil)
-		sr := v.Buffer().Substr(text.Region{0, v.Buffer().Size()})
+		sr := v.Substr(text.Region{0, v.Size()})
 		if sr != test.exp {
 			t.Errorf("%s test %d failed: %v, %+v", "toggle_comment", i, sr, test)
 		}

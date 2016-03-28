@@ -417,9 +417,9 @@ func (e *Editor) GetClipboard() string {
 
 func (e *Editor) handleLog(s string) {
 	c := e.Console()
-	f := fmt.Sprintf("%08d %d %s", c.Buffer().Size(), len(s), s)
+	f := fmt.Sprintf("%08d %d %s", c.Size(), len(s), s)
 	edit := c.BeginEdit()
-	c.Insert(edit, c.Buffer().Size(), f)
+	c.Insert(edit, c.Size(), f)
 	c.EndEdit(edit)
 }
 

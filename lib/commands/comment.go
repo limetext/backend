@@ -25,7 +25,7 @@ func (c *ToggleCommentCommand) Run(v *View, e *Edit) error {
 
 	for _, r := range v.Sel().Regions() {
 		if r.Size() != 0 {
-			t := v.Buffer().Substr(r)
+			t := v.Substr(r)
 
 			trim := strings.TrimLeftFunc(t, unicode.IsSpace)
 			if strings.HasPrefix(trim, comm) {

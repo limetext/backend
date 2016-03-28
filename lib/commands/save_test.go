@@ -48,7 +48,7 @@ func TestSave(t *testing.T) {
 
 		v := w.OpenFile(testfile, 0)
 		e := v.BeginEdit()
-		v.Insert(e, v.Buffer().Size(), test.text)
+		v.Insert(e, v.Size(), test.text)
 		v.EndEdit(e)
 
 		ed.CommandHandler().RunTextCommand(v, "save", nil)

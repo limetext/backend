@@ -372,12 +372,10 @@ func generateWrapper(ptr reflect.Type, canCreate bool, ignorefunc func(name stri
 
 var (
 	remove      = regexp.MustCompile(`^.+_generated\.go$`)
-	sublimepath = path.Join(path.Dir(filename), "..", "..", "..", "lib", "sublime", "api")
+	sublimepath string
 )
 
 func cleanup() {
-	_, filename, _, _ := runtime.Caller(0)
-
 	f, err := os.Open(sublimepath)
 	if err != nil {
 		panic(err)
@@ -397,6 +395,9 @@ func cleanup() {
 }
 
 func main() {
+	_, filename, _, _ := runtime.Caller(0)
+	sublimepath = path.Join(path.Dir(filename), "..", "..", "..", "lib", "sublime", "api")
+
 	cleanup()
 	var sublime_methods = ""
 	sn := func(t reflect.Type, m reflect.Method) string {
@@ -405,19 +406,17 @@ func main() {
 		return sn
 	}
 
-	_, filename, _, _ := runtime.Caller(0)
-
 	data := [][]string{
 		{path.Join(sublimepath, "region_generated.go"), generateWrapper(reflect.TypeOf(text.Region{}), true, regexp.MustCompile("Cut").MatchString)},
 		{path.Join(sublimepath, "regionset_generated.go"), generateWrapper(reflect.TypeOf(&text.RegionSet{}), false, regexp.MustCompile("Less|Swap|Adjust|Has|Cut").MatchString)},
 		{path.Join(sublimepath, "edit_generated.go"), generateWrapper(reflect.TypeOf(&backend.Edit{}), false, regexp.MustCompile("Apply|Undo").MatchString)},
-		{path.Join(sublimepath, "view_generated.go"), generateWrapper(reflect.TypeOf(&backend.View{}), false, regexp.MustCompile("Buffer|Syntax|CommandHistory|Show|AddRegions|UndoStack|Transform|Reload|Save|Close|ExpandByClass|Erased|FileChanged|Inserted|Find$|^Status").MatchString)},
+		{path.Join(sublimepath, "view_generated.go"), generateWrapper(reflect.TypeOf(&backend.View{}), false, regexp.MustCompile("Buffer|Syntax|CommandHistory|Show|AddRegions|UndoStack|Transform|Reload|Save|Close|ExpandByClass|Erased|FileChanged|Inserted|Find$|^Status|Word|Line|Substr|FullLine|ChangeCount|FileName|^Name|RowCol|SetName|Size|TextPoint").MatchString)},
 		{path.Join(sublimepath, "window_generated.go"), generateWrapper(reflect.TypeOf(&backend.Window{}), false, regexp.MustCompile("OpenFile|SetActiveView|Close").MatchString)},
 		{path.Join(sublimepath, "settings_generated.go"), generateWrapper(reflect.TypeOf(&text.Settings{}), false, regexp.MustCompile("Parent|Set|Get|UnmarshalJSON|MarshalJSON").MatchString)},
 		{path.Join(sublimepath, "view_buffer_generated.go"), generatemethodsEx(
-			reflect.TypeOf(backend.GetEditor().Console().Buffer()),
+			reflect.TypeOf(text.NewBuffer()),
 			regexp.MustCompile("Erase|Insert|Substr|SetFile|AddCallback|AddObserver|RemoveObserver|Data|Runes|Settings|Index|Close|Unlock|Lock|String").MatchString,
-			"o.data.Buffer().",
+			"o.data.",
 			func(t reflect.Type, m reflect.Method) string {
 				mn := ""
 				switch m.Name {

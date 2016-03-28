@@ -28,7 +28,6 @@ func runCopyTest(command string, tests *[]copyTest, t *testing.T) {
 	}, func() (string, error) {
 		return dummyClipboard, nil
 	})
-	defer ed.Init()
 
 	w := ed.NewWindow()
 	defer w.Close()
@@ -40,7 +39,9 @@ func runCopyTest(command string, tests *[]copyTest, t *testing.T) {
 			v.Close()
 		}()
 
-		v.Buffer().Insert(0, test.buf)
+		edit := v.BeginEdit()
+		v.Insert(edit, 0, test.buf)
+		v.EndEdit(edit)
 		v.Sel().Clear()
 
 		ed.SetClipboard(test.clip)
@@ -55,7 +56,7 @@ func runCopyTest(command string, tests *[]copyTest, t *testing.T) {
 			t.Errorf("Test %d: Expected clipboard to be %q, but got %q", i, test.expClip, ed.GetClipboard())
 		}
 
-		b := v.Buffer().Substr(text.Region{A: 0, B: v.Buffer().Size()})
+		b := v.Substr(text.Region{A: 0, B: v.Size()})
 
 		if b != test.expBuf {
 			t.Errorf("Test %d: Expected buffer to be %q, but got %q", i, test.expBuf, b)

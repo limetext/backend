@@ -76,9 +76,9 @@ func (w *Window) OpenFile(filename string, flags int) *View {
 	v.SetScratch(true)
 	e := v.BeginEdit()
 	if fn, err := filepath.Abs(filename); err != nil {
-		v.Buffer().SetFileName(filename)
+		v.SetFileName(filename)
 	} else {
-		v.Buffer().SetFileName(fn)
+		v.SetFileName(fn)
 	}
 	if d, err := ioutil.ReadFile(filename); err != nil {
 		log.Error("Couldn't load file %s: %s", filename, err)

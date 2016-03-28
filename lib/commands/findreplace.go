@@ -48,19 +48,17 @@ func (c *FindUnderExpandCommand) Run(v *View, e *Edit) error {
 
 	if sel.HasEmpty() {
 		for i, r := range rs {
-			if r2 := v.Buffer().Word(r.A); r2.Size() > r.Size() {
+			if r2 := v.Word(r.A); r2.Size() > r.Size() {
 				rs[i] = r2
 			}
 		}
 		sel.Clear()
 		sel.AddAll(rs)
-		b := v.Buffer()
-		lastSearch = b.SubstrR(rs[len(rs)-1])
+		lastSearch = v.SubstrR(rs[len(rs)-1])
 		return nil
 	}
 	last := rs[len(rs)-1]
-	b := v.Buffer()
-	lastSearch = b.SubstrR(last)
+	lastSearch = v.SubstrR(last)
 	r := v.Find(string(lastSearch), last.End(), IGNORECASE|LITERAL)
 	if r.A != -1 {
 		sel.Add(r)

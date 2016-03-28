@@ -100,7 +100,7 @@ func TestTranspose(t *testing.T) {
 	for i, test := range tests {
 		// Load the starting text into the buffer
 		e := v.BeginEdit()
-		v.Erase(e, Region{0, v.Buffer().Size()})
+		v.Erase(e, Region{0, v.Size()})
 		v.Insert(e, 0, test.start)
 		v.EndEdit(e)
 
@@ -112,7 +112,7 @@ func TestTranspose(t *testing.T) {
 
 		ed.CommandHandler().RunTextCommand(v, "transpose", nil)
 
-		b := v.Buffer().Substr(Region{0, v.Buffer().Size()})
+		b := v.Substr(Region{0, v.Size()})
 		if b != test.expect {
 			t.Errorf("Test %d: Expected %q; got %q", i, test.expect, b)
 		}
