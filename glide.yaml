@@ -11,4 +11,3 @@ import:
 - package: gopkg.in/fsnotify.v1
 excludeDirs:
 - tasks
-- packages
