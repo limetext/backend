@@ -26,6 +26,8 @@ type pkg struct {
 	defaultSettings  *text.HasSettings
 	defaultKB        *keys.HasKeyBindings
 	plugins          map[string]*plugin
+	syntaxes         []*Language
+	colorSchemes     []*Theme
 	// TODO: themes, snippets, etc more info on iss#71
 }
 
@@ -116,6 +118,14 @@ func (p *pkg) loadSettings() {
 	packages.LoadJSON(pt, p.Settings())
 }
 
+func (p *pkg) loadSyntaxes() {
+
+}
+
+func (p *pkg) loadColorSchemes() {
+
+}
+
 // Any directory in sublime is a package
 func isPKG(dir string) bool {
 	fi, err := os.Stat(dir)
@@ -125,7 +135,7 @@ func isPKG(dir string) bool {
 	return true
 }
 
-var packageRecord *packages.Record = &packages.Record{isPKG, newPKG}
+var packageRecord = &packages.Record{isPKG, newPKG}
 
 func init() {
 	packages.Register(packageRecord)

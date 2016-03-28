@@ -17,11 +17,12 @@ package parser
 
 import (
 	"bytes"
+	"sort"
+	"sync"
+
 	"github.com/limetext/lime-backend/lib/render"
 	"github.com/limetext/text"
 	"github.com/quarnster/parser"
-	"sort"
-	"sync"
 )
 
 type (

@@ -6,10 +6,11 @@ package sublime
 
 import (
 	"fmt"
-	"github.com/limetext/lime-backend/lib/loaders"
-	"github.com/limetext/lime-backend/lib/util"
 	"io/ioutil"
 	"testing"
+
+	"github.com/limetext/lime-backend/lib/loaders"
+	"github.com/limetext/lime-backend/lib/util"
 )
 
 func TestLoadTheme(t *testing.T) {

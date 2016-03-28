@@ -62,7 +62,7 @@ func isPlugin(filename string) bool {
 }
 
 var (
-	pluginRecord *packages.Record = &packages.Record{isPlugin, newPlugin}
+	pluginRecord = &packages.Record{isPlugin, newPlugin}
 
 	module *py.Module
 )

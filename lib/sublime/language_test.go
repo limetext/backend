@@ -6,9 +6,10 @@ package sublime
 
 import (
 	"fmt"
-	"github.com/limetext/lime-backend/lib/util"
 	"io/ioutil"
 	"testing"
+
+	"github.com/limetext/lime-backend/lib/util"
 )
 
 func TestLanguageProviderLanguageFromScope(t *testing.T) {
