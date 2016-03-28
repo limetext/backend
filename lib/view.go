@@ -19,7 +19,6 @@ import (
 	"github.com/limetext/lime-backend/lib/packages"
 	"github.com/limetext/lime-backend/lib/parser"
 	"github.com/limetext/lime-backend/lib/render"
-	"github.com/limetext/lime-backend/lib/textmate"
 	. "github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/rubex"
 	. "github.com/limetext/text"
@@ -164,18 +163,10 @@ func (v *View) parsethread() {
 			}
 		}()
 
-		b := v.buffer
-		sub := b.Substr(Region{0, b.Size()})
+		sub := v.Substr(Region{0, b.Size()})
 
 		source, _ := v.Settings().Get("syntax", "").(string)
 		if len(source) == 0 {
-			return
-		}
-
-		// TODO: Allow other parsers instead of this hardcoded textmate version
-		pr, err := textmate.NewLanguageParser(source, sub)
-		if err != nil {
-			log.Error("Couldn't parse: %v", err)
 			return
 		}
 
@@ -256,6 +247,7 @@ func (v *View) reparse(forced bool) {
 func (v *View) loadSettings() {
 	syntax := v.Settings().Get("syntax", "").(string)
 
+	/* TODO: This should change */
 	if syntax == "" {
 		v.Settings().SetParent(v.window)
 		return
@@ -266,6 +258,7 @@ func (v *View) loadSettings() {
 	defSet.Settings().SetParent(v.window)
 	usrSet.Settings().SetParent(defSet)
 	v.Settings().SetParent(usrSet)
+	/* End of change */
 
 	ed := GetEditor()
 	if r, err := rubex.Compile(`([A-Za-z]+?)\.(?:[^.]+)$`); err != nil {

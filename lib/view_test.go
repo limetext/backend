@@ -6,9 +6,6 @@ package backend
 
 import (
 	"fmt"
-	"github.com/limetext/lime-backend/lib/textmate"
-	"github.com/limetext/lime-backend/lib/util"
-	"github.com/limetext/text"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -16,6 +13,9 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/limetext/lime-backend/lib/util"
+	"github.com/limetext/text"
 )
 
 func TestView(t *testing.T) {
@@ -157,37 +157,36 @@ func TestExtractScope(t *testing.T) {
 	}()
 
 	const (
-		in      = "textmate/testdata/main.go"
+		in      = "sublime/testdata/main.go"
 		expfile = "testdata/scoperange.res"
-		syntax  = "textmate/testdata/Go.tmLanguage"
+		syntax  = "sublime/testdata/Go.tmLanguage"
 	)
 	v.Settings().Set("syntax", syntax)
-	if d, err := ioutil.ReadFile(in); err != nil {
+	d, err := ioutil.ReadFile(in)
+	if err != nil {
 		t.Fatal(err)
-	} else {
-		//		v.rootNode = nil
-		e := v.BeginEdit()
-		v.Insert(e, 0, string(d))
-		v.EndEdit(e)
-		last := text.Region{A: -1, B: -1}
-		str := ""
-		nr := text.Region{A: 0, B: 0}
-		for v.ExtractScope(1) == nr {
-			time.Sleep(time.Millisecond)
+	}
+	e := v.BeginEdit()
+	v.Insert(e, 0, string(d))
+	v.EndEdit(e)
+	last := text.Region{A: -1, B: -1}
+	str := ""
+	nr := text.Region{A: 0, B: 0}
+	for v.ExtractScope(1) == nr {
+		time.Sleep(time.Millisecond)
+	}
+	for i := 0; i < v.buffer.Size(); i++ {
+		if r := v.ExtractScope(i); r != last {
+			str += fmt.Sprintf("%d (%d, %d)\n", i, r.A, r.B)
+			last = r
 		}
-		for i := 0; i < v.buffer.Size(); i++ {
-			if r := v.ExtractScope(i); r != last {
-				str += fmt.Sprintf("%d (%d, %d)\n", i, r.A, r.B)
-				last = r
-			}
+	}
+	if d, err := ioutil.ReadFile(expfile); err != nil {
+		if err := ioutil.WriteFile(expfile, []byte(str), 0644); err != nil {
+			t.Error(err)
 		}
-		if d, err := ioutil.ReadFile(expfile); err != nil {
-			if err := ioutil.WriteFile(expfile, []byte(str), 0644); err != nil {
-				t.Error(err)
-			}
-		} else if diff := util.Diff(string(d), str); diff != "" {
-			t.Error(diff)
-		}
+	} else if diff := util.Diff(string(d), str); diff != "" {
+		t.Error(diff)
 	}
 }
 
@@ -203,9 +202,9 @@ func TestScopeName(t *testing.T) {
 	}()
 
 	const (
-		in      = "textmate/testdata/main.go"
+		in      = "sublime/testdata/main.go"
 		expfile = "testdata/scopename.res"
-		syntax  = "textmate/testdata/Go.tmLanguage"
+		syntax  = "sublime/testdata/Go.tmLanguage"
 	)
 	v.Settings().Set("syntax", syntax)
 	if d, err := ioutil.ReadFile(in); err != nil {
@@ -281,11 +280,6 @@ func TestTransform(t *testing.T) {
 		v.Close()
 	}()
 
-	sc, err := textmate.LoadTheme("testdata/GlitterBomb.tmTheme")
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	d, err := ioutil.ReadFile("view.go")
 	if err != nil {
 		t.Fatal(err)
@@ -298,7 +292,7 @@ func TestTransform(t *testing.T) {
 		t.Error("Expected view.Transform return nil when the syntax isn't set yet")
 	}
 
-	v.Settings().Set("syntax", "textmate/testdata/Go.tmLanguage")
+	v.Settings().Set("syntax", "sublime/testdata/Go.tmLanguage")
 
 	time.Sleep(time.Second)
 	a := v.Transform(sc, text.Region{A: 0, B: 100}).Transcribe()
@@ -321,12 +315,7 @@ func BenchmarkTransformTranscribe(b *testing.B) {
 		v.Close()
 	}()
 
-	sc, err := textmate.LoadTheme("testdata/GlitterBomb.tmTheme")
-	if err != nil {
-		b.Fatal(err)
-	}
-
-	v.Settings().Set("syntax", "textmate/testdata/Go.tmLanguage")
+	v.Settings().Set("syntax", "sublime/testdata/Go.tmLanguage")
 
 	d, err := ioutil.ReadFile("view.go")
 	if err != nil {
@@ -889,8 +878,8 @@ func BenchmarkScopeNameLinear(b *testing.B) {
 	}()
 
 	const (
-		in     = "textmate/language_test.go"
-		syntax = "textmate/testdata/Go.tmLanguage"
+		in     = "sublime/language_test.go"
+		syntax = "sublime/testdata/Go.tmLanguage"
 	)
 	b.StopTimer()
 	v.Settings().Set("syntax", syntax)
@@ -920,8 +909,8 @@ func BenchmarkScopeNameRandom(b *testing.B) {
 	}()
 
 	const (
-		in     = "textmate/language_test.go"
-		syntax = "textmate/testdata/Go.tmLanguage"
+		in     = "sublime/language_test.go"
+		syntax = "sublime/testdata/Go.tmLanguage"
 	)
 	b.StopTimer()
 	v.Settings().Set("syntax", syntax)
