@@ -34,7 +34,7 @@ func getRegions(v *View, cut bool) *text.RegionSet {
 	he, ae := rs.HasEmpty(), !rs.HasNonEmpty() || cut
 	for _, r := range rs.Regions() {
 		if ae && r.Empty() {
-			rs.Add(v.Buffer().FullLineR(r))
+			rs.Add(v.FullLineR(r))
 		} else if he && r.Empty() {
 			rs.Substract(r)
 		}
@@ -48,7 +48,7 @@ func getSelSubstrs(v *View, rs *text.RegionSet) []string {
 	s := make([]string, len(rs.Regions()))
 	for i, r := range rs.Regions() {
 		add = ""
-		s1 = v.Buffer().Substr(r)
+		s1 = v.Substr(r)
 		if !v.Sel().HasNonEmpty() && !strings.HasSuffix(s1, "\n") {
 			add = "\n"
 		}

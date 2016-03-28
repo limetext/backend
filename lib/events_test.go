@@ -84,7 +84,7 @@ func TestOnPreSave(t *testing.T) {
 	if callCount != 1 {
 		t.Fatalf("%d != 1", callCount)
 	}
-	v.Buffer().SetFileName(testfile)
+	v.SetFileName(testfile)
 	if err := v.Save(); err != nil {
 		t.Fatalf("Could not save the view %s", err)
 	}

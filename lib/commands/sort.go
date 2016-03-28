@@ -5,10 +5,11 @@
 package commands
 
 import (
-	. "github.com/limetext/lime-backend/lib"
-	. "github.com/limetext/text"
 	"sort"
 	"strings"
+
+	. "github.com/limetext/lime-backend/lib"
+	. "github.com/limetext/text"
 )
 
 type (
@@ -73,7 +74,6 @@ func (s textSorter) Less(i, j int) bool {
 
 func (c *SortLinesCommand) Run(v *View, e *Edit) error {
 	sel := v.Sel()
-	buf := v.Buffer()
 
 	// Used as a set of int
 	sorted_rows := make(map[int]bool)
@@ -82,11 +82,11 @@ func (c *SortLinesCommand) Run(v *View, e *Edit) error {
 	texts := []string{}
 	for i := 0; i < sel.Len(); i++ {
 		// Get regions containing each line.
-		for _, r := range buf.Lines(sel.Get(i)) {
+		for _, r := range v.Lines(sel.Get(i)) {
 			if ok := sorted_rows[r.Begin()]; !ok {
 				sorted_rows[r.Begin()] = true
 				regions = append(regions, r)
-				texts = append(texts, buf.Substr(r))
+				texts = append(texts, v.Substr(r))
 			}
 		}
 	}
@@ -110,7 +110,7 @@ func (c *SortLinesCommand) Run(v *View, e *Edit) error {
 			offset += len(texts[i]) - r.Size()
 		} else {
 			// Erase the line and its ending
-			fullLine := buf.FullLineR(r)
+			fullLine := v.FullLineR(r)
 			v.Erase(e, fullLine)
 			offset -= fullLine.Size()
 		}
@@ -121,13 +121,12 @@ func (c *SortLinesCommand) Run(v *View, e *Edit) error {
 
 func (c *SortSelectionCommand) Run(v *View, e *Edit) error {
 	sel := v.Sel()
-	buf := v.Buffer()
 
 	regions := make([]Region, sel.Len())
 	texts := make([]string, sel.Len())
 	for i := 0; i < sel.Len(); i++ {
 		regions[i] = sel.Get(i)
-		texts[i] = buf.Substr(regions[i])
+		texts[i] = v.Substr(regions[i])
 	}
 
 	sort.Sort(textSorter{

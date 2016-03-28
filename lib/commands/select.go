@@ -39,7 +39,7 @@ func (c *SelectAllCommand) Run(v *View, e *Edit) error {
 			- Select a single region of (0, view.buffersize())
 	*/
 
-	r := Region{0, v.Buffer().Size()}
+	r := Region{0, v.Size()}
 	v.Sel().Clear()
 	v.Sel().Add(r)
 	return nil

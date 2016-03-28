@@ -230,7 +230,7 @@ func TestScopeName(t *testing.T) {
 				last = name
 			}
 		}
-		if i := v.Buffer().Size(); lasti != i {
+		if i := v.Size(); lasti != i {
 			str += fmt.Sprintf("%d-%d: %s\n", lasti, i, last)
 		}
 		if d, err := ioutil.ReadFile(expfile); err != nil {
@@ -345,7 +345,7 @@ func BenchmarkTransformTranscribe(b *testing.B) {
 	wg.Wait()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		v.Transform(sc, text.Region{A: 0, B: v.Buffer().Size()}).Transcribe()
+		v.Transform(sc, text.Region{A: 0, B: v.Size()}).Transcribe()
 	}
 	fmt.Println(util.Prof.String())
 }

@@ -32,11 +32,11 @@ func (c *IndentCommand) Run(v *View, e *Edit) error {
 
 	for i := 0; i < sel.Len(); i++ {
 		r := sel.Get(i)
-		start_row, _ := v.Buffer().RowCol(r.Begin())
-		end_row, _ := v.Buffer().RowCol(r.End())
+		start_row, _ := v.RowCol(r.Begin())
+		end_row, _ := v.RowCol(r.End())
 		for row := start_row; row <= end_row; row++ {
 			// Insert an indent at the beginning of the line
-			pos := v.Buffer().TextPoint(row, 0)
+			pos := v.TextPoint(row, 0)
 			v.Insert(e, pos, indent)
 		}
 	}
@@ -48,12 +48,12 @@ func (c *UnindentCommand) Run(v *View, e *Edit) error {
 	sel := v.Sel()
 	for i := 0; i < sel.Len(); i++ {
 		r := sel.Get(i)
-		start_row, _ := v.Buffer().RowCol(r.Begin())
-		end_row, _ := v.Buffer().RowCol(r.End())
+		start_row, _ := v.RowCol(r.Begin())
+		end_row, _ := v.RowCol(r.End())
 		for row := start_row; row <= end_row; row++ {
-			pos := v.Buffer().TextPoint(row, 0)
+			pos := v.TextPoint(row, 0)
 			// Get the first at the beginning of the line (as many as defined by tab_size)
-			sub := v.Buffer().Substr(Region{pos, pos + tab_size})
+			sub := v.Substr(Region{pos, pos + tab_size})
 			if len(sub) == 0 {
 				continue
 			}
@@ -69,7 +69,7 @@ func (c *UnindentCommand) Run(v *View, e *Edit) error {
 				}
 			}
 			if to_remove > 0 {
-				v.Buffer().Erase(pos, to_remove)
+				v.Erase(e, Region{pos, pos + to_remove})
 			}
 		}
 	}

@@ -20,7 +20,7 @@ var (
 )
 
 func (o *View) Py_change_count() (py.Object, error) {
-	ret0 := o.data.Buffer().ChangeCount()
+	ret0 := o.data.ChangeCount()
 	var err error
 	var pyret0 py.Object
 
@@ -32,7 +32,7 @@ func (o *View) Py_change_count() (py.Object, error) {
 }
 
 func (o *View) Py_file_name() (py.Object, error) {
-	ret0 := o.data.Buffer().FileName()
+	ret0 := o.data.FileName()
 	var err error
 	var pyret0 py.Object
 
@@ -60,7 +60,7 @@ func (o *View) fullline(tu *py.Tuple) (py.Object, error) {
 			}
 		}
 	}
-	ret0 := o.data.Buffer().FullLine(arg1)
+	ret0 := o.data.FullLine(arg1)
 	var err error
 	var pyret0 py.Object
 
@@ -88,7 +88,7 @@ func (o *View) fullliner(tu *py.Tuple) (py.Object, error) {
 			}
 		}
 	}
-	ret0 := o.data.Buffer().FullLineR(arg1)
+	ret0 := o.data.FullLineR(arg1)
 	var err error
 	var pyret0 py.Object
 
@@ -100,7 +100,7 @@ func (o *View) fullliner(tu *py.Tuple) (py.Object, error) {
 }
 
 func (o *View) Py_buffer_id() (py.Object, error) {
-	ret0 := o.data.Buffer().Id()
+	ret0 := o.data.Id()
 	var err error
 	var pyret0 py.Object
 
@@ -128,7 +128,7 @@ func (o *View) line(tu *py.Tuple) (py.Object, error) {
 			}
 		}
 	}
-	ret0 := o.data.Buffer().Line(arg1)
+	ret0 := o.data.Line(arg1)
 	var err error
 	var pyret0 py.Object
 
@@ -156,7 +156,7 @@ func (o *View) liner(tu *py.Tuple) (py.Object, error) {
 			}
 		}
 	}
-	ret0 := o.data.Buffer().LineR(arg1)
+	ret0 := o.data.LineR(arg1)
 	var err error
 	var pyret0 py.Object
 
@@ -184,7 +184,7 @@ func (o *View) Py_lines(tu *py.Tuple) (py.Object, error) {
 			}
 		}
 	}
-	ret0 := o.data.Buffer().Lines(arg1)
+	ret0 := o.data.Lines(arg1)
 	var err error
 	var pyret0 py.Object
 
@@ -196,7 +196,7 @@ func (o *View) Py_lines(tu *py.Tuple) (py.Object, error) {
 }
 
 func (o *View) Py_name() (py.Object, error) {
-	ret0 := o.data.Buffer().Name()
+	ret0 := o.data.Name()
 	var err error
 	var pyret0 py.Object
 
@@ -224,7 +224,7 @@ func (o *View) Py_rowcol(tu *py.Tuple) (py.Object, error) {
 			}
 		}
 	}
-	ret0, ret1 := o.data.Buffer().RowCol(arg1)
+	ret0, ret1 := o.data.RowCol(arg1)
 	var err error
 	var pyret0 py.Object
 
@@ -259,7 +259,7 @@ func (o *View) Py_set_name(tu *py.Tuple) (py.Object, error) {
 			}
 		}
 	}
-	if err := o.data.Buffer().SetName(arg1); err != nil {
+	if err := o.data.SetName(arg1); err != nil {
 		return nil, err
 	} else {
 		return toPython(nil)
@@ -267,7 +267,7 @@ func (o *View) Py_set_name(tu *py.Tuple) (py.Object, error) {
 }
 
 func (o *View) Py_size() (py.Object, error) {
-	ret0 := o.data.Buffer().Size()
+	ret0 := o.data.Size()
 	var err error
 	var pyret0 py.Object
 
@@ -309,7 +309,7 @@ func (o *View) Py_text_point(tu *py.Tuple) (py.Object, error) {
 			}
 		}
 	}
-	ret0 := o.data.Buffer().TextPoint(arg1, arg2)
+	ret0 := o.data.TextPoint(arg1, arg2)
 	var err error
 	var pyret0 py.Object
 
@@ -337,7 +337,7 @@ func (o *View) word(tu *py.Tuple) (py.Object, error) {
 			}
 		}
 	}
-	ret0 := o.data.Buffer().Word(arg1)
+	ret0 := o.data.Word(arg1)
 	var err error
 	var pyret0 py.Object
 
@@ -365,7 +365,7 @@ func (o *View) wordr(tu *py.Tuple) (py.Object, error) {
 			}
 		}
 	}
-	ret0 := o.data.Buffer().WordR(arg1)
+	ret0 := o.data.WordR(arg1)
 	var err error
 	var pyret0 py.Object
 

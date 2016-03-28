@@ -44,16 +44,16 @@ func TestUndoRedoCommands(t *testing.T) {
 	}
 	v.EndEdit(edit)
 
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "1234a1234b1234c1234d" {
-		t.Error(v.Buffer().Substr(Region{0, v.Buffer().Size()}))
+	if v.Substr(Region{0, v.Size()}) != "1234a1234b1234c1234d" {
+		t.Error(v.Substr(Region{0, v.Size()}))
 	}
 	ch.RunTextCommand(v, "undo", nil)
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "abcd" {
-		t.Error("expected 'abcd', but got: ", v.Buffer().Substr(Region{0, v.Buffer().Size()}))
+	if v.Substr(Region{0, v.Size()}) != "abcd" {
+		t.Error("expected 'abcd', but got: ", v.Substr(Region{0, v.Size()}))
 	}
 	ch.RunTextCommand(v, "redo", nil)
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "1234a1234b1234c1234d" {
-		t.Error("expected '1234a1234b1234c1234d', but got: ", v.Buffer().Substr(Region{0, v.Buffer().Size()}))
+	if v.Substr(Region{0, v.Size()}) != "1234a1234b1234c1234d" {
+		t.Error("expected '1234a1234b1234c1234d', but got: ", v.Substr(Region{0, v.Size()}))
 	}
 
 	v.Sel().Clear()
@@ -75,34 +75,34 @@ func TestUndoRedoCommands(t *testing.T) {
 	}
 	v.EndEdit(edit)
 
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "hello world1234ahello world1234bhello world1234chello world1234d" {
-		t.Error(v.Buffer().Substr(Region{0, v.Buffer().Size()}))
+	if v.Substr(Region{0, v.Size()}) != "hello world1234ahello world1234bhello world1234chello world1234d" {
+		t.Error(v.Substr(Region{0, v.Size()}))
 	}
 	ch.RunTextCommand(v, "undo", nil)
 
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "1234a1234b1234c1234d" {
-		t.Error("expected '1234a1234b1234c1234d', but got: ", v.Buffer().Substr(Region{0, v.Buffer().Size()}))
+	if v.Substr(Region{0, v.Size()}) != "1234a1234b1234c1234d" {
+		t.Error("expected '1234a1234b1234c1234d', but got: ", v.Substr(Region{0, v.Size()}))
 	}
 	ch.RunTextCommand(v, "undo", nil)
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "abcd" {
-		t.Error("expected 'abcd', but got: ", v.Buffer().Substr(Region{0, v.Buffer().Size()}))
+	if v.Substr(Region{0, v.Size()}) != "abcd" {
+		t.Error("expected 'abcd', but got: ", v.Substr(Region{0, v.Size()}))
 	}
 	ch.RunTextCommand(v, "undo", nil)
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "" {
-		t.Error("expected '', but got: ", v.Buffer().Substr(Region{0, v.Buffer().Size()}))
+	if v.Substr(Region{0, v.Size()}) != "" {
+		t.Error("expected '', but got: ", v.Substr(Region{0, v.Size()}))
 	}
 	v.UndoStack().Redo(true)
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "abcd" {
-		t.Error("expected 'abcd', but got: ", v.Buffer().Substr(Region{0, v.Buffer().Size()}))
+	if v.Substr(Region{0, v.Size()}) != "abcd" {
+		t.Error("expected 'abcd', but got: ", v.Substr(Region{0, v.Size()}))
 	}
 
 	v.UndoStack().Redo(true)
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "1234a1234b1234c1234d" {
-		t.Error("expected '1234a1234b1234c1234d', but got: ", v.Buffer().Substr(Region{0, v.Buffer().Size()}))
+	if v.Substr(Region{0, v.Size()}) != "1234a1234b1234c1234d" {
+		t.Error("expected '1234a1234b1234c1234d', but got: ", v.Substr(Region{0, v.Size()}))
 	}
 
 	v.UndoStack().Redo(true)
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "hello world1234ahello world1234bhello world1234chello world1234d" {
-		t.Error(v.Buffer().Substr(Region{0, v.Buffer().Size()}))
+	if v.Substr(Region{0, v.Size()}) != "hello world1234ahello world1234bhello world1234chello world1234d" {
+		t.Error(v.Substr(Region{0, v.Size()}))
 	}
 }

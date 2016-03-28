@@ -348,11 +348,6 @@ func (v *View) Window() *Window {
 	return v.window
 }
 
-// Returns the underlying Buffer that this View is a view into.
-func (v *View) Buffer() Buffer {
-	return v.buffer
-}
-
 // Inserts text at the given position in the provided edit object.
 // Tabs are (sometimes, depending on the View's settings) translated to spaces.
 // The return value is the length of the string that was inserted.
@@ -999,4 +994,76 @@ func (v *View) EraseStatus(key string) {
 
 func (v *View) SetSyntaxFile(file string) {
 	v.Settings().Set("syntax", file)
+}
+
+func (v *View) ChangeCount() int {
+	return v.buffer.ChangeCount()
+}
+
+func (v *View) FileName() string {
+	return v.buffer.FileName()
+}
+
+func (v *View) Substr(r Region) string {
+	return v.buffer.Substr(r)
+}
+
+func (v *View) SubstrR(r Region) []rune {
+	return v.buffer.SubstrR(r)
+}
+
+func (v *View) FullLine(off int) Region {
+	return v.buffer.FullLine(off)
+}
+
+func (v *View) FullLineR(r Region) Region {
+	return v.buffer.FullLineR(r)
+}
+
+func (v *View) BufferId() Id {
+	return v.buffer.Id()
+}
+
+func (v *View) Line(off int) Region {
+	return v.buffer.Line(off)
+}
+
+func (v *View) LineR(r Region) Region {
+	return v.buffer.LineR(r)
+}
+
+func (v *View) Lines(r Region) []Region {
+	return v.buffer.Lines(r)
+}
+
+func (v *View) SetFileName(n string) error {
+	return v.buffer.SetFileName(n)
+}
+
+func (v *View) Name() string {
+	return v.buffer.Name()
+}
+
+func (v *View) SetName(n string) error {
+	return v.buffer.SetName(n)
+}
+
+func (v *View) RowCol(point int) (int, int) {
+	return v.buffer.RowCol(point)
+}
+
+func (v *View) TextPoint(row, col int) int {
+	return v.buffer.TextPoint(row, col)
+}
+
+func (v *View) Size() int {
+	return v.buffer.Size()
+}
+
+func (v *View) Word(off int) Region {
+	return v.buffer.Word(off)
+}
+
+func (v *View) WordR(r Region) Region {
+	return v.buffer.WordR(r)
 }
