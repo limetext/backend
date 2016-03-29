@@ -47,6 +47,7 @@ type (
 		platformKB       *keys.HasKeyBindings
 		userKB           *keys.HasKeyBindings
 		pkgsPaths        map[string]string
+		colorchemes      map[string]ColorScheme
 	}
 
 	// The Frontend interface defines the API
@@ -441,3 +442,14 @@ func (e *Editor) RemovePackagesPath(key string) {
 	}
 	delete(e.pkgsPaths, key)
 }
+
+func (e *Editor) AddColorScheme(path string, cs ColorScheme) {
+	e.colorchemes[path] = cs
+}
+
+func (e *Editor) GetColorScheme(path string) ColorScheme {
+	return e.colorchemes[path]
+}
+
+// TODO: should generate sth like sublime text color schemes menu
+func (e *Editor) ColorSchemes() {}

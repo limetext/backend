@@ -7,7 +7,7 @@ package sublime
 import (
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/limetext/lime-backend/lib"
 	"github.com/limetext/lime-backend/lib/keys"
@@ -66,7 +66,7 @@ func (p *pkg) loadPlugins() {
 	}
 	for _, fi := range fis {
 		if isPlugin(fi.Name()) {
-			p.loadPlugin(path.Join(p.Name(), fi.Name()))
+			p.loadPlugin(filepath.Join(p.Name(), fi.Name()))
 		}
 	}
 }
@@ -91,10 +91,10 @@ func (p *pkg) loadKeyBindings() {
 	p.KeyBindings().SetParent(p.defaultKB)
 	p.defaultKB.KeyBindings().SetParent(tmp)
 
-	pt := path.Join(p.Name(), "Default.sublime-keymap")
+	pt := filepath.Join(p.Name(), "Default.sublime-keymap")
 	packages.LoadJSON(pt, p.defaultKB.KeyBindings())
 
-	pt = path.Join(p.Name(), "Default ("+ed.Plat()+").sublime-keymap")
+	pt = filepath.Join(p.Name(), "Default ("+ed.Plat()+").sublime-keymap")
 	packages.LoadJSON(pt, p.KeyBindings())
 }
 
@@ -108,29 +108,21 @@ func (p *pkg) loadSettings() {
 	p.platformSettings.Settings().SetParent(p.defaultSettings)
 	p.defaultSettings.Settings().SetParent(tmp)
 
-	pt := path.Join(p.Name(), "Preferences.sublime-settings")
+	pt := filepath.Join(p.Name(), "Preferences.sublime-settings")
 	packages.LoadJSON(pt, p.defaultSettings.Settings())
 
-	pt = path.Join(p.Name(), "Preferences ("+ed.Plat()+").sublime-settings")
+	pt = filepath.Join(p.Name(), "Preferences ("+ed.Plat()+").sublime-settings")
 	packages.LoadJSON(pt, p.platformSettings.Settings())
 
-	pt = path.Join(ed.PackagesPath("user"), "Preferences.sublime-settings")
+	pt = filepath.Join(ed.PackagesPath("user"), "Preferences.sublime-settings")
 	packages.LoadJSON(pt, p.Settings())
-}
-
-func (p *pkg) loadSyntaxes() {
-
-}
-
-func (p *pkg) loadColorSchemes() {
-
 }
 
 // Any directory in sublime is a package
 func isPKG(dir string) bool {
 	fi, err := os.Stat(dir)
 	if err != nil || !fi.IsDir() {
-		return false
+		return
 	}
 	return true
 }

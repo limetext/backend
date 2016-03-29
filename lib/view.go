@@ -49,6 +49,11 @@ type (
 	parseReq struct {
 		forced bool
 	}
+
+	ColorScheme interface {
+		render.ColourScheme
+		Name() string
+	}
 )
 
 func newView(w *Window) *View {
@@ -163,7 +168,7 @@ func (v *View) parsethread() {
 			}
 		}()
 
-		sub := v.Substr(Region{0, b.Size()})
+		sub := v.Substr(Region{0, v.Size()})
 
 		source, _ := v.Settings().Get("syntax", "").(string)
 		if len(source) == 0 {

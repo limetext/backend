@@ -10,7 +10,6 @@ import (
 	"math/rand"
 	"os"
 	"reflect"
-	"sync"
 	"testing"
 	"time"
 
@@ -207,38 +206,37 @@ func TestScopeName(t *testing.T) {
 		syntax  = "sublime/testdata/Go.tmLanguage"
 	)
 	v.Settings().Set("syntax", syntax)
-	if d, err := ioutil.ReadFile(in); err != nil {
+	d, err := ioutil.ReadFile(in)
+	if err != nil {
 		t.Fatal(err)
-	} else {
-		//		v.rootNode = nil
-		e := v.BeginEdit()
-		v.Insert(e, 0, string(d))
-		v.EndEdit(e)
-		last := ""
-		str := ""
-		lasti := 0
-		for v.ScopeName(1) == "" {
-			time.Sleep(250 * time.Millisecond)
-		}
-		for i := 0; i < v.buffer.Size(); i++ {
-			if name := v.ScopeName(i); name != last {
-				if last != "" {
-					str += fmt.Sprintf("%d-%d: %s\n", lasti, i, last)
-					lasti = i
-				}
-				last = name
+	}
+	e := v.BeginEdit()
+	v.Insert(e, 0, string(d))
+	v.EndEdit(e)
+	last := ""
+	str := ""
+	lasti := 0
+	for v.ScopeName(1) == "" {
+		time.Sleep(250 * time.Millisecond)
+	}
+	for i := 0; i < v.buffer.Size(); i++ {
+		if name := v.ScopeName(i); name != last {
+			if last != "" {
+				str += fmt.Sprintf("%d-%d: %s\n", lasti, i, last)
+				lasti = i
 			}
+			last = name
 		}
-		if i := v.Size(); lasti != i {
-			str += fmt.Sprintf("%d-%d: %s\n", lasti, i, last)
+	}
+	if i := v.Size(); lasti != i {
+		str += fmt.Sprintf("%d-%d: %s\n", lasti, i, last)
+	}
+	if d, err := ioutil.ReadFile(expfile); err != nil {
+		if err := ioutil.WriteFile(expfile, []byte(str), 0644); err != nil {
+			t.Error(err)
 		}
-		if d, err := ioutil.ReadFile(expfile); err != nil {
-			if err := ioutil.WriteFile(expfile, []byte(str), 0644); err != nil {
-				t.Error(err)
-			}
-		} else if diff := util.Diff(string(d), str); diff != "" {
-			t.Error(diff)
-		}
+	} else if diff := util.Diff(string(d), str); diff != "" {
+		t.Error(diff)
 	}
 }
 
@@ -268,75 +266,6 @@ func TestStress(t *testing.T) {
 		}
 		v.EndEdit(e)
 	}
-}
-
-func TestTransform(t *testing.T) {
-	w := GetEditor().NewWindow()
-	defer w.Close()
-
-	v := w.NewFile()
-	defer func() {
-		v.SetScratch(true)
-		v.Close()
-	}()
-
-	d, err := ioutil.ReadFile("view.go")
-	if err != nil {
-		t.Fatal(err)
-	}
-	e := v.BeginEdit()
-	v.Insert(e, 0, string(d))
-	v.EndEdit(e)
-
-	if v.Transform(sc, text.Region{A: 0, B: 100}) != nil {
-		t.Error("Expected view.Transform return nil when the syntax isn't set yet")
-	}
-
-	v.Settings().Set("syntax", "sublime/testdata/Go.tmLanguage")
-
-	time.Sleep(time.Second)
-	a := v.Transform(sc, text.Region{A: 0, B: 100}).Transcribe()
-	v.Transform(sc, text.Region{A: 100, B: 200}).Transcribe()
-	c := v.Transform(sc, text.Region{A: 0, B: 100}).Transcribe()
-	if !reflect.DeepEqual(a, c) {
-		t.Errorf("not equal:\n%v\n%v", a, c)
-	}
-}
-
-func BenchmarkTransformTranscribe(b *testing.B) {
-	b.StopTimer()
-	w := GetEditor().NewWindow()
-	defer w.Close()
-
-	v := w.NewFile()
-
-	defer func() {
-		v.SetScratch(true)
-		v.Close()
-	}()
-
-	v.Settings().Set("syntax", "sublime/testdata/Go.tmLanguage")
-
-	d, err := ioutil.ReadFile("view.go")
-	if err != nil {
-		b.Fatal(err)
-	}
-	var wg sync.WaitGroup
-	wg.Add(1)
-	v.Settings().AddOnChange("benchmark", func(key string) {
-		if key == "lime.syntax.updated" {
-			wg.Done()
-		}
-	})
-	e := v.BeginEdit()
-	v.Insert(e, 0, string(d))
-	v.EndEdit(e)
-	wg.Wait()
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		v.Transform(sc, text.Region{A: 0, B: v.Size()}).Transcribe()
-	}
-	fmt.Println(util.Prof.String())
 }
 
 func TestSaveAsNewFile(t *testing.T) {

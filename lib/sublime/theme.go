@@ -157,3 +157,7 @@ func (t *Theme) Spice(vr *render.ViewRegions) (ret render.Flavour) {
 	ret.Background = render.Colour(bg)
 	return
 }
+
+func (t *Theme) Name() string {
+	return t.Name
+}

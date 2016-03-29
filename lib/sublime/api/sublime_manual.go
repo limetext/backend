@@ -98,6 +98,7 @@ var sublime_manual_methods = []py.Method{
 	{Name: "packages_path", Func: sublime_PackagesPath},
 }
 
+// TODO: check how many times is this function running
 func init() {
 	sublime_methods = append(sublime_methods, sublime_manual_methods...)
 	l := py.InitAndLock()

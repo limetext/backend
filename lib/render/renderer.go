@@ -68,29 +68,6 @@ type (
 func Transform(scheme ColourScheme, data ViewRegionMap, viewport text.Region) Recipe {
 	pe := util.Prof.Enter("render.Transform")
 	defer pe.Exit()
-	// TODO:
-	// 	caret_blink := true
-	// if b, ok := v.Settings().Get("caret_blink", true).(bool); ok {
-	// 	caret_blink = b
-	// }
-	//
-	// highlight_line := false
-	// if b, ok := v.Settings().Get("highlight_line", highlight_line).(bool); ok {
-	// 	highlight_line = b
-	// }
-	//	if b, ok := v.Settings().Get("inverse_caret_state", false).(bool); !b && ok {
-	// 	if caret_style == termbox.AttrReverse {
-	// 		caret_style = termbox.AttrUnderline
-	// 	} else {
-	// 		caret_style = termbox.AttrReverse
-	// 	}
-	// }
-	// caret_style := termbox.AttrUnderline
-	// if b, ok := v.Settings().Get("caret_style", "underline").(string); ok {
-	// 	if b == "block" {
-	// 		caret_style = termbox.AttrReverse
-	// 	}
-	// }
 
 	data.Cull(viewport)
 	recipe := make(Recipe)
