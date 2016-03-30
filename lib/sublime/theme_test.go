@@ -95,7 +95,7 @@ func TestViewTransform(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	d, err := ioutil.ReadFile("view.go")
+	d, err := ioutil.ReadFile("testdata/view.go")
 	if err != nil {
 		t.Fatal(err)
 	}

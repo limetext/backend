@@ -155,6 +155,11 @@ func TestViewExtractScope(t *testing.T) {
 		expfile = "testdata/scoperange.res"
 		syntax  = "testdata/Go.tmLanguage"
 	)
+	lp, err := NewLanguageParser(syntax, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	backend.GetEditor().AddSyntax(syntax, lp)
 	v.Settings().Set("syntax", syntax)
 	d, err := ioutil.ReadFile(in)
 	if err != nil {
@@ -200,6 +205,11 @@ func TestViewScopeName(t *testing.T) {
 		expfile = "testdata/scopename.res"
 		syntax  = "testdata/Go.tmLanguage"
 	)
+	lp, err := NewLanguageParser(syntax, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	backend.GetEditor().AddSyntax(syntax, lp)
 	v.Settings().Set("syntax", syntax)
 	d, err := ioutil.ReadFile(in)
 	if err != nil {
@@ -250,6 +260,11 @@ func TestViewStress(t *testing.T) {
 	}()
 
 	syntax := "testdata/Go.tmLanguage"
+	lp, err := NewLanguageParser(syntax, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	backend.GetEditor().AddSyntax(syntax, lp)
 	v.Settings().Set("syntax", syntax)
 	for i := 0; i < 1000; i++ {
 		e := v.BeginEdit()
@@ -278,6 +293,11 @@ func BenchmarkViewScopeNameLinear(b *testing.B) {
 		syntax = "testdata/Go.tmLanguage"
 	)
 	b.StopTimer()
+	lp, err := NewLanguageParser(syntax, "")
+	if err != nil {
+		b.Fatal(err)
+	}
+	backend.GetEditor().AddSyntax(syntax, lp)
 	v.Settings().Set("syntax", syntax)
 	if d, err := ioutil.ReadFile(in); err != nil {
 		b.Fatal(err)
@@ -309,6 +329,11 @@ func BenchmarkViewScopeNameRandom(b *testing.B) {
 		syntax = "testdata/Go.tmLanguage"
 	)
 	b.StopTimer()
+	lp, err := NewLanguageParser(syntax, "")
+	if err != nil {
+		b.Fatal(err)
+	}
+	backend.GetEditor().AddSyntax(syntax, lp)
 	v.Settings().Set("syntax", syntax)
 	if d, err := ioutil.ReadFile(in); err != nil {
 		b.Fatal(err)

@@ -85,6 +85,7 @@ type (
 	}
 
 	LanguageParser struct {
+		sync.Mutex
 		l    *Language
 		data []rune
 	}
@@ -467,11 +468,13 @@ func NewLanguageParser(scope string, data string) (*LanguageParser, error) {
 	if l, err := Provider.GetLanguage(scope); err != nil {
 		return nil, err
 	} else {
-		return &LanguageParser{l, []rune(data)}, nil
+		return &LanguageParser{l: l, data: []rune(data)}, nil
 	}
 }
 
 func (lp *LanguageParser) Parse() (*parser.Node, error) {
+	lp.Lock()
+	defer lp.Unlock()
 	sdata := string(lp.data)
 	rn := parser.Node{P: lp, Name: lp.l.ScopeName}
 	defer func() {
@@ -526,7 +529,6 @@ func (lp *LanguageParser) FileTypes() []string {
 	return lp.l.FileTypes
 }
 
-// TODO: I dont think this is right
 func (lp *LanguageParser) SetData(data string) {
 	lp.data = []rune(data)
 }
