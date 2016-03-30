@@ -23,18 +23,22 @@ type (
 	Color color.RGBA
 
 	// TODO(q): personally I don't care about the font style attributes
-	Settings map[string]Color
+	ThemeSettings map[string]Color
 
 	ScopeSetting struct {
 		Name     string
 		Scope    string
-		Settings Settings
+		Settings ThemeSettings
 	}
 	Theme struct {
-		GutterSettings Settings
+		GutterSettings ThemeSettings
 		Name           string
 		Settings       []ScopeSetting
 		UUID           UUID
+	}
+
+	ColorScheme struct {
+		Theme
 	}
 )
 
@@ -86,8 +90,8 @@ func (c *Color) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (s *Settings) UnmarshalJSON(data []byte) error {
-	*s = make(Settings)
+func (s *ThemeSettings) UnmarshalJSON(data []byte) error {
+	*s = make(ThemeSettings)
 	tmp := make(map[string]json.RawMessage)
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
@@ -158,6 +162,6 @@ func (t *Theme) Spice(vr *render.ViewRegions) (ret render.Flavour) {
 	return
 }
 
-func (t *Theme) Name() string {
-	return t.Name
+func (c *ColorScheme) Name() string {
+	return c.Theme.Name
 }

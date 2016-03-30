@@ -5,15 +5,11 @@
 package backend
 
 import (
-	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"os"
 	"reflect"
 	"testing"
-	"time"
 
-	"github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/text"
 )
 
@@ -141,130 +137,6 @@ func TestErase(t *testing.T) {
 	}
 	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "12345678" {
 		t.Error(d)
-	}
-}
-
-// This is not 100% what ST3 does
-func TestExtractScope(t *testing.T) {
-	w := GetEditor().NewWindow()
-	defer w.Close()
-
-	v := w.NewFile()
-	defer func() {
-		v.SetScratch(true)
-		v.Close()
-	}()
-
-	const (
-		in      = "sublime/testdata/main.go"
-		expfile = "testdata/scoperange.res"
-		syntax  = "sublime/testdata/Go.tmLanguage"
-	)
-	v.Settings().Set("syntax", syntax)
-	d, err := ioutil.ReadFile(in)
-	if err != nil {
-		t.Fatal(err)
-	}
-	e := v.BeginEdit()
-	v.Insert(e, 0, string(d))
-	v.EndEdit(e)
-	last := text.Region{A: -1, B: -1}
-	str := ""
-	nr := text.Region{A: 0, B: 0}
-	for v.ExtractScope(1) == nr {
-		time.Sleep(time.Millisecond)
-	}
-	for i := 0; i < v.buffer.Size(); i++ {
-		if r := v.ExtractScope(i); r != last {
-			str += fmt.Sprintf("%d (%d, %d)\n", i, r.A, r.B)
-			last = r
-		}
-	}
-	if d, err := ioutil.ReadFile(expfile); err != nil {
-		if err := ioutil.WriteFile(expfile, []byte(str), 0644); err != nil {
-			t.Error(err)
-		}
-	} else if diff := util.Diff(string(d), str); diff != "" {
-		t.Error(diff)
-	}
-}
-
-// This is not 100% what ST3 does, but IMO ST3 is wrong
-func TestScopeName(t *testing.T) {
-	w := GetEditor().NewWindow()
-	defer w.Close()
-
-	v := w.NewFile()
-	defer func() {
-		v.SetScratch(true)
-		v.Close()
-	}()
-
-	const (
-		in      = "sublime/testdata/main.go"
-		expfile = "testdata/scopename.res"
-		syntax  = "sublime/testdata/Go.tmLanguage"
-	)
-	v.Settings().Set("syntax", syntax)
-	d, err := ioutil.ReadFile(in)
-	if err != nil {
-		t.Fatal(err)
-	}
-	e := v.BeginEdit()
-	v.Insert(e, 0, string(d))
-	v.EndEdit(e)
-	last := ""
-	str := ""
-	lasti := 0
-	for v.ScopeName(1) == "" {
-		time.Sleep(250 * time.Millisecond)
-	}
-	for i := 0; i < v.buffer.Size(); i++ {
-		if name := v.ScopeName(i); name != last {
-			if last != "" {
-				str += fmt.Sprintf("%d-%d: %s\n", lasti, i, last)
-				lasti = i
-			}
-			last = name
-		}
-	}
-	if i := v.Size(); lasti != i {
-		str += fmt.Sprintf("%d-%d: %s\n", lasti, i, last)
-	}
-	if d, err := ioutil.ReadFile(expfile); err != nil {
-		if err := ioutil.WriteFile(expfile, []byte(str), 0644); err != nil {
-			t.Error(err)
-		}
-	} else if diff := util.Diff(string(d), str); diff != "" {
-		t.Error(diff)
-	}
-}
-
-func TestStress(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
-	}
-	ed := GetEditor()
-	w := ed.NewWindow()
-	defer w.Close()
-
-	v := w.OpenFile("testdata/view.go", 0)
-	defer func() {
-		v.SetScratch(true)
-		v.Close()
-	}()
-
-	syntax := "testdata/Go.tmLanguage"
-	v.Settings().Set("syntax", syntax)
-	for i := 0; i < 1000; i++ {
-		e := v.BeginEdit()
-		for i := 0; i < 100; i++ {
-			v.Insert(e, 0, "h")
-		}
-		for i := 0; i < 100; i++ {
-			v.Erase(e, text.Region{A: 0, B: 1})
-		}
-		v.EndEdit(e)
 	}
 }
 
@@ -793,67 +665,6 @@ func TestViewLoadSettings(t *testing.T) {
 	v.Settings().Set("syntax", "testdata/Python.tmLanguage")
 	if v.Settings().Get("translate_tabs_to_spaces", false).(bool) != true {
 		t.Error("Expected `translate_tabs_to_spaces` be true for python syntax but is false")
-	}
-}
-
-func BenchmarkScopeNameLinear(b *testing.B) {
-	w := GetEditor().NewWindow()
-	defer w.Close()
-
-	v := w.NewFile()
-	defer func() {
-		v.SetScratch(true)
-		v.Close()
-	}()
-
-	const (
-		in     = "sublime/language_test.go"
-		syntax = "sublime/testdata/Go.tmLanguage"
-	)
-	b.StopTimer()
-	v.Settings().Set("syntax", syntax)
-	if d, err := ioutil.ReadFile(in); err != nil {
-		b.Fatal(err)
-	} else {
-		e := v.BeginEdit()
-		v.Insert(e, 0, string(d))
-		v.EndEdit(e)
-		b.StartTimer()
-		for j := 0; j < b.N; j++ {
-			for i := 0; i < v.buffer.Size(); i++ {
-				v.ScopeName(i)
-			}
-		}
-	}
-}
-
-func BenchmarkScopeNameRandom(b *testing.B) {
-	w := GetEditor().NewWindow()
-	defer w.Close()
-
-	v := w.NewFile()
-	defer func() {
-		v.SetScratch(true)
-		v.Close()
-	}()
-
-	const (
-		in     = "sublime/language_test.go"
-		syntax = "sublime/testdata/Go.tmLanguage"
-	)
-	b.StopTimer()
-	v.Settings().Set("syntax", syntax)
-	if d, err := ioutil.ReadFile(in); err != nil {
-		b.Fatal(err)
-	} else {
-		e := v.BeginEdit()
-		v.Insert(e, 0, string(d))
-		v.EndEdit(e)
-		p := rand.Perm(b.N)
-		b.StartTimer()
-		for _, i := range p {
-			v.ScopeName(i)
-		}
 	}
 }
 

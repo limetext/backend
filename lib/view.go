@@ -86,7 +86,7 @@ func newView(w *Window) *View {
 	go v.parsethread()
 	v.Settings().Set("is_widget", false)
 
-	return ret
+	return v
 }
 
 // implement the fmt.Stringer interface

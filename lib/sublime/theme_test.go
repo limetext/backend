@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/limetext/lime-backend/lib"
 	"github.com/limetext/lime-backend/lib/loaders"
 	"github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/text"
@@ -80,7 +81,7 @@ func TestLoadThemeFromMissingFile(t *testing.T) {
 }
 
 func TestViewTransform(t *testing.T) {
-	w := GetEditor().NewWindow()
+	w := backend.GetEditor().NewWindow()
 	defer w.Close()
 
 	v := w.NewFile()
@@ -119,7 +120,7 @@ func TestViewTransform(t *testing.T) {
 
 func BenchmarkViewTransformTranscribe(b *testing.B) {
 	b.StopTimer()
-	w := GetEditor().NewWindow()
+	w := backend.GetEditor().NewWindow()
 	defer w.Close()
 
 	v := w.NewFile()

@@ -15,11 +15,11 @@ type (
 	Metadata struct {
 		Name     string
 		Scope    string
-		Settings Settings
+		Settings MetaSettings
 		UUID     string
 	}
 
-	Settings struct {
+	MetaSettings struct {
 		// string is regex
 		IncreaseIndentPattern        string
 		DecreaseIndentPattern        string

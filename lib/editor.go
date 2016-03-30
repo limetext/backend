@@ -47,11 +47,8 @@ type (
 		platformKB       *keys.HasKeyBindings
 		userKB           *keys.HasKeyBindings
 		pkgsPaths        map[string]string
-		// map from path to ColorScheme or syntax the path should be
-		// relative to package path plus Packages/{PackageName}/ at
-		// the beginning e.g "Packages/Test/folder/test.tmTheme"
-		colorchemes map[string]ColorScheme
-		syntaxes    map[string]Syntax
+		colorchemes      map[string]ColorScheme
+		syntaxes         map[string]Syntax
 	}
 
 	// The Frontend interface defines the API
@@ -468,5 +465,5 @@ func (e *Editor) GetSyntax(path string) Syntax {
 	return e.syntaxes[path]
 }
 
-// TODO: should generate sth like sublime text color schemes menu
+// TODO: should generate sth like sublime text syntaxes menu
 func (e *Editor) Syntaxes() {}

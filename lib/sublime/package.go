@@ -26,8 +26,8 @@ type pkg struct {
 	defaultSettings  *text.HasSettings
 	defaultKB        *keys.HasKeyBindings
 	plugins          map[string]*plugin
-	syntaxes         []*Language
-	colorSchemes     []*Theme
+	syntaxes         []*LanguageParser
+	colorSchemes     []*ColorScheme
 	// TODO: themes, snippets, etc more info on iss#71
 }
 
@@ -122,7 +122,7 @@ func (p *pkg) loadSettings() {
 func isPKG(dir string) bool {
 	fi, err := os.Stat(dir)
 	if err != nil || !fi.IsDir() {
-		return
+		return false
 	}
 	return true
 }
