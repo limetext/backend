@@ -529,6 +529,9 @@ func (lp *LanguageParser) FileTypes() []string {
 	return lp.l.FileTypes
 }
 
+// TODO: this is not correct
 func (lp *LanguageParser) SetData(data string) {
+	lp.Lock()
+	defer lp.Unlock()
 	lp.data = []rune(data)
 }

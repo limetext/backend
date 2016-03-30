@@ -141,10 +141,12 @@ func GetEditor() *Editor {
 
 		ed.console.Settings().Set("is_widget", true)
 		// Initializing settings hierarchy
+		// default <- platform <- user(editor)
 		ed.platformSettings.Settings().SetParent(ed.defaultSettings)
 		ed.Settings().SetParent(ed.platformSettings)
 
 		// Initializing keybidings hierarchy
+		// default <- platform <- user <- user platform(editor)
 		ed.KeyBindings().SetParent(ed.userKB)
 		ed.userKB.KeyBindings().SetParent(ed.platformKB)
 		ed.platformKB.KeyBindings().SetParent(ed.defaultKB)

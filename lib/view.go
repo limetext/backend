@@ -31,20 +31,23 @@ type (
 	View struct {
 		HasSettings
 		HasId
-		name        string
-		window      *Window
-		buffer      Buffer
-		selection   RegionSet
-		undoStack   UndoStack
-		scratch     bool
-		overwrite   bool
-		cursyntax   string
-		syntax      parser.SyntaxHighlighter
-		regions     render.ViewRegionMap
-		editstack   []*Edit
-		lock        sync.Mutex
-		reparseChan chan parseReq
-		status      map[string]string
+		name             string
+		window           *Window
+		buffer           Buffer
+		selection        RegionSet
+		undoStack        UndoStack
+		scratch          bool
+		overwrite        bool
+		cursyntax        string
+		syntax           parser.SyntaxHighlighter
+		regions          render.ViewRegionMap
+		editstack        []*Edit
+		lock             sync.Mutex
+		reparseChan      chan parseReq
+		status           map[string]string
+		defaultSettings  *HasSettings
+		platformSettings *HasSettings
+		userSettings     *HasSettings
 	}
 	parseReq struct {
 		forced bool
@@ -64,9 +67,21 @@ type (
 )
 
 func newView(w *Window) *View {
-	v := &View{window: w, regions: make(render.ViewRegionMap)}
-	v.status = make(map[string]string)
-	v.reparseChan = make(chan parseReq, 32)
+	v := &View{
+		window:           w,
+		regions:          make(render.ViewRegionMap),
+		status:           make(map[string]string),
+		reparseChan:      make(chan parseReq, 32),
+		defaultSettings:  new(HasSettings),
+		platformSettings: new(HasSettings),
+		userSettings:     new(HasSettings),
+	}
+	// Initializing keybidings hierarchy
+	// window <- default <- platform <- user <- view
+	v.defaultSettings.Settings().SetParent(v.window)
+	v.platformSettings.Settings().SetParent(v.defaultSettings)
+	v.userSettings.Settings().SetParent(v.platformSettings)
+	v.Settings().SetParent(v.userSettings)
 
 	v.loadSettings()
 	v.Settings().AddOnChange("lime.view.syntax", func(name string) {
@@ -261,34 +276,26 @@ func (v *View) reparse(forced bool) {
 // Will load view settings respect to current syntax
 // e.g if current syntax is Python settings order will be:
 // Packages/Python/Python.sublime-settings
+// Packages/Python/Python (windows).sublime-settings
 // Packages/User/Python.sublime-settings
 // <Buffer Specific Settings>
 func (v *View) loadSettings() {
 	syntax := v.Settings().Get("syntax", "").(string)
-
-	/* TODO: This should change */
-	if syntax == "" {
-		v.Settings().SetParent(v.window)
-		return
-	}
-
-	defSet, usrSet := &HasSettings{}, &HasSettings{}
-
-	defSet.Settings().SetParent(v.window)
-	usrSet.Settings().SetParent(defSet)
-	v.Settings().SetParent(usrSet)
-	/* End of change */
-
 	ed := GetEditor()
 	if r, err := rubex.Compile(`([A-Za-z]+?)\.(?:[^.]+)$`); err != nil {
 		log.Error(err)
 		return
+		// TODO: should we match syntax file name or the syntax name
 	} else if s := r.FindStringSubmatch(syntax); s != nil {
+		// TODO: the syntax folder should be the package name
 		p := path.Join(ed.PackagesPath("shipped"), s[1], s[1]+".sublime-settings")
-		packages.LoadJSON(p, defSet.Settings())
+		packages.LoadJSON(p, v.defaultSettings.Settings())
+
+		p = path.Join(ed.PackagesPath("shipped"), s[1], s[1]+" ("+ed.Plat()+").sublime-settings")
+		packages.LoadJSON(p, v.platformSettings.Settings())
 
 		p = path.Join(ed.PackagesPath("user"), s[1]+".sublime-settings")
-		packages.LoadJSON(p, usrSet.Settings())
+		packages.LoadJSON(p, v.userSettings.Settings())
 	}
 }
 

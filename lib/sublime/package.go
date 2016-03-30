@@ -32,13 +32,28 @@ type pkg struct {
 }
 
 func newPKG(dir string) packages.Package {
-	return &pkg{
+	p := &pkg{
 		dir:              dir,
 		platformSettings: new(text.HasSettings),
 		defaultSettings:  new(text.HasSettings),
 		defaultKB:        new(keys.HasKeyBindings),
 		plugins:          make(map[string]*plugin),
 	}
+
+	ed := backend.GetEditor()
+
+	// Initializing settings hierarchy
+	// editor <- default <- platform <- user(package)
+	p.Settings().SetParent(p.platformSettings)
+	p.platformSettings.Settings().SetParent(p.defaultSettings)
+	p.defaultSettings.Settings().SetParent(ed)
+
+	// Initializing keybidings hierarchy
+	// editor <- default <- platform(package)
+	p.KeyBindings().SetParent(p.defaultKB)
+	p.defaultKB.KeyBindings().SetParent(ed)
+
+	return p
 }
 
 func (p *pkg) Load() {
@@ -85,11 +100,6 @@ func (p *pkg) loadPlugin(fn string) {
 func (p *pkg) loadKeyBindings() {
 	log.Fine("Loading %s keybindings", p.Name())
 	ed := backend.GetEditor()
-	tmp := ed.KeyBindings().Parent()
-
-	ed.KeyBindings().SetParent(p)
-	p.KeyBindings().SetParent(p.defaultKB)
-	p.defaultKB.KeyBindings().SetParent(tmp)
 
 	pt := filepath.Join(p.Name(), "Default.sublime-keymap")
 	packages.LoadJSON(pt, p.defaultKB.KeyBindings())
@@ -101,12 +111,6 @@ func (p *pkg) loadKeyBindings() {
 func (p *pkg) loadSettings() {
 	log.Fine("Loading %s settings", p.Name())
 	ed := backend.GetEditor()
-	tmp := ed.Settings().Parent()
-
-	ed.Settings().SetParent(p)
-	p.Settings().SetParent(p.platformSettings)
-	p.platformSettings.Settings().SetParent(p.defaultSettings)
-	p.defaultSettings.Settings().SetParent(tmp)
 
 	pt := filepath.Join(p.Name(), "Preferences.sublime-settings")
 	packages.LoadJSON(pt, p.defaultSettings.Settings())
