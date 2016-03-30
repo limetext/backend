@@ -197,6 +197,30 @@ func TestHandleInput(t *testing.T) {
 	}
 }
 
+func TestAddColorScheme(t *testing.T) {
+
+}
+
+func TestGetColorScheme(t *testing.T) {
+
+}
+
+func TestColorSchemes(t *testing.T) {
+
+}
+
+func TestAddSyntax(t *testing.T) {
+
+}
+
+func TestGetSyntax(t *testing.T) {
+
+}
+
+func TestSyntaxes(t *testing.T) {
+
+}
+
 func init() {
 	ed := GetEditor()
 	ed.AddPackagesPath("shipped", path.Join("testdata", "shipped"))

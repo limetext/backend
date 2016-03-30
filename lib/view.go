@@ -54,31 +54,38 @@ type (
 		render.ColourScheme
 		Name() string
 	}
+
+	Syntax interface {
+		parser.Parser
+		Name() string
+		SetData(string)
+		FileTypes() []string
+	}
 )
 
 func newView(w *Window) *View {
-	ret := &View{window: w, regions: make(render.ViewRegionMap)}
-	ret.status = make(map[string]string)
-	ret.loadSettings()
+	v := &View{window: w, regions: make(render.ViewRegionMap)}
+	v.status = make(map[string]string)
+	v.reparseChan = make(chan parseReq, 32)
 
-	ret.Settings().AddOnChange("lime.view.syntax", func(name string) {
-		ret.lock.Lock()
-		defer ret.lock.Unlock()
+	v.loadSettings()
+	v.Settings().AddOnChange("lime.view.syntax", func(name string) {
+		v.lock.Lock()
+		defer v.lock.Unlock()
 
 		if name != "syntax" {
 			return
 		}
-		syn, _ := ret.Settings().Get("syntax", "").(string)
-		if syn != ret.cursyntax {
-			ret.cursyntax = syn
-			ret.reparse(true)
-			ret.loadSettings()
+		syn, _ := v.Settings().Get("syntax", "").(string)
+		if syn != v.cursyntax {
+			v.cursyntax = syn
+			v.reparse(true)
+			v.loadSettings()
 		}
 	})
+	go v.parsethread()
+	v.Settings().Set("is_widget", false)
 
-	ret.reparseChan = make(chan parseReq, 32)
-	go ret.parsethread()
-	ret.Settings().Set("is_widget", false)
 	return ret
 }
 
@@ -174,6 +181,13 @@ func (v *View) parsethread() {
 		if len(source) == 0 {
 			return
 		}
+
+		pr := GetEditor().GetSyntax(source)
+		if pr == nil {
+			log.Error("No syntax %s", source)
+			return
+		}
+		pr.SetData(sub)
 
 		syn, err := parser.NewSyntaxHighlighter(pr)
 		if err != nil {

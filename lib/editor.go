@@ -47,7 +47,11 @@ type (
 		platformKB       *keys.HasKeyBindings
 		userKB           *keys.HasKeyBindings
 		pkgsPaths        map[string]string
-		colorchemes      map[string]ColorScheme
+		// map from path to ColorScheme or syntax the path should be
+		// relative to package path plus Packages/{PackageName}/ at
+		// the beginning e.g "Packages/Test/folder/test.tmTheme"
+		colorchemes map[string]ColorScheme
+		syntaxes    map[string]Syntax
 	}
 
 	// The Frontend interface defines the API
@@ -130,6 +134,8 @@ func GetEditor() *Editor {
 			platformKB:       new(keys.HasKeyBindings),
 			userKB:           new(keys.HasKeyBindings),
 			pkgsPaths:        make(map[string]string),
+			colorchemes:      make(map[string]ColorScheme),
+			syntaxes:         make(map[string]Syntax),
 		}
 		var err error
 		if ed.Watcher, err = watch.NewWatcher(); err != nil {
@@ -453,3 +459,14 @@ func (e *Editor) GetColorScheme(path string) ColorScheme {
 
 // TODO: should generate sth like sublime text color schemes menu
 func (e *Editor) ColorSchemes() {}
+
+func (e *Editor) AddSyntax(path string, s Syntax) {
+	e.syntaxes[path] = s
+}
+
+func (e *Editor) GetSyntax(path string) Syntax {
+	return e.syntaxes[path]
+}
+
+// TODO: should generate sth like sublime text color schemes menu
+func (e *Editor) Syntaxes() {}

@@ -42,6 +42,7 @@ type (
 	UnpatchedLanguage struct {
 		FileTypes      []string
 		FirstLineMatch string
+		Name           string
 		RootPattern    RootPattern `json:"patterns"`
 		Repository     map[string]*Pattern
 		ScopeName      string
@@ -270,10 +271,11 @@ func (p *Pattern) FirstMatch(data string, pos int) (pat *Pattern, ret MatchObjec
 	startIdx := -1
 	for i := 0; i < len(p.cachedPatterns); {
 		ip, im := p.cachedPatterns[i].Cache(data, pos)
-		if im != nil /* && im[0] != im[1]*/ {
+		if im != nil {
 			if startIdx < 0 || startIdx > im[0] {
 				startIdx, pat, ret = im[0], ip, im
-				// This match is right at the start, we're not going to find a better pattern than this,
+				// This match is right at the start, we're not
+				// going to find a better pattern than this,
 				// so stop the search
 				if im[0] == pos {
 					break
@@ -281,7 +283,8 @@ func (p *Pattern) FirstMatch(data string, pos int) (pat *Pattern, ret MatchObjec
 			}
 			i++
 		} else {
-			// If it wasn't found now, it'll never be found, so the pattern can be popped from the cache
+			// If it wasn't found now, it'll never be found,
+			// so the pattern can be popped from the cache
 			copy(p.cachedPatterns[i:], p.cachedPatterns[i+1:])
 			p.cachedPatterns = p.cachedPatterns[:len(p.cachedPatterns)-1]
 		}
@@ -422,7 +425,7 @@ func (p *Pattern) CreateNode(data string, pos int, d parser.DataSource, mo Match
 				break
 			}
 		}
-		if /*(endmatch == nil || (endmatch != nil && endmatch[0] != i)) && */ len(p.cachedPatterns) > 0 {
+		if len(p.cachedPatterns) > 0 {
 			// Might be more recursive patterns to apply BEFORE the end is reached
 			pattern2, match2 := p.FirstMatch(data, i)
 			if match2 != nil && ((endmatch == nil && match2[0] < end) || (endmatch != nil && (match2[0] < endmatch[0] || match2[0] == endmatch[0] && ret.Range.A == ret.Range.B))) {
@@ -513,4 +516,17 @@ func (lp *LanguageParser) Parse() (*parser.Node, error) {
 		panic("reached maximum number of iterations")
 	}
 	return &rn, nil
+}
+
+func (lp *LanguageParser) Name() string {
+	return lp.l.Name
+}
+
+func (lp *LanguageParser) FileTypes() []string {
+	return lp.l.FileTypes
+}
+
+// TODO: I dont think this is right
+func (lp *LanguageParser) SetData(data string) {
+	lp.data = []rune(data)
 }

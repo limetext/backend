@@ -93,7 +93,6 @@ func TestTmLanguage(t *testing.T) {
 		} else if root, err := lp.Parse(); err != nil {
 			t.Error(err)
 		} else {
-			//		fmt.Println(lp.RootNode())
 			str := fmt.Sprintf("%s", root)
 			if d, err := ioutil.ReadFile(t3.out); err != nil {
 				if err := ioutil.WriteFile(t3.out, []byte(str), 0644); err != nil {
