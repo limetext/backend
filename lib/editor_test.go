@@ -214,7 +214,7 @@ func TestAddColorScheme(t *testing.T) {
 	ed := GetEditor()
 
 	ed.AddColorScheme("test/path", cs)
-	if ret := ed.colorchemes["test/path"]; ret != cs {
+	if ret := ed.colorSchemes["test/path"]; ret != cs {
 		t.Errorf("Expected 'test/path' color scheme %v, but got %v", cs, ret)
 	}
 }

@@ -47,7 +47,7 @@ type (
 		platformKB       *keys.HasKeyBindings
 		userKB           *keys.HasKeyBindings
 		pkgsPaths        map[string]string
-		colorchemes      map[string]ColorScheme
+		colorSchemes     map[string]ColorScheme
 		syntaxes         map[string]Syntax
 	}
 
@@ -131,7 +131,7 @@ func GetEditor() *Editor {
 			platformKB:       new(keys.HasKeyBindings),
 			userKB:           new(keys.HasKeyBindings),
 			pkgsPaths:        make(map[string]string),
-			colorchemes:      make(map[string]ColorScheme),
+			colorSchemes:     make(map[string]ColorScheme),
 			syntaxes:         make(map[string]Syntax),
 		}
 		var err error
@@ -449,11 +449,11 @@ func (e *Editor) RemovePackagesPath(key string) {
 }
 
 func (e *Editor) AddColorScheme(path string, cs ColorScheme) {
-	e.colorchemes[path] = cs
+	e.colorSchemes[path] = cs
 }
 
 func (e *Editor) GetColorScheme(path string) ColorScheme {
-	return e.colorchemes[path]
+	return e.colorSchemes[path]
 }
 
 // TODO: should generate sth like sublime text color schemes menu

@@ -26,8 +26,8 @@ type pkg struct {
 	defaultSettings  *text.HasSettings
 	defaultKB        *keys.HasKeyBindings
 	plugins          map[string]*plugin
-	syntaxes         []*LanguageParser
-	colorSchemes     []*ColorScheme
+	syntaxes         map[string]*LanguageParser
+	colorSchemes     map[string]*ColorScheme
 	// TODO: themes, snippets, etc more info on iss#71
 }
 
@@ -38,6 +38,8 @@ func newPKG(dir string) packages.Package {
 		defaultSettings:  new(text.HasSettings),
 		defaultKB:        new(keys.HasKeyBindings),
 		plugins:          make(map[string]*plugin),
+		syntaxes:         make(map[string]*LanguageParser),
+		colorSchemes:     make(map[string]*ColorScheme),
 	}
 
 	ed := backend.GetEditor()
@@ -61,6 +63,8 @@ func (p *pkg) Load() {
 	p.loadKeyBindings()
 	p.loadSettings()
 	p.loadPlugins()
+
+	filepath.Walk(p.Name(), p.scan)
 }
 
 func (p *pkg) Name() string {
@@ -68,9 +72,7 @@ func (p *pkg) Name() string {
 }
 
 // TODO: how we should watch the package and the files containing?
-func (p *pkg) FileCreated(name string) {
-	p.loadPlugin(name)
-}
+func (p *pkg) FileCreated(name string) {}
 
 func (p *pkg) loadPlugins() {
 	log.Fine("Loading %s plugins", p.Name())
@@ -86,15 +88,38 @@ func (p *pkg) loadPlugins() {
 	}
 }
 
-func (p *pkg) loadPlugin(fn string) {
-	if _, exist := p.plugins[fn]; exist {
+func (p *pkg) loadPlugin(path string) {
+	pl := newPlugin(path)
+	pl.Load()
+
+	p.plugins[path] = pl.(*plugin)
+}
+
+func (p *pkg) loadColorScheme(path string) {
+	log.Debug("Loading color scheme %s", path)
+	tm, err := LoadTheme(path)
+	if err != nil {
+		log.Warn("Error loading %s color scheme %s: %s", p.Name(), path, err)
 		return
 	}
 
-	pl := newPlugin(fn)
-	pl.Load()
+	cs := &ColorScheme{*tm}
+	// TODO: the path should be modified
+	p.colorSchemes[path] = cs
+	backend.GetEditor().AddColorScheme(path, cs)
+}
 
-	p.plugins[fn] = pl.(*plugin)
+func (p *pkg) loadSyntax(path string) {
+	log.Debug("Loading syntax %s", path)
+	syn, err := NewLanguageParser(path, "")
+	if err != nil {
+		log.Warn("Error loading %s syntax %s: %s", p.Name(), path, err)
+		return
+	}
+
+	// TODO: the path should be modified
+	p.syntaxes[path] = syn
+	backend.GetEditor().AddSyntax(path, syn)
 }
 
 func (p *pkg) loadKeyBindings() {
@@ -120,6 +145,33 @@ func (p *pkg) loadSettings() {
 
 	pt = filepath.Join(ed.PackagesPath("user"), "Preferences.sublime-settings")
 	packages.LoadJSON(pt, p.Settings())
+}
+
+func (p *pkg) scan(path string, info os.FileInfo, err error) error {
+	if info.IsDir() {
+		return nil
+	}
+	if isColorScheme(path) {
+		p.loadColorScheme(path)
+	}
+	if isSyntax(path) {
+		p.loadSyntax(path)
+	}
+	return nil
+}
+
+func isColorScheme(path string) bool {
+	if filepath.Ext(path) == ".tmTheme" {
+		return true
+	}
+	return false
+}
+
+func isSyntax(path string) bool {
+	if filepath.Ext(path) == ".tmLanguage" {
+		return true
+	}
+	return false
 }
 
 // Any directory in sublime is a package

@@ -25,11 +25,6 @@ func newPlugin(fn string) packages.Package {
 
 // TODO: implement unload
 func (p *plugin) Load() {
-	// in case error ocured on running onInit function
-	if module == nil {
-		return
-	}
-
 	dir, file := filepath.Split(p.Name())
 	name := filepath.Base(dir) + "." + file[:len(file)-3]
 	s, err := py.NewUnicode(name)
@@ -73,6 +68,8 @@ func onInit() {
 	var err error
 	if module, err = py.Import("sublime_plugin"); err != nil {
 		log.Error(err)
+		packages.Unregister(pluginRecord)
+		packages.Unregister(packageRecord)
 	}
 }
 
