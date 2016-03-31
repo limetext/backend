@@ -10,6 +10,7 @@ import (
 
 	"github.com/limetext/lime-backend/lib/keys"
 	"github.com/limetext/lime-backend/lib/packages"
+	limeparser "github.com/limetext/lime-backend/lib/parser"
 	"github.com/limetext/lime-backend/lib/render"
 	"github.com/quarnster/parser"
 )
@@ -241,8 +242,9 @@ func (d *dummySyntax) FileTypes() []string {
 	return d.filetypes
 }
 
-func (d *dummySyntax) SetData(s string) {
-	d.data = s
+func (d *dummySyntax) Parser(data string) limeparser.Parser {
+	d.data = data
+	return d
 }
 
 func (d *dummySyntax) Parse() (*parser.Node, error) { return nil, nil }

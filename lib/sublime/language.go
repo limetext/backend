@@ -16,6 +16,7 @@ import (
 
 	"github.com/limetext/lime-backend/lib/loaders"
 	"github.com/limetext/lime-backend/lib/log"
+	limeparser "github.com/limetext/lime-backend/lib/parser"
 	"github.com/limetext/rubex"
 	"github.com/limetext/text"
 	"github.com/quarnster/parser"
@@ -85,9 +86,12 @@ type (
 	}
 
 	LanguageParser struct {
-		sync.Mutex
 		l    *Language
 		data []rune
+	}
+
+	Syntax struct {
+		l *Language
 	}
 )
 
@@ -464,17 +468,7 @@ func (lp *LanguageParser) patch(lut []int, node *parser.Node) {
 	}
 }
 
-func NewLanguageParser(scope string, data string) (*LanguageParser, error) {
-	if l, err := Provider.GetLanguage(scope); err != nil {
-		return nil, err
-	} else {
-		return &LanguageParser{l: l, data: []rune(data)}, nil
-	}
-}
-
 func (lp *LanguageParser) Parse() (*parser.Node, error) {
-	lp.Lock()
-	defer lp.Unlock()
 	sdata := string(lp.data)
 	rn := parser.Node{P: lp, Name: lp.l.ScopeName}
 	defer func() {
@@ -521,17 +515,22 @@ func (lp *LanguageParser) Parse() (*parser.Node, error) {
 	return &rn, nil
 }
 
-func (lp *LanguageParser) Name() string {
-	return lp.l.Name
+func newSyntax(path string) (*Syntax, error) {
+	l, err := Provider.LanguageFromFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return &Syntax{l: l}, nil
 }
 
-func (lp *LanguageParser) FileTypes() []string {
-	return lp.l.FileTypes
+func (s *Syntax) Parser(data string) limeparser.Parser {
+	return &LanguageParser{l: s.l, data: []rune(data)}
 }
 
-// TODO: this is not correct
-func (lp *LanguageParser) SetData(data string) {
-	lp.Lock()
-	defer lp.Unlock()
-	lp.data = []rune(data)
+func (s *Syntax) Name() string {
+	return s.l.Name
+}
+
+func (s *Syntax) FileTypes() []string {
+	return s.l.FileTypes
 }

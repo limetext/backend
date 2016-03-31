@@ -26,7 +26,7 @@ type pkg struct {
 	defaultSettings  *text.HasSettings
 	defaultKB        *keys.HasKeyBindings
 	plugins          map[string]*plugin
-	syntaxes         map[string]*LanguageParser
+	syntaxes         map[string]*Syntax
 	colorSchemes     map[string]*ColorScheme
 	// TODO: themes, snippets, etc more info on iss#71
 }
@@ -38,7 +38,7 @@ func newPKG(dir string) packages.Package {
 		defaultSettings:  new(text.HasSettings),
 		defaultKB:        new(keys.HasKeyBindings),
 		plugins:          make(map[string]*plugin),
-		syntaxes:         make(map[string]*LanguageParser),
+		syntaxes:         make(map[string]*Syntax),
 		colorSchemes:     make(map[string]*ColorScheme),
 	}
 
@@ -111,9 +111,9 @@ func (p *pkg) loadColorScheme(path string) {
 
 func (p *pkg) loadSyntax(path string) {
 	log.Debug("Loading syntax %s", path)
-	syn, err := NewLanguageParser(path, "")
+	syn, err := newSyntax(path)
 	if err != nil {
-		log.Warn("Error loading %s syntax %s: %s", p.Name(), path, err)
+		log.Warn("Error loading %s syntax: %s", p.Name(), err)
 		return
 	}
 

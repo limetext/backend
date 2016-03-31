@@ -59,9 +59,8 @@ type (
 	}
 
 	Syntax interface {
-		parser.Parser
+		Parser(data string) parser.Parser
 		Name() string
-		SetData(string)
 		FileTypes() []string
 	}
 )
@@ -191,20 +190,17 @@ func (v *View) parsethread() {
 		}()
 
 		sub := v.Substr(Region{0, v.Size()})
-
 		source, _ := v.Settings().Get("syntax", "").(string)
 		if len(source) == 0 {
 			return
 		}
-
-		pr := GetEditor().GetSyntax(source)
-		if pr == nil {
+		syn := GetEditor().GetSyntax(source)
+		if syn == nil {
 			log.Error("No syntax %s", source)
 			return
 		}
-		pr.SetData(sub)
-
-		syn, err := parser.NewSyntaxHighlighter(pr)
+		pr := syn.Parser(sub)
+		synh, err := parser.NewSyntaxHighlighter(pr)
 		if err != nil {
 			log.Error("Couldn't create syntaxhighlighter: %v", err)
 			return
@@ -220,14 +216,14 @@ func (v *View) parsethread() {
 		v.lock.Lock()
 		defer v.lock.Unlock()
 
-		v.syntax = syn
+		v.syntax = synh
 		for k := range v.regions {
 			if strings.HasPrefix(k, "lime.syntax") {
 				delete(v.regions, k)
 			}
 		}
 
-		for k, v2 := range syn.Flatten() {
+		for k, v2 := range synh.Flatten() {
 			if v2.Regions.HasNonEmpty() {
 				v.regions[k] = v2
 			}
