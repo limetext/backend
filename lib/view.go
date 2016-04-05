@@ -283,14 +283,17 @@ func (v *View) loadSettings() {
 		return
 		// TODO: should we match syntax file name or the syntax name
 	} else if s := r.FindStringSubmatch(syntax); s != nil {
-		// TODO: the syntax folder should be the package name
+		// TODO: the syntax folder should be the package path and name
 		p := path.Join(ed.PackagesPath("shipped"), s[1], s[1]+".sublime-settings")
+		log.Fine("Loading %s for view", p)
 		packages.LoadJSON(p, v.defaultSettings.Settings())
 
 		p = path.Join(ed.PackagesPath("shipped"), s[1], s[1]+" ("+ed.Plat()+").sublime-settings")
+		log.Fine("Loading %s for view", p)
 		packages.LoadJSON(p, v.platformSettings.Settings())
 
 		p = path.Join(ed.PackagesPath("user"), s[1]+".sublime-settings")
+		log.Fine("Loading %s for view", p)
 		packages.LoadJSON(p, v.userSettings.Settings())
 	}
 }

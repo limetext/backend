@@ -5,9 +5,10 @@
 package backend
 
 import (
+	"strings"
+
 	"github.com/limetext/lime-backend/lib/log"
 	"github.com/limetext/lime-backend/lib/util"
-	"strings"
 )
 
 type (
@@ -159,6 +160,7 @@ var (
 
 	OnPackagesPathAdd    PackagesPathEvent
 	OnPackagesPathRemove PackagesPathEvent
+	// TODO: on packages path change specially default
 )
 
 var (

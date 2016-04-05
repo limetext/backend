@@ -19,7 +19,8 @@ import (
 
 // A sublime package
 type pkg struct {
-	dir string
+	dir  string
+	name string
 	text.HasSettings
 	keys.HasKeyBindings
 	platformSettings *text.HasSettings
@@ -34,6 +35,7 @@ type pkg struct {
 func newPKG(dir string) packages.Package {
 	p := &pkg{
 		dir:              dir,
+		name:             filepath.Base(dir),
 		platformSettings: new(text.HasSettings),
 		defaultSettings:  new(text.HasSettings),
 		defaultKB:        new(keys.HasKeyBindings),
@@ -67,8 +69,12 @@ func (p *pkg) Load() {
 	filepath.Walk(p.Name(), p.scan)
 }
 
-func (p *pkg) Name() string {
+func (p *pkg) Path() string {
 	return p.dir
+}
+
+func (p *pkg) Name() string {
+	return p.name
 }
 
 // TODO: how we should watch the package and the files containing?
@@ -76,14 +82,14 @@ func (p *pkg) FileCreated(name string) {}
 
 func (p *pkg) loadPlugins() {
 	log.Fine("Loading %s plugins", p.Name())
-	fis, err := ioutil.ReadDir(p.Name())
+	fis, err := ioutil.ReadDir(p.Path())
 	if err != nil {
-		log.Warn("Error on reading directory %s, %s", p.Name(), err)
+		log.Warn("Error on reading directory %s, %s", p.Path(), err)
 		return
 	}
 	for _, fi := range fis {
 		if isPlugin(fi.Name()) {
-			p.loadPlugin(filepath.Join(p.Name(), fi.Name()))
+			p.loadPlugin(filepath.Join(p.Path(), fi.Name()))
 		}
 	}
 }
@@ -126,10 +132,12 @@ func (p *pkg) loadKeyBindings() {
 	log.Fine("Loading %s keybindings", p.Name())
 	ed := backend.GetEditor()
 
-	pt := filepath.Join(p.Name(), "Default.sublime-keymap")
+	pt := filepath.Join(p.Path(), "Default.sublime-keymap")
+	log.Finest("Loading %s", pt)
 	packages.LoadJSON(pt, p.defaultKB.KeyBindings())
 
-	pt = filepath.Join(p.Name(), "Default ("+ed.Plat()+").sublime-keymap")
+	pt = filepath.Join(p.Path(), "Default ("+ed.Plat()+").sublime-keymap")
+	log.Finest("Loading %s", pt)
 	packages.LoadJSON(pt, p.KeyBindings())
 }
 
@@ -137,13 +145,16 @@ func (p *pkg) loadSettings() {
 	log.Fine("Loading %s settings", p.Name())
 	ed := backend.GetEditor()
 
-	pt := filepath.Join(p.Name(), "Preferences.sublime-settings")
+	pt := filepath.Join(p.Path(), "Preferences.sublime-settings")
+	log.Finest("Loading %s", pt)
 	packages.LoadJSON(pt, p.defaultSettings.Settings())
 
-	pt = filepath.Join(p.Name(), "Preferences ("+ed.Plat()+").sublime-settings")
+	pt = filepath.Join(p.Path(), "Preferences ("+ed.Plat()+").sublime-settings")
+	log.Finest("Loading %s", pt)
 	packages.LoadJSON(pt, p.platformSettings.Settings())
 
 	pt = filepath.Join(ed.PackagesPath("user"), "Preferences.sublime-settings")
+	log.Finest("Loading %s", pt)
 	packages.LoadJSON(pt, p.Settings())
 }
 

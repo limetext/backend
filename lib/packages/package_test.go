@@ -10,6 +10,7 @@ type dummyPackage struct{}
 
 func (d *dummyPackage) Load()        {}
 func (d *dummyPackage) Name() string { return "" }
+func (d *dummyPackage) Path() string { return "" }
 
 func TestRecordCheckAction(t *testing.T) {
 	count := 0
