@@ -14,8 +14,8 @@ var watcher *wch.Watcher
 
 // Helper function for watching a package
 func watch(pkg Package) {
-	if err := watcher.Watch(pkg.Name(), pkg); err != nil {
-		log.Warn("Couldn't watch %s: %s", pkg.Name(), err)
+	if err := watcher.Watch(pkg.Path(), pkg); err != nil {
+		log.Warn("Couldn't watch %s: %s", pkg.Path(), err)
 	}
 }
 

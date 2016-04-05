@@ -19,7 +19,8 @@ import (
 
 // A sublime package
 type pkg struct {
-	dir string
+	dir  string
+	name string
 	text.HasSettings
 	keys.HasKeyBindings
 	platformSettings *text.HasSettings
@@ -32,6 +33,7 @@ type pkg struct {
 func newPKG(dir string) packages.Package {
 	return &pkg{
 		dir:              dir,
+		name:             path.Base(dir),
 		platformSettings: new(text.HasSettings),
 		defaultSettings:  new(text.HasSettings),
 		defaultKB:        new(keys.HasKeyBindings),
@@ -46,25 +48,27 @@ func (p *pkg) Load() {
 	p.loadPlugins()
 }
 
-func (p *pkg) Name() string {
+func (p *pkg) Path() string {
 	return p.dir
 }
 
-// TODO: how we should watch the package and the files containing?
-func (p *pkg) FileCreated(name string) {
-	p.loadPlugin(name)
+func (p *pkg) Name() string {
+	return p.name
 }
+
+// TODO: how we should watch the package and the files containing?
+func (p *pkg) FileCreated(name string) {}
 
 func (p *pkg) loadPlugins() {
 	log.Fine("Loading %s plugins", p.Name())
-	fis, err := ioutil.ReadDir(p.Name())
+	fis, err := ioutil.ReadDir(p.Path())
 	if err != nil {
-		log.Warn("Error on reading directory %s, %s", p.Name(), err)
+		log.Warn("Error on reading directory %s, %s", p.Path(), err)
 		return
 	}
 	for _, fi := range fis {
 		if isPlugin(fi.Name()) {
-			p.loadPlugin(path.Join(p.Name(), fi.Name()))
+			p.loadPlugin(path.Join(p.Path(), fi.Name()))
 		}
 	}
 }
@@ -89,10 +93,10 @@ func (p *pkg) loadKeyBindings() {
 	p.KeyBindings().SetParent(p.defaultKB)
 	p.defaultKB.KeyBindings().SetParent(tmp)
 
-	pt := path.Join(p.Name(), "Default.sublime-keymap")
+	pt := path.Join(p.Path(), "Default.sublime-keymap")
 	packages.LoadJSON(pt, p.defaultKB.KeyBindings())
 
-	pt = path.Join(p.Name(), "Default ("+ed.Plat()+").sublime-keymap")
+	pt = path.Join(p.Path(), "Default ("+ed.Plat()+").sublime-keymap")
 	packages.LoadJSON(pt, p.KeyBindings())
 }
 
@@ -106,10 +110,10 @@ func (p *pkg) loadSettings() {
 	p.platformSettings.Settings().SetParent(p.defaultSettings)
 	p.defaultSettings.Settings().SetParent(tmp)
 
-	pt := path.Join(p.Name(), "Preferences.sublime-settings")
+	pt := path.Join(p.Path(), "Preferences.sublime-settings")
 	packages.LoadJSON(pt, p.defaultSettings.Settings())
 
-	pt = path.Join(p.Name(), "Preferences ("+ed.Plat()+").sublime-settings")
+	pt = path.Join(p.Path(), "Preferences ("+ed.Plat()+").sublime-settings")
 	packages.LoadJSON(pt, p.platformSettings.Settings())
 
 	pt = path.Join(ed.PackagesPath("user"), "Preferences.sublime-settings")

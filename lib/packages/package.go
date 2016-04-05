@@ -9,9 +9,8 @@ type (
 	// so the backend could manage the loading watching and etc
 	Package interface {
 		Load()
-
-		// Returns the path of the package
 		Name() string
+		Path() string
 	}
 
 	// We will register each package as a record, Check function for

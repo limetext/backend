@@ -16,27 +16,32 @@ import (
 
 // Sublime plugin which is a single python file
 type plugin struct {
-	filename string
+	path string
+	name string
 }
 
 func newPlugin(fn string) packages.Package {
-	return &plugin{filename: fn}
+	return &plugin{path: fn}
 }
 
 // TODO: implement unload
 func (p *plugin) Load() {
 	// in case error ocured on running onInit function
+	// TODO: it's better to unregister plugin record but then we need to
+	// unregister package record to
 	if module == nil {
 		return
 	}
 
-	dir, file := filepath.Split(p.Name())
+	dir, file := filepath.Split(p.Path())
+	p.name = file
 	name := filepath.Base(dir) + "." + file[:len(file)-3]
 	s, err := py.NewUnicode(name)
 	if err != nil {
 		log.Warn(err)
 		return
 	}
+	defer s.Decref()
 
 	log.Debug("Loading plugin %s", name)
 	l := py.NewLock()
@@ -50,7 +55,11 @@ func (p *plugin) Load() {
 }
 
 func (p *plugin) Name() string {
-	return p.filename
+	return p.name
+}
+
+func (p *plugin) Path() string {
+	return p.path
 }
 
 func (p *plugin) FileChanged(name string) {
@@ -72,7 +81,7 @@ func onInit() {
 	defer l.Unlock()
 	var err error
 	if module, err = py.Import("sublime_plugin"); err != nil {
-		log.Error(err)
+		log.Error("Error importing sublime_plugin: %s", err)
 	}
 }
 
