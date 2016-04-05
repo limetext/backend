@@ -47,7 +47,7 @@ func record(path string) {
 		pkg := rec.Action(path)
 		go func() {
 			pkg.Load()
-			wch(pkg)
+			watch(pkg)
 		}()
 		// TODO: should we break here? if we do maybe there is still
 		// more records which can accept the path
