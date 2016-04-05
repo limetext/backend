@@ -273,9 +273,11 @@ func (v *View) loadSettings() {
 		return
 	} else if s := r.FindStringSubmatch(syntax); s != nil {
 		p := path.Join(ed.PackagesPath("shipped"), s[1], s[1]+".sublime-settings")
+		log.Fine("Loading %s for view", p)
 		packages.LoadJSON(p, defSet.Settings())
 
 		p = path.Join(ed.PackagesPath("user"), s[1]+".sublime-settings")
+		log.Fine("Loading %s for view", p)
 		packages.LoadJSON(p, usrSet.Settings())
 	}
 }

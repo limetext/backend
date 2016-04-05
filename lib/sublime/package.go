@@ -94,9 +94,11 @@ func (p *pkg) loadKeyBindings() {
 	p.defaultKB.KeyBindings().SetParent(tmp)
 
 	pt := path.Join(p.Path(), "Default.sublime-keymap")
+	log.Finest("Loading %s", pt)
 	packages.LoadJSON(pt, p.defaultKB.KeyBindings())
 
 	pt = path.Join(p.Path(), "Default ("+ed.Plat()+").sublime-keymap")
+	log.Finest("Loading %s", pt)
 	packages.LoadJSON(pt, p.KeyBindings())
 }
 
@@ -111,12 +113,15 @@ func (p *pkg) loadSettings() {
 	p.defaultSettings.Settings().SetParent(tmp)
 
 	pt := path.Join(p.Path(), "Preferences.sublime-settings")
+	log.Finest("Loading %s", pt)
 	packages.LoadJSON(pt, p.defaultSettings.Settings())
 
 	pt = path.Join(p.Path(), "Preferences ("+ed.Plat()+").sublime-settings")
+	log.Finest("Loading %s", pt)
 	packages.LoadJSON(pt, p.platformSettings.Settings())
 
 	pt = path.Join(ed.PackagesPath("user"), "Preferences.sublime-settings")
+	log.Finest("Loading %s", pt)
 	packages.LoadJSON(pt, p.Settings())
 }
 

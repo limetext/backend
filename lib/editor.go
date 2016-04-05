@@ -191,15 +191,19 @@ func (e *Editor) loadKeyBindings() {
 	log.Fine("Loading editor keybindings")
 
 	p := path.Join(e.PackagesPath("default"), "Default.sublime-keymap")
+	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.defaultKB.KeyBindings())
 
 	p = path.Join(e.PackagesPath("default"), "Default ("+e.Plat()+").sublime-keymap")
+	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.platformKB.KeyBindings())
 
 	p = path.Join(e.PackagesPath("user"), "Default.sublime-keymap")
+	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.userKB.KeyBindings())
 
 	p = path.Join(e.PackagesPath("user"), "Default ("+e.Plat()+").sublime-keymap")
+	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.KeyBindings())
 }
 
@@ -207,12 +211,15 @@ func (e *Editor) loadSettings() {
 	log.Fine("Loading editor settings")
 
 	p := path.Join(e.PackagesPath("default"), "Preferences.sublime-settings")
+	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.defaultSettings.Settings())
 
 	p = path.Join(e.PackagesPath("default"), "Preferences ("+e.Plat()+").sublime-settings")
+	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.platformSettings.Settings())
 
 	p = path.Join(e.PackagesPath("user"), "Preferences.sublime-settings")
+	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.Settings())
 }
 

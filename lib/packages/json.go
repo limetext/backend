@@ -9,12 +9,12 @@ import (
 	"io/ioutil"
 
 	"github.com/limetext/lime-backend/lib/loaders"
-	"github.com/limetext/lime-backend/lib/log"
 )
 
 // Helper type for loading json files(e.g keymaps settings)
 type JSON struct {
 	path    string
+	err     error
 	marshal json.Unmarshaler
 }
 
@@ -25,20 +25,24 @@ func NewJSON(path string, marshal json.Unmarshaler) *JSON {
 // Won't return the json type itself just watch & load
 func LoadJSON(path string, marshal json.Unmarshaler) error {
 	j := NewJSON(path, marshal)
-	if err := watcher.Watch(j.path, j); err != nil {
-		log.Warn("Couldn't watch %s: %s", j.path, err)
-	}
-	return j.Load()
+	watch(j)
+	j.Load()
+	return j.err
 }
 
-func (j *JSON) Load() error {
-	log.Debug("Loading %s", j.path)
-	data, err := ioutil.ReadFile(j.path)
+func (j *JSON) Load() {
+	j.err = nil
+	data, err := ioutil.ReadFile(j.Path())
 	if err != nil {
-		return err
+		j.err = err
+		return
 	}
-	return loaders.LoadJSON(data, j.marshal)
+	j.err = loaders.LoadJSON(data, j.marshal)
 }
+
+func (j *JSON) Name() string { return j.path }
+
+func (j *JSON) Path() string { return j.path }
 
 // TODO(.): add actions for other events like delete and create
 func (j *JSON) FileChanged(name string) {
