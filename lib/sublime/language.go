@@ -198,6 +198,21 @@ func (l *Language) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (l *Language) copy() *Language {
+	ret := &Language{}
+	ret.FileTypes = make([]string, len(l.FileTypes))
+	copy(ret.FileTypes, l.FileTypes)
+	ret.FirstLineMatch = l.FirstLineMatch
+	ret.Name = l.Name
+	ret.RootPattern.Pattern = *l.RootPattern.Pattern.copy(ret)
+	ret.Repository = make(map[string]*Pattern)
+	for key, pat := range l.Repository {
+		ret.Repository[key] = pat.copy(ret)
+	}
+	ret.ScopeName = l.ScopeName
+	return ret
+}
+
 func (r *RootPattern) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &r.Patterns)
 }
@@ -240,6 +255,12 @@ func (c *Captures) Swap(i, j int) {
 	(*c)[i], (*c)[j] = (*c)[j], (*c)[i]
 }
 
+func (c *Captures) copy() *Captures {
+	ret := make(Captures, len(*c))
+	copy(ret, *c)
+	return &ret
+}
+
 func (m MatchObject) fix(add int) {
 	for i := range m {
 		if m[i] != -1 {
@@ -270,6 +291,21 @@ func (r *Regex) Find(data string, pos int) MatchObject {
 		return mo
 	}
 	return nil
+}
+
+func (r *Regex) copy() *Regex {
+	ret := &Regex{}
+	if r.re == nil {
+		return ret
+	}
+	if re, err := rubex.Compile(fmt.Sprint(r.re)); err != nil {
+		log.Warn("Error on copying regex: %s", err)
+	} else {
+		ret.re = re
+	}
+	ret.lastIndex = r.lastIndex
+	ret.lastFound = r.lastFound
+	return ret
 }
 
 func (p *Pattern) FirstMatch(data string, pos int) (pat *Pattern, ret MatchObject) {
@@ -454,6 +490,29 @@ func (p *Pattern) CreateNode(data string, pos int, d parser.DataSource, mo Match
 	return
 }
 
+func (p *Pattern) copy(l *Language) *Pattern {
+	ret := &Pattern{}
+	ret.Named = p.Named
+	ret.Include = p.Include
+	ret.Match = *p.Match.copy()
+	if p.Captures != nil {
+		ret.Captures = *p.Captures.copy()
+	}
+	ret.Begin = *p.Begin.copy()
+	if p.BeginCaptures != nil {
+		ret.BeginCaptures = *p.BeginCaptures.copy()
+	}
+	ret.End = *p.End.copy()
+	if p.EndCaptures != nil {
+		ret.EndCaptures = *p.EndCaptures.copy()
+	}
+	ret.owner = l
+	for _, pat := range p.Patterns {
+		ret.Patterns = append(ret.Patterns, *pat.copy(l))
+	}
+	return ret
+}
+
 func (d *LanguageParser) Data(a, b int) string {
 	a = text.Clamp(0, len(d.data), a)
 	b = text.Clamp(0, len(d.data), b)
@@ -523,8 +582,9 @@ func newSyntax(path string) (*Syntax, error) {
 	return &Syntax{l: l}, nil
 }
 
-func (s *Syntax) Parser(data string) limeparser.Parser {
-	return &LanguageParser{l: s.l, data: []rune(data)}
+func (s *Syntax) Parser(data string) (limeparser.Parser, error) {
+	l := s.l.copy()
+	return &LanguageParser{l: l, data: []rune(data)}, nil
 }
 
 func (s *Syntax) Name() string {

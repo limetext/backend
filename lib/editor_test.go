@@ -246,9 +246,9 @@ func (d *dummySyntax) FileTypes() []string {
 	return d.filetypes
 }
 
-func (d *dummySyntax) Parser(data string) limeparser.Parser {
+func (d *dummySyntax) Parser(data string) (limeparser.Parser, error) {
 	d.data = data
-	return d
+	return d, nil
 }
 
 func (d *dummySyntax) Parse() (*parser.Node, error) { return nil, nil }

@@ -94,7 +94,9 @@ func TestTmLanguage(t *testing.T) {
 
 		if syn, err := syntaxFromLanguage(t3.syn); err != nil {
 			t.Error(err)
-		} else if root, err := syn.Parser(d0).Parse(); err != nil {
+		} else if pr, err := syn.Parser(d0); err != nil {
+			t.Error(err)
+		} else if root, err := pr.Parse(); err != nil {
 			t.Error(err)
 		} else {
 			str := fmt.Sprintf("%s", root)
@@ -133,7 +135,16 @@ func BenchmarkLanguage(b *testing.B) {
 				b.Fatal(err)
 				return
 			}
-			syn.Parser(d0[j]).Parse()
+			pr, err := syn.Parser(d0[j])
+			if err != nil {
+				b.Fatal(err)
+				return
+			}
+			_, err = pr.Parse()
+			if err != nil {
+				b.Fatal(err)
+				return
+			}
 		}
 	}
 	fmt.Println(util.Prof)

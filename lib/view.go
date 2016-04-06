@@ -59,7 +59,7 @@ type (
 	}
 
 	Syntax interface {
-		Parser(data string) parser.Parser
+		Parser(data string) (parser.Parser, error)
 		Name() string
 		FileTypes() []string
 	}
@@ -199,7 +199,11 @@ func (v *View) parsethread() {
 			log.Error("No syntax %s", source)
 			return
 		}
-		pr := syn.Parser(sub)
+		pr, err := syn.Parser(sub)
+		if err != nil {
+			log.Error("Couldn't get parser from syntax: %s", err)
+			return
+		}
 		synh, err := parser.NewSyntaxHighlighter(pr)
 		if err != nil {
 			log.Error("Couldn't create syntaxhighlighter: %v", err)
