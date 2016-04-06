@@ -18,19 +18,25 @@ import (
 )
 
 // A sublime package
-type pkg struct {
-	dir  string
-	name string
-	text.HasSettings
-	keys.HasKeyBindings
-	platformSettings *text.HasSettings
-	defaultSettings  *text.HasSettings
-	defaultKB        *keys.HasKeyBindings
-	plugins          map[string]*plugin
-	syntaxes         map[string]*Syntax
-	colorSchemes     map[string]*ColorScheme
-	// TODO: themes, snippets, etc more info on iss#71
-}
+type (
+	pkg struct {
+		dir  string
+		name string
+		text.HasSettings
+		keys.HasKeyBindings
+		platformSettings *text.HasSettings
+		defaultSettings  *text.HasSettings
+		defaultKB        *keys.HasKeyBindings
+		plugins          map[string]*plugin
+		syntaxes         map[string]*Syntax
+		colorSchemes     map[string]*ColorScheme
+		// TODO: themes, snippets, etc more info on iss#71
+	}
+
+	ColorScheme struct {
+		Theme
+	}
+)
 
 func newPKG(dir string) packages.Package {
 	p := &pkg{
@@ -169,6 +175,10 @@ func (p *pkg) scan(path string, info os.FileInfo, err error) error {
 		p.loadSyntax(path)
 	}
 	return nil
+}
+
+func (c *ColorScheme) Name() string {
+	return c.Theme.Name
 }
 
 func isColorScheme(path string) bool {

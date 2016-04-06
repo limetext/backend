@@ -36,18 +36,14 @@ type (
 		Settings       []ScopeSetting
 		UUID           UUID
 	}
-
-	ColorScheme struct {
-		Theme
-	}
 )
 
 func LoadTheme(filename string) (*Theme, error) {
 	var scheme Theme
 	if d, err := ioutil.ReadFile(filename); err != nil {
-		return nil, fmt.Errorf("Unable to read colorscheme definition: %s", err)
+		return nil, fmt.Errorf("Unable to read theme definition: %s", err)
 	} else if err := loaders.LoadPlist(d, &scheme); err != nil {
-		return nil, fmt.Errorf("Unable to load colorscheme definition: %s", err)
+		return nil, fmt.Errorf("Unable to load theme definition: %s", err)
 	}
 
 	return &scheme, nil
@@ -160,8 +156,4 @@ func (t *Theme) Spice(vr *render.ViewRegions) (ret render.Flavour) {
 	}
 	ret.Background = render.Colour(bg)
 	return
-}
-
-func (c *ColorScheme) Name() string {
-	return c.Theme.Name
 }

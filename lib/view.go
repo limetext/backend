@@ -284,7 +284,6 @@ func (v *View) loadSettings() {
 	ed := GetEditor()
 	if r, err := rubex.Compile(`([A-Za-z]+?)\.(?:[^.]+)$`); err != nil {
 		log.Error(err)
-		return
 		// TODO: should we match syntax file name or the syntax name
 	} else if s := r.FindStringSubmatch(syntax); s != nil {
 		// TODO: the syntax folder should be the package path and name

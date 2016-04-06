@@ -16,7 +16,6 @@ import (
 
 	"github.com/limetext/lime-backend/lib/loaders"
 	"github.com/limetext/lime-backend/lib/log"
-	limeparser "github.com/limetext/lime-backend/lib/parser"
 	"github.com/limetext/rubex"
 	"github.com/limetext/text"
 	"github.com/quarnster/parser"
@@ -88,10 +87,6 @@ type (
 	LanguageParser struct {
 		l    *Language
 		data []rune
-	}
-
-	Syntax struct {
-		l *Language
 	}
 )
 
@@ -572,25 +567,4 @@ func (lp *LanguageParser) Parse() (*parser.Node, error) {
 		panic("reached maximum number of iterations")
 	}
 	return &rn, nil
-}
-
-func newSyntax(path string) (*Syntax, error) {
-	l, err := Provider.LanguageFromFile(path)
-	if err != nil {
-		return nil, err
-	}
-	return &Syntax{l: l}, nil
-}
-
-func (s *Syntax) Parser(data string) (limeparser.Parser, error) {
-	l := s.l.copy()
-	return &LanguageParser{l: l, data: []rune(data)}, nil
-}
-
-func (s *Syntax) Name() string {
-	return s.l.Name
-}
-
-func (s *Syntax) FileTypes() []string {
-	return s.l.FileTypes
 }

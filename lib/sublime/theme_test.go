@@ -7,15 +7,10 @@ package sublime
 import (
 	"fmt"
 	"io/ioutil"
-	"reflect"
-	"sync"
 	"testing"
-	"time"
 
-	"github.com/limetext/lime-backend/lib"
 	"github.com/limetext/lime-backend/lib/loaders"
 	"github.com/limetext/lime-backend/lib/util"
-	"github.com/limetext/text"
 )
 
 func TestLoadTheme(t *testing.T) {
@@ -78,83 +73,4 @@ func TestLoadThemeFromMissingFile(t *testing.T) {
 	if err == nil {
 		t.Errorf("Tried to load %s, expecting an error, but didn't get one", f)
 	}
-}
-
-func TestViewTransform(t *testing.T) {
-	w := backend.GetEditor().NewWindow()
-	defer w.Close()
-
-	v := w.NewFile()
-	defer func() {
-		v.SetScratch(true)
-		v.Close()
-	}()
-
-	sc, err := LoadTheme("testdata/GlitterBomb.tmTheme")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	d, err := ioutil.ReadFile("testdata/view.go")
-	if err != nil {
-		t.Fatal(err)
-	}
-	e := v.BeginEdit()
-	v.Insert(e, 0, string(d))
-	v.EndEdit(e)
-
-	if v.Transform(sc, text.Region{A: 0, B: 100}) != nil {
-		t.Error("Expected view.Transform return nil when the syntax isn't set yet")
-	}
-
-	v.Settings().Set("syntax", "testdata/Go.tmLanguage")
-
-	time.Sleep(time.Second)
-	a := v.Transform(sc, text.Region{A: 0, B: 100}).Transcribe()
-	v.Transform(sc, text.Region{A: 100, B: 200}).Transcribe()
-	c := v.Transform(sc, text.Region{A: 0, B: 100}).Transcribe()
-	if !reflect.DeepEqual(a, c) {
-		t.Errorf("not equal:\n%v\n%v", a, c)
-	}
-}
-
-func BenchmarkViewTransformTranscribe(b *testing.B) {
-	b.StopTimer()
-	w := backend.GetEditor().NewWindow()
-	defer w.Close()
-
-	v := w.NewFile()
-
-	defer func() {
-		v.SetScratch(true)
-		v.Close()
-	}()
-
-	sc, err := LoadTheme("testdata/GlitterBomb.tmTheme")
-	if err != nil {
-		b.Fatal(err)
-	}
-
-	v.Settings().Set("syntax", "testdata/Go.tmLanguage")
-
-	d, err := ioutil.ReadFile("view.go")
-	if err != nil {
-		b.Fatal(err)
-	}
-	var wg sync.WaitGroup
-	wg.Add(1)
-	v.Settings().AddOnChange("benchmark", func(key string) {
-		if key == "lime.syntax.updated" {
-			wg.Done()
-		}
-	})
-	e := v.BeginEdit()
-	v.Insert(e, 0, string(d))
-	v.EndEdit(e)
-	wg.Wait()
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		v.Transform(sc, text.Region{A: 0, B: v.Size()}).Transcribe()
-	}
-	fmt.Println(util.Prof.String())
 }
