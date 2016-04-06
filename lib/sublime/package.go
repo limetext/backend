@@ -34,7 +34,7 @@ type (
 	}
 
 	ColorScheme struct {
-		Theme
+		*Theme
 	}
 )
 
@@ -107,28 +107,26 @@ func (p *pkg) loadPlugin(path string) {
 }
 
 func (p *pkg) loadColorScheme(path string) {
-	log.Debug("Loading color scheme %s", path)
+	log.Fine("Loading %s package color scheme %s", p.Name(), path)
 	tm, err := LoadTheme(path)
 	if err != nil {
 		log.Warn("Error loading %s color scheme %s: %s", p.Name(), path, err)
 		return
 	}
 
-	cs := &ColorScheme{*tm}
-	// TODO: the path should be modified
+	cs := &ColorScheme{tm}
 	p.colorSchemes[path] = cs
 	backend.GetEditor().AddColorScheme(path, cs)
 }
 
 func (p *pkg) loadSyntax(path string) {
-	log.Debug("Loading syntax %s", path)
+	log.Fine("Loading %s package syntax %s", p.Name(), path)
 	syn, err := newSyntax(path)
 	if err != nil {
 		log.Warn("Error loading %s syntax: %s", p.Name(), err)
 		return
 	}
 
-	// TODO: the path should be modified
 	p.syntaxes[path] = syn
 	backend.GetEditor().AddSyntax(path, syn)
 }
