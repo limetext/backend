@@ -4,9 +4,7 @@
 
 package commands
 
-import (
-	. "github.com/limetext/lime-backend/lib"
-)
+import . "github.com/limetext/lime-backend/lib"
 
 type (
 	NopApplicationCommand struct {
@@ -24,6 +22,10 @@ type (
 
 func (c *NopApplicationCommand) Run() error {
 	return nil
+}
+
+func (c *NopApplicationCommand) IsChecked() bool {
+	return false
 }
 
 func (c *NopWindowCommand) Run(w *Window) error {
