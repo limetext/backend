@@ -6,11 +6,12 @@ package backend
 
 import (
 	"fmt"
-	"github.com/limetext/lime-backend/lib/log"
-	. "github.com/limetext/lime-backend/lib/util"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/limetext/lime-backend/lib/log"
+	. "github.com/limetext/lime-backend/lib/util"
 )
 
 type (
