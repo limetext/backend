@@ -13,23 +13,24 @@ import (
 	_ "github.com/limetext/lime-backend/lib/sublime/api"
 )
 
-func TestLoadPlugin(t *testing.T) {
-	pn := path.Join("testdata", "packages", "plugin.py")
-	pkg := newPKG(path.Join("testdata", "packages")).(*pkg)
-	pkg.loadPlugin(pn)
+var (
+	pluginPath = path.Join("testdata", "package", "plugin.py")
+	pkgPath    = path.Join("testdata", "package")
+)
 
-	if _, exist := pkg.plugins[pn]; !exist {
-		t.Errorf("Expected to %s exist in %s package plugins", pn, pkg.Name())
+func TestLoadPlugin(t *testing.T) {
+	pkg := newPKG(pkgPath).(*pkg)
+	pkg.loadPlugin(pluginPath)
+	if _, exist := pkg.plugins[pluginPath]; !exist {
+		t.Errorf("Expected to %s exist in %s package plugins", pluginPath, pkg.Name())
 	}
 }
 
 func TestLoadPlugins(t *testing.T) {
-	pn := path.Join("testdata", "packages", "plugin.py")
-	pkg := newPKG(path.Join("testdata", "packages")).(*pkg)
+	pkg := newPKG(pkgPath).(*pkg)
 	pkg.loadPlugins()
-
-	if _, exist := pkg.plugins[pn]; !exist {
-		t.Errorf("Expected to %s exist in %s package plugins", pn, pkg.Name())
+	if _, exist := pkg.plugins[pluginPath]; !exist {
+		t.Errorf("Expected to %s exist in %s package plugins", pluginPath, pkg.Name())
 	}
 }
 

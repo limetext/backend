@@ -71,8 +71,7 @@ func (p *pkg) Load() {
 	p.loadKeyBindings()
 	p.loadSettings()
 	p.loadPlugins()
-
-	filepath.Walk(p.Name(), p.scan)
+	filepath.Walk(p.Path(), p.scan)
 }
 
 func (p *pkg) Path() string {

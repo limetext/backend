@@ -23,7 +23,6 @@ func TestSublimeApiMatchExpected(t *testing.T) {
 	// TODO: this could be much better
 	// "__*__" should be omitted and it should be same as
 	// https://www.sublimetext.com/docs/3/api_reference.html
-
 	const expfile = "testdata/api.txt"
 	l := py.NewLock()
 	defer l.Unlock()

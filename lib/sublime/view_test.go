@@ -24,7 +24,7 @@ func TestViewTransform(t *testing.T) {
 		v.Close()
 	}()
 
-	sc, err := LoadTheme("testdata/GlitterBomb.tmTheme")
+	sc, err := LoadTheme("testdata/package/Monokai.tmTheme")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestViewTransform(t *testing.T) {
 		t.Error("Expected view.Transform return nil when the syntax isn't set yet")
 	}
 
-	v.Settings().Set("syntax", "testdata/Go.tmLanguage")
+	v.Settings().Set("syntax", "testdata/package/Go.tmLanguage")
 
 	time.Sleep(time.Second)
 	a := v.Transform(sc, text.Region{A: 0, B: 100}).Transcribe()
@@ -64,12 +64,12 @@ func BenchmarkViewTransformTranscribe(b *testing.B) {
 		v.Close()
 	}()
 
-	sc, err := LoadTheme("testdata/GlitterBomb.tmTheme")
+	sc, err := LoadTheme("testdata/package/Monokai.tmTheme")
 	if err != nil {
 		b.Fatal(err)
 	}
 
-	v.Settings().Set("syntax", "testdata/Go.tmLanguage")
+	v.Settings().Set("syntax", "testdata/package/Go.tmLanguage")
 
 	d, err := ioutil.ReadFile("view.go")
 	if err != nil {
@@ -107,7 +107,7 @@ func TestViewExtractScope(t *testing.T) {
 	const (
 		in      = "testdata/main.go"
 		expfile = "testdata/scoperange.res"
-		syntax  = "testdata/Go.tmLanguage"
+		syntax  = "testdata/package/Go.tmLanguage"
 	)
 	syn, err := newSyntax(syntax)
 	if err != nil {
@@ -157,7 +157,7 @@ func TestViewScopeName(t *testing.T) {
 	const (
 		in      = "testdata/main.go"
 		expfile = "testdata/scopename.res"
-		syntax  = "testdata/Go.tmLanguage"
+		syntax  = "testdata/package/Go.tmLanguage"
 	)
 	syn, err := newSyntax(syntax)
 	if err != nil {
@@ -213,7 +213,7 @@ func TestViewStress(t *testing.T) {
 		v.Close()
 	}()
 
-	syntax := "testdata/Go.tmLanguage"
+	syntax := "testdata/package/Go.tmLanguage"
 	syn, err := newSyntax(syntax)
 	if err != nil {
 		t.Fatal(err)
@@ -244,7 +244,7 @@ func BenchmarkViewScopeNameLinear(b *testing.B) {
 
 	const (
 		in     = "language_test.go"
-		syntax = "testdata/Go.tmLanguage"
+		syntax = "testdata/package/Go.tmLanguage"
 	)
 	b.StopTimer()
 	syn, err := newSyntax(syntax)
@@ -280,7 +280,7 @@ func BenchmarkViewScopeNameRandom(b *testing.B) {
 
 	const (
 		in     = "language_test.go"
-		syntax = "testdata/Go.tmLanguage"
+		syntax = "testdata/package/Go.tmLanguage"
 	)
 	b.StopTimer()
 	syn, err := newSyntax(syntax)
