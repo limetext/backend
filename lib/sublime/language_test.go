@@ -146,10 +146,10 @@ func BenchmarkLanguage(b *testing.B) {
 	fmt.Println(util.Prof)
 }
 
-func syntaxFromLanguage(id string) (*Syntax, error) {
+func syntaxFromLanguage(id string) (*syntax, error) {
 	l, err := Provider.GetLanguage(id)
 	if err != nil {
 		return nil, err
 	}
-	return &Syntax{l: l}, nil
+	return &syntax{l: l}, nil
 }

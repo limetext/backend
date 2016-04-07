@@ -30,6 +30,7 @@ type (
 		Scope    string
 		Settings ThemeSettings
 	}
+	// For loading tmTheme files
 	Theme struct {
 		GutterSettings ThemeSettings
 		Name           string

@@ -53,14 +53,20 @@ type (
 		forced bool
 	}
 
+	// Any color scheme view should implement this interface
+	// also it should register it self from editor.AddColorSCheme
 	ColorScheme interface {
 		render.ColourScheme
 		Name() string
 	}
 
+	// Any syntax definition for view should implement this interface
+	// also it should register it self from editor.AddSyntax
 	Syntax interface {
+		// provides parser for creating syntax highlighter
 		Parser(data string) (parser.Parser, error)
 		Name() string
+		// filetypes this syntax supports
 		FileTypes() []string
 	}
 )

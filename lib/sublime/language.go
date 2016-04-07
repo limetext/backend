@@ -30,6 +30,7 @@ type (
 		lastFound int
 	}
 
+	// For loading tmLanguage files
 	Language struct {
 		UnpatchedLanguage
 	}

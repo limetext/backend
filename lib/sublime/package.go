@@ -17,8 +17,9 @@ import (
 	"github.com/limetext/text"
 )
 
-// A sublime package
 type (
+	// A sublime package
+	// TODO: iss#71
 	pkg struct {
 		dir  string
 		name string
@@ -28,12 +29,12 @@ type (
 		defaultSettings  *text.HasSettings
 		defaultKB        *keys.HasKeyBindings
 		plugins          map[string]*plugin
-		syntaxes         map[string]*Syntax
-		colorSchemes     map[string]*ColorScheme
-		// TODO: themes, snippets, etc more info on iss#71
+		syntaxes         map[string]*syntax
+		colorSchemes     map[string]*colorScheme
 	}
 
-	ColorScheme struct {
+	// wrapper arount Theme implements backend.ColorScheme
+	colorScheme struct {
 		*Theme
 	}
 )
@@ -46,8 +47,8 @@ func newPKG(dir string) packages.Package {
 		defaultSettings:  new(text.HasSettings),
 		defaultKB:        new(keys.HasKeyBindings),
 		plugins:          make(map[string]*plugin),
-		syntaxes:         make(map[string]*Syntax),
-		colorSchemes:     make(map[string]*ColorScheme),
+		syntaxes:         make(map[string]*syntax),
+		colorSchemes:     make(map[string]*colorScheme),
 	}
 
 	ed := backend.GetEditor()
@@ -114,7 +115,7 @@ func (p *pkg) loadColorScheme(path string) {
 		return
 	}
 
-	cs := &ColorScheme{tm}
+	cs := &colorScheme{tm}
 	p.colorSchemes[path] = cs
 	backend.GetEditor().AddColorScheme(path, cs)
 }
@@ -174,7 +175,7 @@ func (p *pkg) scan(path string, info os.FileInfo, err error) error {
 	return nil
 }
 
-func (c *ColorScheme) Name() string {
+func (c *colorScheme) Name() string {
 	return c.Theme.Name
 }
 
