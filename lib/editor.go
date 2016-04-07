@@ -49,6 +49,7 @@ type (
 		pkgsPaths        map[string]string
 		colorSchemes     map[string]ColorScheme
 		syntaxes         map[string]Syntax
+		filetypes        map[string]string
 	}
 
 	// The Frontend interface defines the API
@@ -133,6 +134,7 @@ func GetEditor() *Editor {
 			pkgsPaths:        make(map[string]string),
 			colorSchemes:     make(map[string]ColorScheme),
 			syntaxes:         make(map[string]Syntax),
+			filetypes:        make(map[string]string),
 		}
 		var err error
 		if ed.Watcher, err = watch.NewWatcher(); err != nil {
@@ -468,10 +470,17 @@ func (e *Editor) ColorSchemes() {}
 
 func (e *Editor) AddSyntax(path string, s Syntax) {
 	e.syntaxes[path] = s
+	for _, t := range s.FileTypes() {
+		e.filetypes[t] = path
+	}
 }
 
 func (e *Editor) GetSyntax(path string) Syntax {
 	return e.syntaxes[path]
+}
+
+func (e *Editor) FileTypeSyntax(ext string) Syntax {
+	return e.filetypes[ext]
 }
 
 // TODO: should generate sth like sublime text syntaxes menu

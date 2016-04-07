@@ -1062,7 +1062,15 @@ func (v *View) Lines(r Region) []Region {
 }
 
 func (v *View) SetFileName(n string) error {
-	return v.buffer.SetFileName(n)
+	if err := v.buffer.SetFileName(n); err != nil {
+		return err
+	}
+	if ext := path.Ext(n); ext == "" {
+		return nil
+	} else if file := GetEditor().FileTypeSyntax(ext[1:]); file != "" {
+		v.SetSyntaxFile(file)
+	}
+	return nil
 }
 
 func (v *View) Name() string {
