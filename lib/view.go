@@ -1066,3 +1066,7 @@ func (v *View) Word(off int) Region {
 func (v *View) WordR(r Region) Region {
 	return v.buffer.WordR(r)
 }
+
+func (v *View) AddObserver(ob BufferObserver) error {
+	return v.buffer.AddObserver(ob)
+}
