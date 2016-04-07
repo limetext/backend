@@ -32,7 +32,6 @@ type (
 	View struct {
 		HasSettings
 		HasId
-		name        string
 		window      *Window
 		buffer      Buffer
 		selection   RegionSet
@@ -80,7 +79,7 @@ func newView(w *Window) *View {
 
 // implement the fmt.Stringer interface
 func (v *View) String() string {
-	return fmt.Sprintf("View{id:%d, name: \"%s\", buffer: %s}", v.Id(), v.name, v.buffer)
+	return fmt.Sprintf("View{id:%d, buffer: %s}", v.Id(), v.buffer)
 }
 
 func (v *View) setBuffer(b Buffer) error {
