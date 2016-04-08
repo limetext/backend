@@ -31,7 +31,6 @@ type (
 	View struct {
 		HasSettings
 		HasId
-		name             string
 		window           *Window
 		buffer           Buffer
 		selection        RegionSet
@@ -111,7 +110,7 @@ func newView(w *Window) *View {
 
 // implement the fmt.Stringer interface
 func (v *View) String() string {
-	return fmt.Sprintf("View{id:%d, name: \"%s\", buffer: %s}", v.Id(), v.name, v.buffer)
+	return fmt.Sprintf("View{id:%d, buffer: %s}", v.Id(), v.buffer)
 }
 
 func (v *View) setBuffer(b Buffer) error {
@@ -219,7 +218,7 @@ func (v *View) parsethread() {
 		// Only set if it isn't invalid already, otherwise the
 		// current syntax highlighting will be more accurate
 		// as it will have had incremental adjustments done to it
-		if v.buffer.ChangeCount() != lastParse {
+		if v.ChangeCount() != lastParse {
 			return
 		}
 
@@ -251,7 +250,7 @@ func (v *View) parsethread() {
 	}
 
 	for pr := range ch {
-		if cc := v.buffer.ChangeCount(); lastParse != cc || pr.forced {
+		if cc := v.ChangeCount(); lastParse != cc || pr.forced {
 			lastParse = cc
 			if doparse() {
 				v.Settings().Set("lime.syntax.updated", lastParse)
@@ -392,7 +391,7 @@ func (v *View) Insert(edit *Edit, point int, value string) int {
 				}
 				ai := idx
 				if i == 0 {
-					_, col := v.buffer.RowCol(point)
+					_, col := v.RowCol(point)
 					ai = col + 1
 				}
 				add := 1 + ((ai + (tab_size - 1)) &^ (tab_size - 1))
@@ -472,7 +471,7 @@ func (v *View) EndEdit(edit *Edit) {
 		current_edit := v.editstack[j]
 		current_edit.invalid = true
 		sel_same := reflect.DeepEqual(*v.Sel(), current_edit.savedSel)
-		buf_same := v.buffer.ChangeCount() == current_edit.savedCount
+		buf_same := v.ChangeCount() == current_edit.savedCount
 		eq := (sel_same && buf_same && current_edit.composite.Len() == 0)
 		if !eq && !sel_same {
 			selection_modified = true
@@ -544,7 +543,7 @@ func (v *View) IsDirty() bool {
 		return false
 	}
 	lastSave, _ := v.Settings().Get("lime.last_save_change_count", -1).(int)
-	return v.buffer.ChangeCount() != lastSave
+	return v.ChangeCount() != lastSave
 }
 
 func (v *View) FileChanged(filename string) {
@@ -562,7 +561,7 @@ func (v *View) FileChanged(filename string) {
 		log.Error("Could not read file: %s\n. Error was: %v", filename, err)
 	} else {
 		edit := v.BeginEdit()
-		end := v.buffer.Size()
+		end := v.Size()
 		v.Replace(edit, Region{0, end}, string(d))
 		v.EndEdit(edit)
 	}
@@ -570,7 +569,7 @@ func (v *View) FileChanged(filename string) {
 
 // Saves the file
 func (v *View) Save() error {
-	return v.SaveAs(v.buffer.FileName())
+	return v.SaveAs(v.FileName())
 }
 
 // Saves the file to the specified filename
@@ -580,12 +579,12 @@ func (v *View) SaveAs(name string) (err error) {
 	defer v.Settings().Erase("lime.saving")
 	var atomic bool
 	OnPreSave.Call(v)
-	if atomic, _ = v.Settings().Get("atomic_save", true).(bool); v.buffer.FileName() == "" || !atomic {
+	if atomic, _ = v.Settings().Get("atomic_save", true).(bool); v.FileName() == "" || !atomic {
 		if err := v.nonAtomicSave(name); err != nil {
 			return err
 		}
 	} else {
-		n, err := ioutil.TempDir(path.Dir(v.buffer.FileName()), "lime")
+		n, err := ioutil.TempDir(path.Dir(v.FileName()), "lime")
 		if err != nil {
 			return err
 		}
@@ -607,21 +606,21 @@ func (v *View) SaveAs(name string) (err error) {
 	}
 
 	ed := GetEditor()
-	if fn := v.buffer.FileName(); fn != name {
-		v.buffer.SetFileName(name)
+	if fn := v.FileName(); fn != name {
+		v.SetFileName(name)
 		if fn != "" {
 			ed.UnWatch(fn, v)
 		}
 		ed.Watch(name, v)
 	}
 
-	v.Settings().Set("lime.last_save_change_count", v.buffer.ChangeCount())
+	v.Settings().Set("lime.last_save_change_count", v.ChangeCount())
 	OnPostSave.Call(v)
 	return nil
 }
 
 func (v *View) nonAtomicSave(name string) error {
-	data := []byte(v.buffer.Substr(Region{0, v.buffer.Size()}))
+	data := []byte(v.Substr(Region{0, v.Size()}))
 	if err := ioutil.WriteFile(name, data, 0644); err != nil {
 		return err
 	}
@@ -744,7 +743,7 @@ func (v *View) Close() bool {
 			return false
 		}
 	}
-	if n := v.buffer.FileName(); n != "" {
+	if n := v.FileName(); n != "" {
 		GetEditor().UnWatch(n, v)
 	}
 
@@ -788,14 +787,14 @@ func (v *View) Classify(point int) (res int) {
 	var a, b string = "", ""
 	ws := v.Settings().Get("word_separators", DEFAULT_SEPARATORS).(string)
 	if point > 0 {
-		a = v.buffer.Substr(Region{point - 1, point})
+		a = v.Substr(Region{point - 1, point})
 	}
-	if point < v.buffer.Size() {
-		b = v.buffer.Substr(Region{point, point + 1})
+	if point < v.Size() {
+		b = v.Substr(Region{point, point + 1})
 	}
 
 	// Out of range
-	if v.buffer.Size() == 0 || point < 0 || point > v.buffer.Size() {
+	if v.Size() == 0 || point < 0 || point > v.Size() {
 		res = 3520
 		return
 	}
@@ -920,7 +919,7 @@ func (v *View) FindByClass(point int, forward bool, classes int) int {
 	if forward {
 		i = 1
 	}
-	size := v.buffer.Size()
+	size := v.Size()
 	// Sublime doesn't consider initial point even if it matches.
 	for p := point + i; ; p += i {
 		if p <= 0 {
@@ -947,7 +946,7 @@ func (v *View) ExpandByClass(r Region, classes int) Region {
 	}
 
 	b := r.B
-	size := v.buffer.Size()
+	size := v.Size()
 	if b < size {
 		b += 1
 	} else if b > size {
@@ -967,8 +966,8 @@ const (
 )
 
 func (v *View) Find(pat string, pos int, flags int) Region {
-	r := Region{pos, v.buffer.Size()}
-	s := v.buffer.Substr(r)
+	r := Region{pos, v.Size()}
+	s := v.Substr(r)
 
 	if flags&LITERAL != 0 {
 		pat = "\\Q" + pat
@@ -1099,4 +1098,8 @@ func (v *View) Word(off int) Region {
 
 func (v *View) WordR(r Region) Region {
 	return v.buffer.WordR(r)
+}
+
+func (v *View) AddObserver(ob BufferObserver) error {
+	return v.buffer.AddObserver(ob)
 }

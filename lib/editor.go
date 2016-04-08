@@ -479,7 +479,7 @@ func (e *Editor) GetSyntax(path string) Syntax {
 	return e.syntaxes[path]
 }
 
-func (e *Editor) FileTypeSyntax(ext string) Syntax {
+func (e *Editor) FileTypeSyntax(ext string) string {
 	return e.filetypes[ext]
 }
 
