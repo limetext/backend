@@ -42,7 +42,7 @@ func (c *TransposeCommand) Run(v *View, e *Edit) error {
 		trs := RegionSet{}
 		for _, r := range rs {
 			if r.Empty() {
-				trs.Add(v.Buffer().Word(r.A))
+				trs.Add(v.Word(r.A))
 			} else {
 				trs.Add(r)
 			}
@@ -52,11 +52,11 @@ func (c *TransposeCommand) Run(v *View, e *Edit) error {
 		}
 
 		srcr := trs.Regions()[trs.Len()-1]
-		stxt := v.Buffer().Substr(srcr)
+		stxt := v.Substr(srcr)
 		slen := srcr.Size()
 		for i := 0; i < trs.Len(); i++ {
 			r := trs.Regions()[i]
-			dtxt := v.Buffer().Substr(r)
+			dtxt := v.Substr(r)
 			dlen := r.Size()
 			v.Replace(e, r, stxt)
 			trs.Adjust(r.Begin()+1, slen-dlen)
@@ -70,13 +70,13 @@ func (c *TransposeCommand) Run(v *View, e *Edit) error {
 				continue
 			}
 			rsnew.Add(Region{r.A + 1, r.B + 1})
-			if r.A == 0 || r.A >= v.Buffer().Size() {
+			if r.A == 0 || r.A >= v.Size() {
 				continue
 			}
 			r1 := Region{r.A - 1, r.A}
 			r2 := Region{r.A, r.A + 1}
-			s1 := v.Buffer().Substr(r1)
-			s2 := v.Buffer().Substr(r2)
+			s1 := v.Substr(r1)
+			s2 := v.Substr(r2)
 			v.Replace(e, r1, s2)
 			v.Replace(e, r2, s1)
 		}

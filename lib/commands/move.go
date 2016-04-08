@@ -96,7 +96,7 @@ type (
 func move_action(v *View, extend bool, transform func(r text.Region) int) {
 	sel := v.Sel()
 	r := sel.Regions()
-	bs := v.Buffer().Size()
+	bs := v.Size()
 	for i := range r {
 		r[i].B = transform(r[i])
 		if r[i].B < 0 {
@@ -138,12 +138,12 @@ func (c *MoveToCommand) Run(v *View, e *Edit) error {
 	switch c.To {
 	case EOL:
 		move_action(v, c.Extend, func(r text.Region) int {
-			line := v.Buffer().Line(r.B)
+			line := v.Line(r.B)
 			return line.B
 		})
 	case BOL:
 		move_action(v, c.Extend, func(r text.Region) int {
-			line := v.Buffer().Line(r.B)
+			line := v.Line(r.B)
 			return line.A
 		})
 	case BOF:
@@ -152,7 +152,7 @@ func (c *MoveToCommand) Run(v *View, e *Edit) error {
 		})
 	case EOF:
 		move_action(v, c.Extend, func(r text.Region) int {
-			return v.Buffer().Size()
+			return v.Size()
 		})
 	case Brackets:
 		move_action(v, c.Extend, func(r text.Region) (pos int) {
@@ -166,20 +166,20 @@ func (c *MoveToCommand) Run(v *View, e *Edit) error {
 			pos = r.B
 
 			// next and before character
-			n := v.Buffer().Substr(text.Region{r.B, r.B + 1})
-			b := v.Buffer().Substr(text.Region{r.B, r.B - 1})
+			n := v.Substr(text.Region{r.B, r.B + 1})
+			b := v.Substr(text.Region{r.B, r.B - 1})
 			if strings.ContainsAny(n, opening) {
 				// TODO: Maybe it's better to use sth like view.FindByClass or even
 				// view.FindByClass() function itself instead of getting whole text
 				// and looping through it. With using view.FindByClass() function
 				// backward we won't need to reverse the text anymore
-				str = v.Buffer().Substr(text.Region{r.B + 1, v.Buffer().Size()})
+				str = v.Substr(text.Region{r.B + 1, v.Size()})
 				br = n
 				rv = revert(n)
 				of = 2
 			} else if strings.ContainsAny(b, closing) {
 				// TODO: same as above
-				str = v.Buffer().Substr(text.Region{0, r.B - 1})
+				str = v.Substr(text.Region{0, r.B - 1})
 				br = b
 				rv = revert(b)
 				str = reverse(str)
@@ -187,7 +187,7 @@ func (c *MoveToCommand) Run(v *View, e *Edit) error {
 				of = -2
 			} else if strings.ContainsAny(n, closing) {
 				// TODO: same as above
-				str = v.Buffer().Substr(text.Region{0, r.B - 1})
+				str = v.Substr(text.Region{0, r.B - 1})
 				br = n
 				rv = revert(n)
 				str = reverse(str)
@@ -195,8 +195,8 @@ func (c *MoveToCommand) Run(v *View, e *Edit) error {
 				of = -1
 			} else {
 				// TODO: same as above
-				str = v.Buffer().Substr(text.Region{r.B, v.Buffer().Size()})
-				bef := v.Buffer().Substr(text.Region{0, r.B})
+				str = v.Substr(text.Region{r.B, v.Size()})
+				bef := v.Substr(text.Region{0, r.B})
 				if p := strings.LastIndexAny(bef, opening); p == -1 {
 					return
 				} else {
@@ -289,14 +289,14 @@ func (c *MoveCommand) Run(v *View, e *Edit) error {
 		})
 	case Lines:
 		move_action(v, c.Extend, func(in text.Region) int {
-			r, col := v.Buffer().RowCol(in.B)
+			r, col := v.RowCol(in.B)
 			_ = r
 			if !c.Forward {
 				r--
 			} else {
 				r++
 			}
-			return v.Buffer().TextPoint(r, col)
+			return v.TextPoint(r, col)
 		})
 	case Words:
 		move_action(v, c.Extend, func(in text.Region) int {
@@ -364,13 +364,13 @@ func (c *ScrollLinesCommand) Run(v *View, e *Edit) error {
 	vr := fe.VisibleRegion(v)
 	var r int
 	if c.Amount >= 0 {
-		r, _ = v.Buffer().RowCol(vr.Begin())
+		r, _ = v.RowCol(vr.Begin())
 		r -= c.Amount
 	} else {
-		r, _ = v.Buffer().RowCol(vr.End() - 1)
+		r, _ = v.RowCol(vr.End() - 1)
 		r -= c.Amount
 	}
-	r = v.Buffer().TextPoint(r, 0)
+	r = v.TextPoint(r, 0)
 	fe.Show(v, text.Region{A: r, B: r})
 	return nil
 }

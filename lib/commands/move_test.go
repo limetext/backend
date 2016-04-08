@@ -1685,8 +1685,8 @@ type scfe struct {
 }
 
 func (f *scfe) VisibleRegion(v *View) Region {
-	s := v.Buffer().Line(v.Buffer().TextPoint(3*3, 1))
-	e := v.Buffer().Line(v.Buffer().TextPoint(6*3, 1))
+	s := v.Line(v.TextPoint(3*3, 1))
+	e := v.Line(v.TextPoint(6*3, 1))
 	return Region{s.Begin(), e.End()}
 }
 
@@ -1715,17 +1715,17 @@ func TestScrollLines(t *testing.T) {
 	v.EndEdit(e)
 	ch.RunTextCommand(v, "scroll_lines", Args{"amount": 0})
 
-	if c := v.Buffer().Line(v.Buffer().TextPoint(3*3, 1)); fe.show.Begin() != c.Begin() {
+	if c := v.Line(v.TextPoint(3*3, 1)); fe.show.Begin() != c.Begin() {
 		t.Errorf("Expected %v, but got %v", c, fe.show)
 	}
 
 	ch.RunTextCommand(v, "scroll_lines", Args{"amount": 1})
-	if c := v.Buffer().Line(v.Buffer().TextPoint(3*3-1, 1)); fe.show.Begin() != c.Begin() {
+	if c := v.Line(v.TextPoint(3*3-1, 1)); fe.show.Begin() != c.Begin() {
 		t.Errorf("Expected %v, but got %v", c, fe.show)
 	}
-	t.Log(fe.VisibleRegion(v), v.Buffer().Line(v.Buffer().TextPoint(6*3+1, 1)))
+	t.Log(fe.VisibleRegion(v), v.Line(v.TextPoint(6*3+1, 1)))
 	ch.RunTextCommand(v, "scroll_lines", Args{"amount": -1})
-	if c := v.Buffer().Line(v.Buffer().TextPoint(6*3+1, 1)); fe.show.Begin() != c.Begin() {
+	if c := v.Line(v.TextPoint(6*3+1, 1)); fe.show.Begin() != c.Begin() {
 		t.Errorf("Expected %v, but got %v", c, fe.show)
 	}
 }

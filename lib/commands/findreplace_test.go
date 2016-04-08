@@ -47,7 +47,7 @@ func runFindTest(tests []findTest, t *testing.T, commands ...string) {
 			t.Errorf("Test %d: Expected %s, but got %s", i, test.exp, sr)
 		}
 		e = v.BeginEdit()
-		v.Erase(e, Region{0, v.Buffer().Size()})
+		v.Erase(e, Region{0, v.Size()})
 		v.EndEdit(e)
 	}
 }
@@ -132,11 +132,11 @@ func runReplaceTest(tests []replaceTest, t *testing.T, commands ...string) {
 		for _, command := range commands {
 			ed.CommandHandler().RunTextCommand(v, command, nil)
 		}
-		if out := v.Buffer().Substr(Region{0, v.Buffer().Size()}); out != test.exp {
+		if out := v.Substr(Region{0, v.Size()}); out != test.exp {
 			t.Errorf("Test %d failed: %s, %+v", i, out, test)
 		}
 		e = v.BeginEdit()
-		v.Erase(e, Region{0, v.Buffer().Size()})
+		v.Erase(e, Region{0, v.Size()})
 		v.EndEdit(e)
 	}
 }

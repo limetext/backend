@@ -6,9 +6,6 @@ package backend
 
 import (
 	"fmt"
-	"github.com/limetext/lime-backend/lib/textmate"
-	"github.com/limetext/lime-backend/lib/util"
-	"github.com/limetext/text"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -16,6 +13,10 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/limetext/lime-backend/lib/textmate"
+	"github.com/limetext/lime-backend/lib/util"
+	"github.com/limetext/text"
 )
 
 func TestView(t *testing.T) {
@@ -50,15 +51,15 @@ func TestView(t *testing.T) {
 	}
 	v.EndEdit(edit)
 
-	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "1234a1234b1234c1234d" {
+	if d := v.Substr(text.Region{A: 0, B: v.Size()}); d != "1234a1234b1234c1234d" {
 		t.Error(d)
 	}
 	v.undoStack.Undo(true)
-	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "abcd" {
+	if d := v.Substr(text.Region{A: 0, B: v.Size()}); d != "abcd" {
 		t.Error("expected 'abcd', but got: ", d)
 	}
 	v.undoStack.Redo(true)
-	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "1234a1234b1234c1234d" {
+	if d := v.Substr(text.Region{A: 0, B: v.Size()}); d != "1234a1234b1234c1234d" {
 		t.Error("expected '1234a1234b1234c1234d', but got: ", d)
 	}
 
@@ -81,34 +82,34 @@ func TestView(t *testing.T) {
 	}
 	v.EndEdit(edit)
 
-	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "hello world1234ahello world1234bhello world1234chello world1234d" {
+	if d := v.Substr(text.Region{A: 0, B: v.Size()}); d != "hello world1234ahello world1234bhello world1234chello world1234d" {
 		t.Error(d)
 	}
 	v.undoStack.Undo(true)
 
-	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "1234a1234b1234c1234d" {
+	if d := v.Substr(text.Region{A: 0, B: v.Size()}); d != "1234a1234b1234c1234d" {
 		t.Error("expected '1234a1234b1234c1234d', but got: ", d)
 	}
 	v.undoStack.Undo(true)
-	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "abcd" {
+	if d := v.Substr(text.Region{A: 0, B: v.Size()}); d != "abcd" {
 		t.Error("expected 'abcd', but got: ", d)
 	}
 	v.undoStack.Undo(true)
-	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "" {
+	if d := v.Substr(text.Region{A: 0, B: v.Size()}); d != "" {
 		t.Error("expected '', but got: ", d)
 	}
 	v.undoStack.Redo(true)
-	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "abcd" {
+	if d := v.Substr(text.Region{A: 0, B: v.Size()}); d != "abcd" {
 		t.Error("expected 'abcd', but got: ", d)
 	}
 
 	v.undoStack.Redo(true)
-	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "1234a1234b1234c1234d" {
+	if d := v.Substr(text.Region{A: 0, B: v.Size()}); d != "1234a1234b1234c1234d" {
 		t.Error("expected '1234a1234b1234c1234d', but got: ", d)
 	}
 
 	v.undoStack.Redo(true)
-	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "hello world1234ahello world1234bhello world1234chello world1234d" {
+	if d := v.Substr(text.Region{A: 0, B: v.Size()}); d != "hello world1234ahello world1234bhello world1234chello world1234d" {
 		t.Error(d)
 	}
 }
@@ -140,7 +141,7 @@ func TestErase(t *testing.T) {
 	if !reflect.DeepEqual(s.Regions(), []text.Region{{A: 4, B: 4}, {A: 8, B: 8}}) {
 		t.Error(s)
 	}
-	if d := v.buffer.Substr(text.Region{A: 0, B: v.buffer.Size()}); d != "12345678" {
+	if d := v.Substr(text.Region{A: 0, B: v.Size()}); d != "12345678" {
 		t.Error(d)
 	}
 }
@@ -175,7 +176,7 @@ func TestExtractScope(t *testing.T) {
 		for v.ExtractScope(1) == nr {
 			time.Sleep(time.Millisecond)
 		}
-		for i := 0; i < v.buffer.Size(); i++ {
+		for i := 0; i < v.Size(); i++ {
 			if r := v.ExtractScope(i); r != last {
 				str += fmt.Sprintf("%d (%d, %d)\n", i, r.A, r.B)
 				last = r
@@ -221,7 +222,7 @@ func TestScopeName(t *testing.T) {
 		for v.ScopeName(1) == "" {
 			time.Sleep(250 * time.Millisecond)
 		}
-		for i := 0; i < v.buffer.Size(); i++ {
+		for i := 0; i < v.Size(); i++ {
 			if name := v.ScopeName(i); name != last {
 				if last != "" {
 					str += fmt.Sprintf("%d-%d: %s\n", lasti, i, last)
@@ -230,7 +231,7 @@ func TestScopeName(t *testing.T) {
 				last = name
 			}
 		}
-		if i := v.Buffer().Size(); lasti != i {
+		if i := v.Size(); lasti != i {
 			str += fmt.Sprintf("%d-%d: %s\n", lasti, i, last)
 		}
 		if d, err := ioutil.ReadFile(expfile); err != nil {
@@ -345,7 +346,7 @@ func BenchmarkTransformTranscribe(b *testing.B) {
 	wg.Wait()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		v.Transform(sc, text.Region{A: 0, B: v.Buffer().Size()}).Transcribe()
+		v.Transform(sc, text.Region{A: 0, B: v.Size()}).Transcribe()
 	}
 	fmt.Println(util.Prof.String())
 }
@@ -682,8 +683,8 @@ func TestSetBuffer(t *testing.T) {
 
 	_ = v.setBuffer(b)
 
-	if v.buffer.Name() != b.Name() {
-		t.Errorf("Expected buffer called %s, but got %s", b.Name(), v.buffer.Name())
+	if v.Name() != b.Name() {
+		t.Errorf("Expected buffer called %s, but got %s", b.Name(), v.Name())
 	}
 }
 
@@ -710,8 +711,8 @@ func TestSetBufferTwice(t *testing.T) {
 		t.Errorf("Expected setting the second buffer to cause an error, but it didn't.")
 	}
 
-	if v.buffer.Name() != b1.Name() {
-		t.Errorf("Expected buffer called %s, but got %s", b1.Name(), v.buffer.Name())
+	if v.Name() != b1.Name() {
+		t.Errorf("Expected buffer called %s, but got %s", b1.Name(), v.Name())
 	}
 }
 
@@ -806,8 +807,10 @@ func TestIsDirtyWhenDirty(t *testing.T) {
 		v.Close()
 	}()
 
+	edit := v.BeginEdit()
 	v.SetScratch(false)
-	v.buffer.Insert(0, "test")
+	v.Insert(edit, 0, "test")
+	v.EndEdit(edit)
 
 	if !v.IsDirty() {
 		t.Errorf("Expected the view to be marked as dirty, but it wasn't")
@@ -902,7 +905,7 @@ func BenchmarkScopeNameLinear(b *testing.B) {
 		v.EndEdit(e)
 		b.StartTimer()
 		for j := 0; j < b.N; j++ {
-			for i := 0; i < v.buffer.Size(); i++ {
+			for i := 0; i < v.Size(); i++ {
 				v.ScopeName(i)
 			}
 		}

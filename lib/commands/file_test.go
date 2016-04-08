@@ -48,8 +48,8 @@ func TestOpenFile(t *testing.T) {
 	if err != nil {
 		exp = testPath
 	}
-	if w.Views()[l].Buffer().FileName() != exp {
-		t.Errorf("Expected %s as FileName, but got %s", testPath, w.Views()[l].Buffer().FileName())
+	if w.Views()[l].FileName() != exp {
+		t.Errorf("Expected %s as FileName, but got %s", testPath, w.Views()[l].FileName())
 	}
 
 	for _, v := range w.Views() {

@@ -215,6 +215,6 @@ func init() {
 	})
 
 	OnLoad.Add(func(v *View) {
-		GetEditor().Watch(v.Buffer().FileName(), v)
+		GetEditor().Watch(v.FileName(), v)
 	})
 }

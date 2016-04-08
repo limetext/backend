@@ -50,7 +50,7 @@ func (c *TitleCaseCommand) Run(v *View, e *Edit) error {
 	for i := 0; i < sel.Len(); i++ {
 		r := sel.Get(i)
 		if r.Size() != 0 {
-			t := v.Buffer().Substr(r)
+			t := v.Substr(r)
 			v.Replace(e, r, strings.Title(t))
 		}
 	}
@@ -64,7 +64,7 @@ func (c *SwapCaseCommand) Run(v *View, e *Edit) error {
 		if r.Size() == 0 {
 			continue
 		}
-		text := v.Buffer().Substr(r)
+		text := v.Substr(r)
 		swapped := make([]rune, 0)
 		for _, c := range text {
 			if unicode.IsUpper(c) {
@@ -83,7 +83,7 @@ func (c *UpperCaseCommand) Run(v *View, e *Edit) error {
 	for i := 0; i < sel.Len(); i++ {
 		r := sel.Get(i)
 		if r.Size() != 0 {
-			t := v.Buffer().Substr(r)
+			t := v.Substr(r)
 			v.Replace(e, r, strings.ToUpper(t))
 		}
 	}
@@ -95,7 +95,7 @@ func (c *LowerCaseCommand) Run(v *View, e *Edit) error {
 	for i := 0; i < sel.Len(); i++ {
 		r := sel.Get(i)
 		if r.Size() != 0 {
-			t := v.Buffer().Substr(r)
+			t := v.Substr(r)
 			v.Replace(e, r, strings.ToLower(t))
 		}
 	}

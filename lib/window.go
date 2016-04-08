@@ -6,12 +6,13 @@ package backend
 
 import (
 	"fmt"
-	"github.com/limetext/lime-backend/lib/log"
-	"github.com/limetext/text"
 	"io/ioutil"
 	"path/filepath"
 	"runtime/debug"
 	"sync"
+
+	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/text"
 )
 
 type Window struct {
@@ -38,7 +39,7 @@ func (w *Window) NewFile() *View {
 	v.setBuffer(text.NewBuffer())
 	v.selection.Clear()
 	v.selection.Add(text.Region{A: 0, B: 0})
-	v.Settings().Set("lime.last_save_change_count", v.buffer.ChangeCount())
+	v.Settings().Set("lime.last_save_change_count", v.ChangeCount())
 
 	OnNew.Call(v)
 	w.SetActiveView(v)
@@ -76,9 +77,9 @@ func (w *Window) OpenFile(filename string, flags int) *View {
 	v.SetScratch(true)
 	e := v.BeginEdit()
 	if fn, err := filepath.Abs(filename); err != nil {
-		v.Buffer().SetFileName(filename)
+		v.SetFileName(filename)
 	} else {
-		v.Buffer().SetFileName(fn)
+		v.SetFileName(fn)
 	}
 	if d, err := ioutil.ReadFile(filename); err != nil {
 		log.Error("Couldn't load file %s: %s", filename, err)
@@ -88,7 +89,7 @@ func (w *Window) OpenFile(filename string, flags int) *View {
 	v.EndEdit(e)
 	v.selection.Clear()
 	v.selection.Add(text.Region{A: 0, B: 0})
-	v.Settings().Set("lime.last_save_change_count", v.buffer.ChangeCount())
+	v.Settings().Set("lime.last_save_change_count", v.ChangeCount())
 	v.SetScratch(false)
 
 	OnLoad.Call(v)

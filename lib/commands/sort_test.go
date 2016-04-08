@@ -47,7 +47,7 @@ func runSortTest(command string, tests []sortTest, t *testing.T) {
 		}
 		ed.CommandHandler().RunTextCommand(v, command, args)
 
-		if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != test.expect {
+		if d := v.Substr(Region{0, v.Size()}); d != test.expect {
 			t.Errorf("Test %d: Excepted %#v,\n but got %#v", i, test.expect, d)
 		}
 	}

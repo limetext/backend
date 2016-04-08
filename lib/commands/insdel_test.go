@@ -36,15 +36,15 @@ Goodbye world
 	v.Sel().Add(Region{16, 16})
 	v.Sel().Add(Region{30, 30})
 	ed.CommandHandler().RunTextCommand(v, "left_delete", nil)
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != `Hello worl
+	if v.Substr(Region{0, v.Size()}) != `Hello worl
 Tes
 Goodbye worl
 ` {
-		t.Error(v.Buffer().Substr(Region{0, v.Buffer().Size()}))
+		t.Error(v.Substr(Region{0, v.Size()}))
 	}
 	ed.CommandHandler().RunTextCommand(v, "insert", Args{"characters": "a"})
-	if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != "Hello worla\nTesa\nGoodbye worla\n" {
-		lines := strings.Split(v.Buffer().Substr(Region{0, v.Buffer().Size()}), "\n")
+	if d := v.Substr(Region{0, v.Size()}); d != "Hello worla\nTesa\nGoodbye worla\n" {
+		lines := strings.Split(v.Substr(Region{0, v.Size()}), "\n")
 		for _, l := range lines {
 			t.Errorf("%d: '%s'", len(l), l)
 		}
@@ -52,48 +52,50 @@ Goodbye worl
 
 	v.Settings().Set("translate_tabs_to_spaces", true)
 	ed.CommandHandler().RunTextCommand(v, "insert", Args{"characters": "\t"})
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "Hello worla \nTesa    \nGoodbye worla   \n" {
-		lines := strings.Split(v.Buffer().Substr(Region{0, v.Buffer().Size()}), "\n")
+	if v.Substr(Region{0, v.Size()}) != "Hello worla \nTesa    \nGoodbye worla   \n" {
+		lines := strings.Split(v.Substr(Region{0, v.Size()}), "\n")
 		for _, l := range lines {
 			t.Errorf("%d: '%s'", len(l), l)
 		}
 	}
 	ed.CommandHandler().RunTextCommand(v, "left_delete", nil)
-	if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != "Hello worla\nTesa\nGoodbye worla\n" {
-		lines := strings.Split(v.Buffer().Substr(Region{0, v.Buffer().Size()}), "\n")
+	if d := v.Substr(Region{0, v.Size()}); d != "Hello worla\nTesa\nGoodbye worla\n" {
+		lines := strings.Split(v.Substr(Region{0, v.Size()}), "\n")
 		for _, l := range lines {
 			t.Errorf("%d: '%s'", len(l), l)
 		}
 	}
 
 	ed.CommandHandler().RunTextCommand(v, "left_delete", nil)
-	if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != "Hello worl\nTes\nGoodbye worl\n" {
-		lines := strings.Split(v.Buffer().Substr(Region{0, v.Buffer().Size()}), "\n")
+	if d := v.Substr(Region{0, v.Size()}); d != "Hello worl\nTes\nGoodbye worl\n" {
+		lines := strings.Split(v.Substr(Region{0, v.Size()}), "\n")
 		for _, l := range lines {
 			t.Errorf("%d: '%s'", len(l), l)
 		}
 	}
 
 	ed.CommandHandler().RunTextCommand(v, "insert", Args{"characters": "\t"})
-	if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != "Hello worl  \nTes \nGoodbye worl    \n" {
-		lines := strings.Split(v.Buffer().Substr(Region{0, v.Buffer().Size()}), "\n")
+	if d := v.Substr(Region{0, v.Size()}); d != "Hello worl  \nTes \nGoodbye worl    \n" {
+		lines := strings.Split(v.Substr(Region{0, v.Size()}), "\n")
 		for _, l := range lines {
 			t.Errorf("%d: '%s'", len(l), l)
 		}
 	}
 
 	ed.CommandHandler().RunTextCommand(v, "left_delete", nil)
-	if v.Buffer().Substr(Region{0, v.Buffer().Size()}) != "Hello worl\nTes\nGoodbye worl\n" {
-		lines := strings.Split(v.Buffer().Substr(Region{0, v.Buffer().Size()}), "\n")
+	if v.Substr(Region{0, v.Size()}) != "Hello worl\nTes\nGoodbye worl\n" {
+		lines := strings.Split(v.Substr(Region{0, v.Size()}), "\n")
 		for _, l := range lines {
 			t.Errorf("%d: '%s'", len(l), l)
 		}
 	}
 
-	v.Buffer().Erase(0, len(v.Buffer().Substr(Region{0, v.Buffer().Size()})))
-	v.Buffer().Insert(0, "€þıœəßðĸʒ×ŋµåäö𝄞")
+	edit := v.BeginEdit()
+	v.Erase(edit, Region{0, v.Size()})
+	v.Insert(edit, 0, "€þıœəßðĸʒ×ŋµåäö𝄞")
+	v.EndEdit(edit)
 	orig := "€þıœəßðĸʒ×ŋµåäö𝄞"
-	if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != orig {
+	if d := v.Substr(Region{0, v.Size()}); d != orig {
 		t.Errorf("%s\n\t%v\n\t%v", d, []byte(d), []byte(orig))
 	}
 
@@ -103,7 +105,7 @@ Goodbye worl
 	v.Sel().Add(Region{9, 9})
 	ed.CommandHandler().RunTextCommand(v, "left_delete", nil)
 	exp := "€þœəðĸ×ŋµåäö𝄞"
-	if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != exp {
+	if d := v.Substr(Region{0, v.Size()}); d != exp {
 		t.Errorf("%s\n\t%v\n\t%v", d, []byte(d), []byte(exp))
 	}
 }
@@ -139,7 +141,7 @@ func runDeleteTest(command string, tests *[]deleteTest, t *testing.T) {
 		}
 
 		ed.CommandHandler().RunTextCommand(v, command, nil)
-		if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != test.text {
+		if d := v.Substr(Region{0, v.Size()}); d != test.text {
 			t.Errorf("Test %02d: Expected %s, but got %s", i, test.text, d)
 		} else if !reflect.DeepEqual(*v.Sel(), s2) {
 			t.Errorf("Test %02d: Expected %v, but have %v", i, s2, v.Sel())
@@ -266,7 +268,7 @@ func TestInsert(t *testing.T) {
 			v.Sel().Add(r)
 		}
 		ed.CommandHandler().RunTextCommand(v, "insert", Args{"characters": test.data})
-		if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != test.expd {
+		if d := v.Substr(Region{0, v.Size()}); d != test.expd {
 			t.Errorf("Insert test %d failed: %s", i, d)
 		}
 		if sr := v.Sel().Regions(); !reflect.DeepEqual(sr, test.expr) {
@@ -328,7 +330,7 @@ func TestDeleteWord(t *testing.T) {
 		v.Sel().AddAll(test.sel)
 
 		ed.CommandHandler().RunTextCommand(v, "delete_word", Args{"forward": test.forward})
-		if d := v.Buffer().Substr(Region{0, v.Buffer().Size()}); d != test.expect {
+		if d := v.Substr(Region{0, v.Size()}); d != test.expect {
 			t.Errorf("Test %d:\nExcepted: '%s' but got: '%s'", i, test.expect, d)
 		}
 	}

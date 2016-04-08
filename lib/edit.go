@@ -6,6 +6,7 @@ package backend
 
 import (
 	"fmt"
+
 	. "github.com/limetext/text"
 )
 
@@ -30,7 +31,7 @@ type (
 func newEdit(v *View) *Edit {
 	ret := &Edit{
 		v:          v,
-		savedCount: v.buffer.ChangeCount(),
+		savedCount: v.ChangeCount(),
 	}
 	for _, r := range v.Sel().Regions() {
 		ret.savedSel.Add(r)
