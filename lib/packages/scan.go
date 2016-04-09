@@ -37,10 +37,18 @@ func Scan(dir string) {
 	if err != nil {
 		log.Error("Error while scanning %s: %s", dir, err)
 	}
-
 	watchDir(dir)
 
+	var pkgs []Package
 	for _, fi := range fis {
-		record(path.Join(dir, fi.Name()))
+		if pkg := record(path.Join(dir, fi.Name())); pkg != nil {
+			pkgs = append(pkgs, pkg)
+		}
 	}
+	go func() {
+		for _, pkg := range pkgs {
+			pkg.Load()
+			watch(pkg)
+		}
+	}()
 }

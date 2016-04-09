@@ -38,18 +38,12 @@ func Unregister(r *Record) {
 	}
 }
 
-func record(path string) {
+func record(path string) Package {
 	for _, rec := range recs {
 		if !rec.Check(path) {
 			continue
 		}
-		pkg := rec.Action(path)
-		go func() {
-			pkg.Load()
-			watch(pkg)
-		}()
-		// TODO: should we break here? if we do maybe there is still
-		// more records which can accept the path
-		// break
+		return rec.Action(path)
 	}
+	return nil
 }
