@@ -184,10 +184,6 @@ func (e *Editor) Init() {
 	e.loadSettings()
 
 	OnInit.call()
-
-	// There should be usable window and view on startup
-	w := e.NewWindow()
-	w.NewFile()
 }
 
 func (e *Editor) SetClipboardFuncs(setter func(string) error, getter func() (string, error)) {

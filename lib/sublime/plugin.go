@@ -82,7 +82,7 @@ func onInit() {
 	}
 }
 
-func onPackagesPathAdd(p string) {
+func pyAddPath(p string) {
 	l := py.NewLock()
 	defer l.Unlock()
 	py.AddToPath(p)
@@ -90,6 +90,6 @@ func onPackagesPathAdd(p string) {
 
 func init() {
 	backend.OnInit.Add(onInit)
-	backend.OnPackagesPathAdd.Add(onPackagesPathAdd)
+	backend.OnPackagesPathAdd.Add(pyAddPath)
 	packages.Register(pluginRecord)
 }

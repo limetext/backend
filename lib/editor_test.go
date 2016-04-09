@@ -10,9 +10,9 @@ import (
 
 	"github.com/limetext/lime-backend/lib/keys"
 	"github.com/limetext/lime-backend/lib/packages"
-	limeparser "github.com/limetext/lime-backend/lib/parser"
+	"github.com/limetext/lime-backend/lib/parser"
 	"github.com/limetext/lime-backend/lib/render"
-	"github.com/quarnster/parser"
+	qp "github.com/quarnster/parser"
 )
 
 func TestGetEditor(t *testing.T) {
@@ -246,12 +246,12 @@ func (d *dummySyntax) FileTypes() []string {
 	return d.filetypes
 }
 
-func (d *dummySyntax) Parser(data string) (limeparser.Parser, error) {
+func (d *dummySyntax) Parser(data string) (parser.Parser, error) {
 	d.data = data
 	return d, nil
 }
 
-func (d *dummySyntax) Parse() (*parser.Node, error) { return nil, nil }
+func (d *dummySyntax) Parse() (*qp.Node, error) { return nil, nil }
 
 func TestAddSyntax(t *testing.T) {
 	syn := new(dummySyntax)

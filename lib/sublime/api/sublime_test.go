@@ -112,5 +112,7 @@ func init() {
 	defer l.Unlock()
 	py.AddToPath("testdata")
 
-	backend.GetEditor().Init()
+	ed := backend.GetEditor()
+	ed.Init()
+	ed.NewWindow()
 }

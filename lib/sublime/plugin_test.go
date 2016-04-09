@@ -49,10 +49,10 @@ class TestToxt(sublime_plugin.TextCommand):
 }
 
 func init() {
-	l := py.NewLock()
-	defer l.Unlock()
-	py.AddToPath(".")
-	py.AddToPath("testdata")
+	pyAddPath(".")
+	pyAddPath("testdata")
 
-	backend.GetEditor().Init()
+	ed := backend.GetEditor()
+	ed.Init()
+	ed.NewWindow()
 }
