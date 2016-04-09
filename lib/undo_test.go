@@ -5,8 +5,9 @@
 package backend
 
 import (
-	"github.com/limetext/text"
 	"testing"
+
+	"github.com/limetext/text"
 )
 
 func TestUndoStackIndex(t *testing.T) {

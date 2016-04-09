@@ -6,8 +6,9 @@ package commands
 
 import (
 	"fmt"
-	. "github.com/limetext/lime-backend/lib"
 	"testing"
+
+	. "github.com/limetext/lime-backend/lib"
 )
 
 type DummyApplicationCommand struct {

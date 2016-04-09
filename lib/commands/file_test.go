@@ -5,9 +5,10 @@
 package commands
 
 import (
-	. "github.com/limetext/lime-backend/lib"
 	"path/filepath"
 	"testing"
+
+	. "github.com/limetext/lime-backend/lib"
 )
 
 func TestNewFile(t *testing.T) {

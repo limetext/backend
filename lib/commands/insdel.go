@@ -5,9 +5,10 @@
 package commands
 
 import (
+	"strings"
+
 	. "github.com/limetext/lime-backend/lib"
 	"github.com/limetext/text"
-	"strings"
 )
 
 type (

@@ -5,11 +5,12 @@
 package commands
 
 import (
-	. "github.com/limetext/lime-backend/lib"
-	. "github.com/limetext/text"
 	"reflect"
 	"strings"
 	"testing"
+
+	. "github.com/limetext/lime-backend/lib"
+	. "github.com/limetext/text"
 )
 
 func TestBasic(t *testing.T) {

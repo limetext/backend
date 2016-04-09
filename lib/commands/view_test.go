@@ -5,8 +5,9 @@
 package commands
 
 import (
-	. "github.com/limetext/lime-backend/lib"
 	"testing"
+
+	. "github.com/limetext/lime-backend/lib"
 )
 
 func TestCloseView(t *testing.T) {

@@ -8,8 +8,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	. "github.com/limetext/lime-backend/lib/util"
 	"sort"
+
+	. "github.com/limetext/lime-backend/lib/util"
 )
 
 type (

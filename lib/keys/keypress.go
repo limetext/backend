@@ -6,9 +6,10 @@ package keys
 
 import (
 	"fmt"
-	"github.com/limetext/lime-backend/lib/log"
 	"strings"
 	"unicode"
+
+	"github.com/limetext/lime-backend/lib/log"
 )
 
 // KeyPress describes a key press event.

@@ -5,9 +5,10 @@
 package commands
 
 import (
+	"testing"
+
 	. "github.com/limetext/lime-backend/lib"
 	. "github.com/limetext/text"
-	"testing"
 )
 
 type caseTest struct {

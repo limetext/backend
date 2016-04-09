@@ -5,9 +5,10 @@
 package commands
 
 import (
-	. "github.com/limetext/lime-backend/lib"
 	"strings"
 	"unicode"
+
+	. "github.com/limetext/lime-backend/lib"
 )
 
 type (

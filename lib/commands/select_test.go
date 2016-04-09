@@ -5,8 +5,9 @@
 package commands
 
 import (
-	. "github.com/limetext/text"
 	"testing"
+
+	. "github.com/limetext/text"
 )
 
 func TestSingleSelection(t *testing.T) {

@@ -5,11 +5,12 @@
 package log
 
 import (
-	"github.com/limetext/log4go"
 	"strings"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/limetext/log4go"
 )
 
 type testlogger func(string)

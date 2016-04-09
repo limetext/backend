@@ -5,10 +5,11 @@
 package render
 
 import (
-	"github.com/limetext/lime-backend/lib/util"
-	"github.com/limetext/text"
 	"image/color"
 	"sort"
+
+	"github.com/limetext/lime-backend/lib/util"
+	"github.com/limetext/text"
 )
 
 type (

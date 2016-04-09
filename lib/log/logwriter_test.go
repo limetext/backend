@@ -6,9 +6,10 @@ package log
 
 import (
 	"fmt"
-	"github.com/limetext/log4go"
 	"os"
 	"testing"
+
+	"github.com/limetext/log4go"
 )
 
 func TestNewLogWriter(t *testing.T) {

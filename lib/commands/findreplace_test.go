@@ -5,10 +5,11 @@
 package commands
 
 import (
-	. "github.com/limetext/lime-backend/lib"
-	. "github.com/limetext/text"
 	"reflect"
 	"testing"
+
+	. "github.com/limetext/lime-backend/lib"
+	. "github.com/limetext/text"
 )
 
 type findTest struct {

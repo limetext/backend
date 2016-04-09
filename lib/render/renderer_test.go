@@ -5,9 +5,10 @@
 package render
 
 import (
-	"github.com/limetext/text"
 	"reflect"
 	"testing"
+
+	"github.com/limetext/text"
 )
 
 type (

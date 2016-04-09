@@ -8,9 +8,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/limetext/lime-backend/lib/loaders/plist"
 	"github.com/quarnster/parser"
-	"strings"
 )
 
 func plistconv(buf *bytes.Buffer, node *parser.Node) error {

@@ -6,10 +6,11 @@ package commands
 
 import (
 	"fmt"
+	"strings"
+
 	. "github.com/limetext/lime-backend/lib"
 	"github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/text"
-	"strings"
 )
 
 const (

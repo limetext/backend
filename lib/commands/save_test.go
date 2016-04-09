@@ -5,10 +5,11 @@
 package commands
 
 import (
-	. "github.com/limetext/lime-backend/lib"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	. "github.com/limetext/lime-backend/lib"
 )
 
 var testfile string = "testdata/save_test.txt"
