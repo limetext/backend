@@ -10,6 +10,9 @@ import (
 
 	"github.com/limetext/lime-backend/lib/keys"
 	"github.com/limetext/lime-backend/lib/packages"
+	limeparser "github.com/limetext/lime-backend/lib/parser"
+	"github.com/limetext/lime-backend/lib/render"
+	"github.com/quarnster/parser"
 )
 
 func TestGetEditor(t *testing.T) {
@@ -199,6 +202,73 @@ func TestHandleInput(t *testing.T) {
 	if ki := <-editor.keyInput; ki != kp {
 		t.Errorf("Expected %s to be on the input buffer, but got %s", kp, ki)
 	}
+}
+
+type dummyColorSc struct {
+	name string
+}
+
+func (d *dummyColorSc) Name() string {
+	return d.name
+}
+
+func (d *dummyColorSc) Spice(*render.ViewRegions) render.Flavour { return render.Flavour{} }
+
+func TestAddColorScheme(t *testing.T) {
+	cs := new(dummyColorSc)
+	ed := GetEditor()
+
+	ed.AddColorScheme("test/path", cs)
+	if ret := ed.colorSchemes["test/path"]; ret != cs {
+		t.Errorf("Expected 'test/path' color scheme %v, but got %v", cs, ret)
+	}
+}
+
+func TestGetColorScheme(t *testing.T) {
+
+}
+
+func TestColorSchemes(t *testing.T) {
+
+}
+
+type dummySyntax struct {
+	name      string
+	filetypes []string
+	data      string
+}
+
+func (d *dummySyntax) Name() string {
+	return d.name
+}
+
+func (d *dummySyntax) FileTypes() []string {
+	return d.filetypes
+}
+
+func (d *dummySyntax) Parser(data string) (limeparser.Parser, error) {
+	d.data = data
+	return d, nil
+}
+
+func (d *dummySyntax) Parse() (*parser.Node, error) { return nil, nil }
+
+func TestAddSyntax(t *testing.T) {
+	syn := new(dummySyntax)
+	ed := GetEditor()
+
+	ed.AddSyntax("test/path", syn)
+	if ret := ed.syntaxes["test/path"]; ret != syn {
+		t.Errorf("Expected 'test/path' syntax %v, but got %v", syn, ret)
+	}
+}
+
+func TestGetSyntax(t *testing.T) {
+
+}
+
+func TestSyntaxes(t *testing.T) {
+
 }
 
 func init() {

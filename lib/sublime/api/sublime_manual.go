@@ -98,16 +98,10 @@ var sublime_manual_methods = []py.Method{
 	{Name: "packages_path", Func: sublime_PackagesPath},
 }
 
+// TODO: check how many times is this function running
 func init() {
-	sublime_methods = append(sublime_methods, sublime_manual_methods...)
 	l := py.InitAndLock()
 	defer l.Unlock()
-
-	m, err := py.InitModule("sublime", sublime_methods)
-	if err != nil {
-		// TODO: we should handle this as error
-		panic(err)
-	}
 
 	if sys, err := py.Import("sys"); err != nil {
 		log.Warn(err)
@@ -119,6 +113,13 @@ func init() {
 			sys.Base().SetAttr(pyc, py.True)
 		}
 		sys.Decref()
+	}
+
+	sublime_methods = append(sublime_methods, sublime_manual_methods...)
+	m, err := py.InitModule("sublime", sublime_methods)
+	if err != nil {
+		// TODO: we should handle this as error
+		panic(err)
 	}
 
 	classes := []struct {

@@ -26,13 +26,6 @@ func newPlugin(fn string) packages.Package {
 
 // TODO: implement unload
 func (p *plugin) Load() {
-	// in case error ocured on running onInit function
-	// TODO: it's better to unregister plugin record but then we need to
-	// unregister package record to
-	if module == nil {
-		return
-	}
-
 	dir, file := filepath.Split(p.Path())
 	p.name = file
 	name := filepath.Base(dir) + "." + file[:len(file)-3]
@@ -71,7 +64,7 @@ func isPlugin(filename string) bool {
 }
 
 var (
-	pluginRecord *packages.Record = &packages.Record{isPlugin, newPlugin}
+	pluginRecord = &packages.Record{isPlugin, newPlugin}
 
 	module *py.Module
 )
@@ -82,6 +75,10 @@ func onInit() {
 	var err error
 	if module, err = py.Import("sublime_plugin"); err != nil {
 		log.Error("Error importing sublime_plugin: %s", err)
+		packages.Unregister(pluginRecord)
+		// TODO: we shouldn't completely unregister packagerecord some
+		// packages contain just syntaxes or themes
+		packages.Unregister(packageRecord)
 	}
 }
 

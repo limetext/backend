@@ -74,7 +74,6 @@ func (s textSorter) Less(i, j int) bool {
 
 func (c *SortLinesCommand) Run(v *View, e *Edit) error {
 	sel := v.Sel()
-
 	// Used as a set of int
 	sorted_rows := make(map[int]bool)
 
@@ -121,7 +120,6 @@ func (c *SortLinesCommand) Run(v *View, e *Edit) error {
 
 func (c *SortSelectionCommand) Run(v *View, e *Edit) error {
 	sel := v.Sel()
-
 	regions := make([]Region, sel.Len())
 	texts := make([]string, sel.Len())
 	for i := 0; i < sel.Len(); i++ {

@@ -2,17 +2,18 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-package textmate
+package sublime
 
 import (
 	"fmt"
-	"github.com/limetext/lime-backend/lib/util"
 	"io/ioutil"
 	"testing"
+
+	"github.com/limetext/lime-backend/lib/util"
 )
 
 func TestLanguageProviderLanguageFromScope(t *testing.T) {
-	l, _ := Provider.LanguageFromFile("testdata/Go.tmLanguage")
+	l, _ := Provider.LanguageFromFile("testdata/package/Go.tmLanguage")
 
 	if _, err := Provider.LanguageFromScope(l.ScopeName); err != nil {
 		t.Errorf("Tried to load %s, but got an error: %v", l.ScopeName, err)
@@ -24,7 +25,7 @@ func TestLanguageProviderLanguageFromScope(t *testing.T) {
 }
 
 func TestLanguageProviderLanguageFromFile(t *testing.T) {
-	if _, err := Provider.LanguageFromFile("testdata/Go.tmLanguage"); err != nil {
+	if _, err := Provider.LanguageFromFile("testdata/package/Go.tmLanguage"); err != nil {
 		t.Errorf("Tried to load testdata/Go.tmLanguage, but got an error: %v", err)
 	}
 
@@ -37,7 +38,7 @@ func TestTmLanguage(t *testing.T) {
 	files := []string{
 		"testdata/Property List (XML).tmLanguage",
 		"testdata/XML.plist",
-		"testdata/Go.tmLanguage",
+		"testdata/package/Go.tmLanguage",
 	}
 	for _, fn := range files {
 		if _, err := Provider.LanguageFromFile(fn); err != nil {
@@ -87,12 +88,13 @@ func TestTmLanguage(t *testing.T) {
 			d0 = string(d)
 		}
 
-		if lp, err := NewLanguageParser(t3.syn, d0); err != nil {
+		if syn, err := syntaxFromLanguage(t3.syn); err != nil {
 			t.Error(err)
-		} else if root, err := lp.Parse(); err != nil {
+		} else if pr, err := syn.Parser(d0); err != nil {
+			t.Error(err)
+		} else if root, err := pr.Parse(); err != nil {
 			t.Error(err)
 		} else {
-			//		fmt.Println(lp.RootNode())
 			str := fmt.Sprintf("%s", root)
 			if d, err := ioutil.ReadFile(t3.out); err != nil {
 				if err := ioutil.WriteFile(t3.out, []byte(str), 0644); err != nil {
@@ -124,13 +126,30 @@ func BenchmarkLanguage(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		for j := range d0 {
-			lp, err := NewLanguageParser("testdata/Go.tmLanguage", d0[j])
+			syn, err := newSyntax("testdata/package/Go.tmLanguage")
 			if err != nil {
 				b.Fatal(err)
 				return
 			}
-			lp.Parse()
+			pr, err := syn.Parser(d0[j])
+			if err != nil {
+				b.Fatal(err)
+				return
+			}
+			_, err = pr.Parse()
+			if err != nil {
+				b.Fatal(err)
+				return
+			}
 		}
 	}
 	fmt.Println(util.Prof)
+}
+
+func syntaxFromLanguage(id string) (*syntax, error) {
+	l, err := Provider.GetLanguage(id)
+	if err != nil {
+		return nil, err
+	}
+	return &syntax{l: l}, nil
 }

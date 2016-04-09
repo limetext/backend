@@ -47,6 +47,9 @@ type (
 		platformKB       *keys.HasKeyBindings
 		userKB           *keys.HasKeyBindings
 		pkgsPaths        map[string]string
+		colorSchemes     map[string]ColorScheme
+		syntaxes         map[string]Syntax
+		filetypes        map[string]string
 	}
 
 	// The Frontend interface defines the API
@@ -129,6 +132,9 @@ func GetEditor() *Editor {
 			platformKB:       new(keys.HasKeyBindings),
 			userKB:           new(keys.HasKeyBindings),
 			pkgsPaths:        make(map[string]string),
+			colorSchemes:     make(map[string]ColorScheme),
+			syntaxes:         make(map[string]Syntax),
+			filetypes:        make(map[string]string),
 		}
 		var err error
 		if ed.Watcher, err = watch.NewWatcher(); err != nil {
@@ -137,10 +143,12 @@ func GetEditor() *Editor {
 
 		ed.console.Settings().Set("is_widget", true)
 		// Initializing settings hierarchy
+		// default <- platform <- user(editor)
 		ed.platformSettings.Settings().SetParent(ed.defaultSettings)
 		ed.Settings().SetParent(ed.platformSettings)
 
 		// Initializing keybidings hierarchy
+		// default <- platform <- user <- user platform(editor)
 		ed.KeyBindings().SetParent(ed.userKB)
 		ed.userKB.KeyBindings().SetParent(ed.platformKB)
 		ed.platformKB.KeyBindings().SetParent(ed.defaultKB)
@@ -448,3 +456,32 @@ func (e *Editor) RemovePackagesPath(key string) {
 	}
 	delete(e.pkgsPaths, key)
 }
+
+func (e *Editor) AddColorScheme(path string, cs ColorScheme) {
+	e.colorSchemes[path] = cs
+}
+
+func (e *Editor) GetColorScheme(path string) ColorScheme {
+	return e.colorSchemes[path]
+}
+
+// TODO: should generate sth like sublime text color schemes menu
+func (e *Editor) ColorSchemes() {}
+
+func (e *Editor) AddSyntax(path string, s Syntax) {
+	e.syntaxes[path] = s
+	for _, t := range s.FileTypes() {
+		e.filetypes[t] = path
+	}
+}
+
+func (e *Editor) GetSyntax(path string) Syntax {
+	return e.syntaxes[path]
+}
+
+func (e *Editor) FileTypeSyntax(ext string) string {
+	return e.filetypes[ext]
+}
+
+// TODO: should generate sth like sublime text syntaxes menu
+func (e *Editor) Syntaxes() {}

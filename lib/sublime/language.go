@@ -2,22 +2,23 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-package textmate
+package sublime
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/limetext/lime-backend/lib/loaders"
-	"github.com/limetext/lime-backend/lib/log"
-	"github.com/limetext/rubex"
-	"github.com/limetext/text"
-	"github.com/quarnster/parser"
 	"io/ioutil"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/limetext/lime-backend/lib/loaders"
+	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/rubex"
+	"github.com/limetext/text"
+	"github.com/quarnster/parser"
 )
 
 const maxiter = 10000
@@ -29,6 +30,7 @@ type (
 		lastFound int
 	}
 
+	// For loading tmLanguage files
 	Language struct {
 		UnpatchedLanguage
 	}
@@ -41,6 +43,7 @@ type (
 	UnpatchedLanguage struct {
 		FileTypes      []string
 		FirstLineMatch string
+		Name           string
 		RootPattern    RootPattern `json:"patterns"`
 		Repository     map[string]*Pattern
 		ScopeName      string
@@ -191,6 +194,21 @@ func (l *Language) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (l *Language) copy() *Language {
+	ret := &Language{}
+	ret.FileTypes = make([]string, len(l.FileTypes))
+	copy(ret.FileTypes, l.FileTypes)
+	ret.FirstLineMatch = l.FirstLineMatch
+	ret.Name = l.Name
+	ret.RootPattern.Pattern = *l.RootPattern.Pattern.copy(ret)
+	ret.Repository = make(map[string]*Pattern)
+	for key, pat := range l.Repository {
+		ret.Repository[key] = pat.copy(ret)
+	}
+	ret.ScopeName = l.ScopeName
+	return ret
+}
+
 func (r *RootPattern) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &r.Patterns)
 }
@@ -233,6 +251,12 @@ func (c *Captures) Swap(i, j int) {
 	(*c)[i], (*c)[j] = (*c)[j], (*c)[i]
 }
 
+func (c *Captures) copy() *Captures {
+	ret := make(Captures, len(*c))
+	copy(ret, *c)
+	return &ret
+}
+
 func (m MatchObject) fix(add int) {
 	for i := range m {
 		if m[i] != -1 {
@@ -265,14 +289,30 @@ func (r *Regex) Find(data string, pos int) MatchObject {
 	return nil
 }
 
+func (r *Regex) copy() *Regex {
+	ret := &Regex{}
+	if r.re == nil {
+		return ret
+	}
+	if re, err := rubex.Compile(fmt.Sprint(r.re)); err != nil {
+		log.Warn("Error on copying regex: %s", err)
+	} else {
+		ret.re = re
+	}
+	ret.lastIndex = r.lastIndex
+	ret.lastFound = r.lastFound
+	return ret
+}
+
 func (p *Pattern) FirstMatch(data string, pos int) (pat *Pattern, ret MatchObject) {
 	startIdx := -1
 	for i := 0; i < len(p.cachedPatterns); {
 		ip, im := p.cachedPatterns[i].Cache(data, pos)
-		if im != nil /* && im[0] != im[1]*/ {
+		if im != nil {
 			if startIdx < 0 || startIdx > im[0] {
 				startIdx, pat, ret = im[0], ip, im
-				// This match is right at the start, we're not going to find a better pattern than this,
+				// This match is right at the start, we're not
+				// going to find a better pattern than this,
 				// so stop the search
 				if im[0] == pos {
 					break
@@ -280,7 +320,8 @@ func (p *Pattern) FirstMatch(data string, pos int) (pat *Pattern, ret MatchObjec
 			}
 			i++
 		} else {
-			// If it wasn't found now, it'll never be found, so the pattern can be popped from the cache
+			// If it wasn't found now, it'll never be found,
+			// so the pattern can be popped from the cache
 			copy(p.cachedPatterns[i:], p.cachedPatterns[i+1:])
 			p.cachedPatterns = p.cachedPatterns[:len(p.cachedPatterns)-1]
 		}
@@ -421,7 +462,7 @@ func (p *Pattern) CreateNode(data string, pos int, d parser.DataSource, mo Match
 				break
 			}
 		}
-		if /*(endmatch == nil || (endmatch != nil && endmatch[0] != i)) && */ len(p.cachedPatterns) > 0 {
+		if len(p.cachedPatterns) > 0 {
 			// Might be more recursive patterns to apply BEFORE the end is reached
 			pattern2, match2 := p.FirstMatch(data, i)
 			if match2 != nil && ((endmatch == nil && match2[0] < end) || (endmatch != nil && (match2[0] < endmatch[0] || match2[0] == endmatch[0] && ret.Range.A == ret.Range.B))) {
@@ -445,6 +486,29 @@ func (p *Pattern) CreateNode(data string, pos int, d parser.DataSource, mo Match
 	return
 }
 
+func (p *Pattern) copy(l *Language) *Pattern {
+	ret := &Pattern{}
+	ret.Named = p.Named
+	ret.Include = p.Include
+	ret.Match = *p.Match.copy()
+	if p.Captures != nil {
+		ret.Captures = *p.Captures.copy()
+	}
+	ret.Begin = *p.Begin.copy()
+	if p.BeginCaptures != nil {
+		ret.BeginCaptures = *p.BeginCaptures.copy()
+	}
+	ret.End = *p.End.copy()
+	if p.EndCaptures != nil {
+		ret.EndCaptures = *p.EndCaptures.copy()
+	}
+	ret.owner = l
+	for _, pat := range p.Patterns {
+		ret.Patterns = append(ret.Patterns, *pat.copy(l))
+	}
+	return ret
+}
+
 func (d *LanguageParser) Data(a, b int) string {
 	a = text.Clamp(0, len(d.data), a)
 	b = text.Clamp(0, len(d.data), b)
@@ -456,14 +520,6 @@ func (lp *LanguageParser) patch(lut []int, node *parser.Node) {
 	node.Range.B = lut[node.Range.B]
 	for _, child := range node.Children {
 		lp.patch(lut, child)
-	}
-}
-
-func NewLanguageParser(scope string, data string) (*LanguageParser, error) {
-	if l, err := Provider.GetLanguage(scope); err != nil {
-		return nil, err
-	} else {
-		return &LanguageParser{l, []rune(data)}, nil
 	}
 }
 

@@ -35,7 +35,6 @@ func (w *Window) NewFile() *View {
 	w.views = append(w.views, newView(w))
 	v := w.views[len(w.views)-1]
 
-	v.Settings().SetParent(w)
 	v.setBuffer(text.NewBuffer())
 	v.selection.Clear()
 	v.selection.Add(text.Region{A: 0, B: 0})

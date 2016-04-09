@@ -19,7 +19,6 @@ import (
 	"github.com/limetext/lime-backend/lib/packages"
 	"github.com/limetext/lime-backend/lib/parser"
 	"github.com/limetext/lime-backend/lib/render"
-	"github.com/limetext/lime-backend/lib/textmate"
 	. "github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/rubex"
 	. "github.com/limetext/text"
@@ -32,49 +31,81 @@ type (
 	View struct {
 		HasSettings
 		HasId
-		window      *Window
-		buffer      Buffer
-		selection   RegionSet
-		undoStack   UndoStack
-		scratch     bool
-		overwrite   bool
-		cursyntax   string
-		syntax      parser.SyntaxHighlighter
-		regions     render.ViewRegionMap
-		editstack   []*Edit
-		lock        sync.Mutex
-		reparseChan chan parseReq
-		status      map[string]string
+		window           *Window
+		buffer           Buffer
+		selection        RegionSet
+		undoStack        UndoStack
+		scratch          bool
+		overwrite        bool
+		cursyntax        string
+		syntax           parser.SyntaxHighlighter
+		regions          render.ViewRegionMap
+		editstack        []*Edit
+		lock             sync.Mutex
+		reparseChan      chan parseReq
+		status           map[string]string
+		defaultSettings  *HasSettings
+		platformSettings *HasSettings
+		userSettings     *HasSettings
 	}
 	parseReq struct {
 		forced bool
 	}
+
+	// Any color scheme view should implement this interface
+	// also it should register it self from editor.AddColorSCheme
+	ColorScheme interface {
+		render.ColourScheme
+		Name() string
+	}
+
+	// Any syntax definition for view should implement this interface
+	// also it should register it self from editor.AddSyntax
+	Syntax interface {
+		// provides parser for creating syntax highlighter
+		Parser(data string) (parser.Parser, error)
+		Name() string
+		// filetypes this syntax supports
+		FileTypes() []string
+	}
 )
 
 func newView(w *Window) *View {
-	ret := &View{window: w, regions: make(render.ViewRegionMap)}
-	ret.status = make(map[string]string)
-	ret.loadSettings()
+	v := &View{
+		window:           w,
+		regions:          make(render.ViewRegionMap),
+		status:           make(map[string]string),
+		reparseChan:      make(chan parseReq, 32),
+		defaultSettings:  new(HasSettings),
+		platformSettings: new(HasSettings),
+		userSettings:     new(HasSettings),
+	}
+	// Initializing keybidings hierarchy
+	// window <- default <- platform <- user <- view
+	v.defaultSettings.Settings().SetParent(v.window)
+	v.platformSettings.Settings().SetParent(v.defaultSettings)
+	v.userSettings.Settings().SetParent(v.platformSettings)
+	v.Settings().SetParent(v.userSettings)
 
-	ret.Settings().AddOnChange("lime.view.syntax", func(name string) {
-		ret.lock.Lock()
-		defer ret.lock.Unlock()
+	v.loadSettings()
+	v.Settings().AddOnChange("lime.view.syntax", func(name string) {
+		v.lock.Lock()
+		defer v.lock.Unlock()
 
 		if name != "syntax" {
 			return
 		}
-		syn, _ := ret.Settings().Get("syntax", "").(string)
-		if syn != ret.cursyntax {
-			ret.cursyntax = syn
-			ret.reparse(true)
-			ret.loadSettings()
+		syn, _ := v.Settings().Get("syntax", "").(string)
+		if syn != v.cursyntax {
+			v.cursyntax = syn
+			v.reparse(true)
+			v.loadSettings()
 		}
 	})
+	go v.parsethread()
+	v.Settings().Set("is_widget", false)
 
-	ret.reparseChan = make(chan parseReq, 32)
-	go ret.parsethread()
-	ret.Settings().Set("is_widget", false)
-	return ret
+	return v
 }
 
 // implement the fmt.Stringer interface
@@ -164,20 +195,21 @@ func (v *View) parsethread() {
 		}()
 
 		sub := v.Substr(Region{0, v.Size()})
-
 		source, _ := v.Settings().Get("syntax", "").(string)
 		if len(source) == 0 {
 			return
 		}
-
-		// TODO: Allow other parsers instead of this hardcoded textmate version
-		pr, err := textmate.NewLanguageParser(source, sub)
-		if err != nil {
-			log.Error("Couldn't parse: %v", err)
+		syn := GetEditor().GetSyntax(source)
+		if syn == nil {
+			log.Error("No syntax %s", source)
 			return
 		}
-
-		syn, err := parser.NewSyntaxHighlighter(pr)
+		pr, err := syn.Parser(sub)
+		if err != nil {
+			log.Error("Couldn't get parser from syntax: %s", err)
+			return
+		}
+		synh, err := parser.NewSyntaxHighlighter(pr)
 		if err != nil {
 			log.Error("Couldn't create syntaxhighlighter: %v", err)
 			return
@@ -193,14 +225,14 @@ func (v *View) parsethread() {
 		v.lock.Lock()
 		defer v.lock.Unlock()
 
-		v.syntax = syn
+		v.syntax = synh
 		for k := range v.regions {
 			if strings.HasPrefix(k, "lime.syntax") {
 				delete(v.regions, k)
 			}
 		}
 
-		for k, v2 := range syn.Flatten() {
+		for k, v2 := range synh.Flatten() {
 			if v2.Regions.HasNonEmpty() {
 				v.regions[k] = v2
 			}
@@ -249,34 +281,28 @@ func (v *View) reparse(forced bool) {
 // Will load view settings respect to current syntax
 // e.g if current syntax is Python settings order will be:
 // Packages/Python/Python.sublime-settings
+// Packages/Python/Python (windows).sublime-settings
 // Packages/User/Python.sublime-settings
 // <Buffer Specific Settings>
 func (v *View) loadSettings() {
 	syntax := v.Settings().Get("syntax", "").(string)
-
-	if syntax == "" {
-		v.Settings().SetParent(v.window)
-		return
-	}
-
-	defSet, usrSet := &HasSettings{}, &HasSettings{}
-
-	defSet.Settings().SetParent(v.window)
-	usrSet.Settings().SetParent(defSet)
-	v.Settings().SetParent(usrSet)
-
 	ed := GetEditor()
 	if r, err := rubex.Compile(`([A-Za-z]+?)\.(?:[^.]+)$`); err != nil {
 		log.Error(err)
-		return
+		// TODO: should we match syntax file name or the syntax name
 	} else if s := r.FindStringSubmatch(syntax); s != nil {
+		// TODO: the syntax folder should be the package path and name
 		p := path.Join(ed.PackagesPath("shipped"), s[1], s[1]+".sublime-settings")
 		log.Fine("Loading %s for view", p)
-		packages.LoadJSON(p, defSet.Settings())
+		packages.LoadJSON(p, v.defaultSettings.Settings())
+
+		p = path.Join(ed.PackagesPath("shipped"), s[1], s[1]+" ("+ed.Plat()+").sublime-settings")
+		log.Fine("Loading %s for view", p)
+		packages.LoadJSON(p, v.platformSettings.Settings())
 
 		p = path.Join(ed.PackagesPath("user"), s[1]+".sublime-settings")
 		log.Fine("Loading %s for view", p)
-		packages.LoadJSON(p, usrSet.Settings())
+		packages.LoadJSON(p, v.userSettings.Settings())
 	}
 }
 
@@ -1035,7 +1061,15 @@ func (v *View) Lines(r Region) []Region {
 }
 
 func (v *View) SetFileName(n string) error {
-	return v.buffer.SetFileName(n)
+	if err := v.buffer.SetFileName(n); err != nil {
+		return err
+	}
+	if ext := path.Ext(n); ext == "" {
+		return nil
+	} else if file := GetEditor().FileTypeSyntax(ext[1:]); file != "" {
+		v.SetSyntaxFile(file)
+	}
+	return nil
 }
 
 func (v *View) Name() string {

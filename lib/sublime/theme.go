@@ -2,35 +2,37 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-package textmate
+package sublime
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/limetext/lime-backend/lib/loaders"
-	"github.com/limetext/lime-backend/lib/log"
-	"github.com/limetext/lime-backend/lib/render"
-	"github.com/limetext/lime-backend/lib/util"
 	"image/color"
 	"io/ioutil"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/limetext/lime-backend/lib/loaders"
+	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/lime-backend/lib/render"
+	"github.com/limetext/lime-backend/lib/util"
 )
 
 type (
 	Color color.RGBA
 
 	// TODO(q): personally I don't care about the font style attributes
-	Settings map[string]Color
+	ThemeSettings map[string]Color
 
 	ScopeSetting struct {
 		Name     string
 		Scope    string
-		Settings Settings
+		Settings ThemeSettings
 	}
+	// For loading tmTheme files
 	Theme struct {
-		GutterSettings Settings
+		GutterSettings ThemeSettings
 		Name           string
 		Settings       []ScopeSetting
 		UUID           UUID
@@ -40,9 +42,9 @@ type (
 func LoadTheme(filename string) (*Theme, error) {
 	var scheme Theme
 	if d, err := ioutil.ReadFile(filename); err != nil {
-		return nil, fmt.Errorf("Unable to load colorscheme definition: %s", err)
+		return nil, fmt.Errorf("Unable to read theme definition: %s", err)
 	} else if err := loaders.LoadPlist(d, &scheme); err != nil {
-		return nil, fmt.Errorf("Unable to load colorscheme definition: %s", err)
+		return nil, fmt.Errorf("Unable to load theme definition: %s", err)
 	}
 
 	return &scheme, nil
@@ -85,8 +87,8 @@ func (c *Color) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (s *Settings) UnmarshalJSON(data []byte) error {
-	*s = make(Settings)
+func (s *ThemeSettings) UnmarshalJSON(data []byte) error {
+	*s = make(ThemeSettings)
 	tmp := make(map[string]json.RawMessage)
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
