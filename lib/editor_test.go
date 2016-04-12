@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/limetext/lime-backend/lib/keys"
-	"github.com/limetext/lime-backend/lib/packages"
 	"github.com/limetext/lime-backend/lib/parser"
 	"github.com/limetext/lime-backend/lib/render"
 	qp "github.com/quarnster/parser"
@@ -22,78 +21,29 @@ func TestGetEditor(t *testing.T) {
 	}
 }
 
-func TestLoadKeyBinding(t *testing.T) {
-	ed := GetEditor()
-	if err := packages.LoadJSON("testdata/Default.sublime-keymap", ed.KeyBindings()); err != nil {
-		t.Fatal(err)
-	}
-
-	kb := ed.KeyBindings().Filter(keys.KeyPress{Key: 'i'})
-	if expectedLen := 3; kb.Len() != expectedLen {
-		t.Errorf("Expected to have %d keys in the filter, but it had %d", expectedLen, kb.Len())
-	}
-}
-
 func TestLoadKeyBindings(t *testing.T) {
 	ed := GetEditor()
-	ed.loadKeyBindings()
 
 	if ed.defaultKB.KeyBindings().Len() <= 0 {
 		t.Errorf("Expected editor to have some keys bound, but it didn't")
 	}
 }
 
-func TestLoadSetting(t *testing.T) {
-	editor := GetEditor()
-	if err := packages.LoadJSON("testdata/Default.sublime-settings", editor.Settings()); err != nil {
-		t.Fatal(err)
-	}
-
-	if editor.Settings().Has("tab_size") != true {
-		t.Error("Expected editor settings to have tab_size, but it didn't")
-	}
-
-	tab_size := editor.Settings().Get("tab_size").(float64)
-	if tab_size != 4 {
-		t.Errorf("Expected tab_size to equal 4, got: %v", tab_size)
-	}
-}
-
 func TestLoadSettings(t *testing.T) {
-	editor := GetEditor()
-	editor.loadSettings()
-
-	if editor.Settings().Has("tab_size") != true {
-		t.Error("Expected editor settings to have tab_size, but it didn't")
-	}
-
-	plat := editor.Settings().Parent()
-	switch editor.Platform() {
+	ed := GetEditor()
+	switch ed.Platform() {
 	case "windows":
-		if plat.Settings().Get("font_face", "") != "Consolas" {
-			t.Errorf("Expected windows font_face be Consolas, but is %s", plat.Settings().Get("font_face", ""))
+		if res := ed.Settings().Get("font_face", ""); res != "Consolas" {
+			t.Errorf("Expected windows font_face be Consolas, but is %s", res)
 		}
 	case "darwin":
-		if plat.Settings().Get("font_face", "") != "Menlo" {
-			t.Errorf("Expected OSX font_face be Menlo, but is %s", plat.Settings().Get("font_face", ""))
+		if res := ed.Settings().Get("font_face", ""); res != "Menlo" {
+			t.Errorf("Expected OSX font_face be Menlo, but is %s", res)
 		}
 	default:
-		if plat.Settings().Get("font_face", "") != "Monospace" {
-			t.Errorf("Expected Linux font_face be Monospace, but is %s", plat.Settings().Get("font_face", ""))
+		if res := ed.Settings().Get("font_face", ""); res != "Monospace" {
+			t.Errorf("Expected Linux font_face be Monospace, but is %s", res)
 		}
-	}
-}
-
-func TestInit(t *testing.T) {
-	editor := GetEditor()
-	editor.Init()
-
-	if editor.defaultKB.KeyBindings().Len() <= 0 {
-		t.Errorf("Expected editor to have some keys bound, but it didn't")
-	}
-
-	if editor.Settings().Parent().Settings().Parent().Settings().Has("tab_size") != true {
-		t.Error("Expected editor settings to have tab_size, but it didn't")
 	}
 }
 
@@ -273,6 +223,7 @@ func TestSyntaxes(t *testing.T) {
 
 func init() {
 	ed := GetEditor()
+	ed.Init()
 	ed.AddPackagesPath("shipped", path.Join("testdata", "shipped"))
 	ed.AddPackagesPath("default", path.Join("testdata", "default"))
 	ed.AddPackagesPath("user", path.Join("testdata", "user"))

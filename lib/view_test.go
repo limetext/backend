@@ -13,6 +13,8 @@ import (
 	"github.com/limetext/text"
 )
 
+var testfile = "testdata/file"
+
 func TestView(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
@@ -195,8 +197,6 @@ func TestSaveAsNewFile(t *testing.T) {
 }
 
 func TestSaveAsOpenFile(t *testing.T) {
-	var testfile string = "testdata/Default.sublime-settings"
-
 	buf, err := ioutil.ReadFile(testfile)
 	if err != nil {
 		t.Fatalf("Can't read test file `%s`: %s", testfile, err)
@@ -208,27 +208,27 @@ func TestSaveAsOpenFile(t *testing.T) {
 	}{
 		{
 			true,
-			"User.sublime-settings",
+			"file0",
 		},
 		{
 			true,
-			"testdata/User.sublime-settings",
+			"file1",
 		},
 		{
 			true,
-			"../User.sublime-settings",
+			"../file0",
 		},
 		{
 			true,
-			os.TempDir() + "/User.sublime-settings",
+			os.TempDir() + "/file0",
 		},
 		{
 			false,
-			"User.sublime-settings",
+			"file0",
 		},
 		{
 			false,
-			"testdata/User.sublime-settings",
+			"testdata/file0",
 		},
 	}
 
@@ -576,7 +576,7 @@ func TestIsDirtyWhenClean(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
 
-	v := w.OpenFile("testdata/Default.sublime-keymap", 0)
+	v := w.OpenFile(testfile, 0)
 	defer v.Close()
 
 	v.Save()
@@ -612,7 +612,7 @@ func TestCloseView(t *testing.T) {
 
 	l := len(w.Views())
 
-	v := w.OpenFile("testdata/Default.sublime-keymap", 0)
+	v := w.OpenFile(testfile, 0)
 
 	v.Save()
 	v.Close()
@@ -623,7 +623,6 @@ func TestCloseView(t *testing.T) {
 }
 
 func TestCloseView2(t *testing.T) {
-	const testfile = "testdata/Default.sublime-keymap"
 	fe := GetEditor().Frontend()
 	if dfe, ok := fe.(*DummyFrontend); ok {
 		// Make it trigger a reload
@@ -649,8 +648,6 @@ func TestCloseView2(t *testing.T) {
 }
 
 func TestViewLoadSettings(t *testing.T) {
-	GetEditor().loadSettings()
-
 	w := GetEditor().NewWindow()
 	defer w.Close()
 

@@ -23,7 +23,6 @@ import (
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	GetEditor()
-	OnPackagesPathAdd.Add(packages.Scan)
 }
 
 type (
@@ -180,8 +179,12 @@ func (e *Editor) Init() {
 	log.Info("Initializing")
 	// TODO: shouldn't we move SetClipboardFuncs to frontends?
 	e.SetClipboardFuncs(setClipboard, getClipboard)
-	e.loadKeyBindings()
-	e.loadSettings()
+
+	OnPackagesPathAdd.Add(packages.Scan)
+	OnDefaultPackagePathAdd.Add(e.loadDefaultSettings)
+	OnDefaultPackagePathAdd.Add(e.loadDefaultKeyBindings)
+	OnUserPackagePathAdd.Add(e.loadUserSettings)
+	OnUserPackagePathAdd.Add(e.loadUserKeyBindings)
 
 	OnInit.call()
 }
@@ -191,38 +194,42 @@ func (e *Editor) SetClipboardFuncs(setter func(string) error, getter func() (str
 	e.clipboardGetter = getter
 }
 
-func (e *Editor) loadKeyBindings() {
-	log.Fine("Loading editor keybindings")
-
-	p := path.Join(e.PackagesPath("default"), "Default.sublime-keymap")
+func (e *Editor) loadDefaultKeyBindings(dir string) {
+	log.Fine("Loading editor default keybindings")
+	p := path.Join(dir, "Default.sublime-keymap")
 	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.defaultKB.KeyBindings())
 
-	p = path.Join(e.PackagesPath("default"), "Default ("+e.Plat()+").sublime-keymap")
+	p = path.Join(dir, "Default ("+e.Plat()+").sublime-keymap")
 	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.platformKB.KeyBindings())
+}
 
-	p = path.Join(e.PackagesPath("user"), "Default.sublime-keymap")
+func (e *Editor) loadUserKeyBindings(dir string) {
+	log.Fine("Loading editor user keybindings")
+	p := path.Join(dir, "Default.sublime-keymap")
 	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.userKB.KeyBindings())
 
-	p = path.Join(e.PackagesPath("user"), "Default ("+e.Plat()+").sublime-keymap")
+	p = path.Join(dir, "Default ("+e.Plat()+").sublime-keymap")
 	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.KeyBindings())
 }
 
-func (e *Editor) loadSettings() {
-	log.Fine("Loading editor settings")
-
-	p := path.Join(e.PackagesPath("default"), "Preferences.sublime-settings")
+func (e *Editor) loadDefaultSettings(dir string) {
+	log.Fine("Loading editor default settings")
+	p := path.Join(dir, "Preferences.sublime-settings")
 	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.defaultSettings.Settings())
 
-	p = path.Join(e.PackagesPath("default"), "Preferences ("+e.Plat()+").sublime-settings")
+	p = path.Join(dir, "Preferences ("+e.Plat()+").sublime-settings")
 	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.platformSettings.Settings())
+}
 
-	p = path.Join(e.PackagesPath("user"), "Preferences.sublime-settings")
+func (e *Editor) loadUserSettings(dir string) {
+	log.Fine("Loading editor user settings")
+	p := path.Join(dir, "Preferences.sublime-settings")
 	log.Finest("Loading %s", p)
 	packages.LoadJSON(p, e.Settings())
 }
@@ -443,6 +450,11 @@ func (e *Editor) AddPackagesPath(key, p string) {
 	}
 	e.pkgsPaths[key] = p
 	OnPackagesPathAdd.call(p)
+	if key == "default" {
+		OnDefaultPackagePathAdd.call(p)
+	} else if key == "user" {
+		OnUserPackagePathAdd.call(p)
+	}
 }
 
 func (e *Editor) RemovePackagesPath(key string) {

@@ -158,9 +158,10 @@ var (
 	OnQueryContext QueryContextEvent //< Called when context is being queried.
 	OnInit         InitEvent         //< Called once at program startup
 
-	OnPackagesPathAdd    PackagesPathEvent
-	OnPackagesPathRemove PackagesPathEvent
-	// TODO: on packages path change specially default
+	OnPackagesPathAdd       PackagesPathEvent
+	OnPackagesPathRemove    PackagesPathEvent
+	OnDefaultPackagePathAdd PackagesPathEvent
+	OnUserPackagePathAdd    PackagesPathEvent
 )
 
 var (
