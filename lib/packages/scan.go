@@ -45,7 +45,10 @@ func Scan(dir string) {
 			pkgs = append(pkgs, pkg)
 		}
 	}
-	go func() {
+	// TODO: we cant run this in a go routine because currently there is
+	// no way to frontends to know when for example the color scheme
+	// is ready
+	func() {
 		for _, pkg := range pkgs {
 			pkg.Load()
 			watch(pkg)
