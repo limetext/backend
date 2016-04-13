@@ -26,7 +26,6 @@ func pyTest(t *testing.T, imp string) {
 }
 
 func init() {
-	pyAddPath(".")
 	pyAddPath("testdata")
 
 	ed := backend.GetEditor()

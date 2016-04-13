@@ -89,6 +89,11 @@ func pyAddPath(p string) {
 }
 
 func init() {
+	// Assuming there is a sublime_plugin.py file in the current directory
+	// for that we should add current directory to python paths
+	// Every package that imports sublime package should have a copy of
+	// sublime_plugin.py file in the "." directory
+	pyAddPath(".")
 	backend.OnInit.Add(onInit)
 	backend.OnPackagesPathAdd.Add(pyAddPath)
 	packages.Register(pluginRecord)
