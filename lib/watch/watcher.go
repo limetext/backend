@@ -11,7 +11,7 @@ import (
 	"sync"
 
 	"github.com/limetext/lime-backend/lib/log"
-	"github.com/limetext/lime-backend/lib/util"
+	"github.com/limetext/util"
 	"gopkg.in/fsnotify.v1"
 )
 

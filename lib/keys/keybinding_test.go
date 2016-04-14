@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/limetext/lime-backend/lib/loaders"
-	"github.com/limetext/lime-backend/lib/util"
+	"github.com/limetext/util"
 )
 
 func TestLoadKeyBindingsFromJSON(t *testing.T) {

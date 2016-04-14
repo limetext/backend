@@ -7,7 +7,7 @@ package keys
 import (
 	"encoding/json"
 
-	"github.com/limetext/lime-backend/lib/util"
+	"github.com/limetext/util"
 )
 
 type (

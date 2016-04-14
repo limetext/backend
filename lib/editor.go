@@ -15,9 +15,9 @@ import (
 	"github.com/limetext/lime-backend/lib/keys"
 	"github.com/limetext/lime-backend/lib/log"
 	"github.com/limetext/lime-backend/lib/packages"
-	. "github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/lime-backend/lib/watch"
 	. "github.com/limetext/text"
+	. "github.com/limetext/util"
 )
 
 func init() {

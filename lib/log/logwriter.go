@@ -7,8 +7,8 @@ package log
 import (
 	"sync"
 
-	. "github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/log4go"
+	. "github.com/limetext/util"
 )
 
 type LogWriter interface {

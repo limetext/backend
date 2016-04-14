@@ -19,9 +19,9 @@ import (
 	"github.com/limetext/lime-backend/lib/packages"
 	"github.com/limetext/lime-backend/lib/parser"
 	"github.com/limetext/lime-backend/lib/render"
-	. "github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/rubex"
 	. "github.com/limetext/text"
+	. "github.com/limetext/util"
 )
 
 type (

@@ -8,8 +8,8 @@ import (
 	"image/color"
 	"sort"
 
-	"github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/text"
+	"github.com/limetext/util"
 )
 
 type (
