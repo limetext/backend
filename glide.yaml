@@ -5,6 +5,7 @@ import:
   subpackages:
   - lib
 - package: github.com/limetext/log4go
+- package: github.com/limetext/util
 - package: github.com/limetext/rubex
 - package: github.com/limetext/text
 - package: github.com/quarnster/parser
