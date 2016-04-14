@@ -5,8 +5,10 @@
 package sublime
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"sort"
 
 	"github.com/limetext/lime-backend/lib/loaders"
 )
@@ -15,26 +17,25 @@ type (
 	Metadata struct {
 		Name     string
 		Scope    string
-		Settings MetaSettings
+		Settings MetaSettings `json:"settings"`
 		UUID     string
 	}
 
 	MetaSettings struct {
-		// string is regex
-		IncreaseIndentPattern        string
-		DecreaseIndentPattern        string
-		BracketIndentNextLinePattern string
-		DisableIndentNextLinePattern string
-		UnIndentedLinePattern        string
-		CancelCompletion             string
+		IncreaseIndentPattern        Regex
+		DecreaseIndentPattern        Regex
+		BracketIndentNextLinePattern Regex
+		DisableIndentNextLinePattern Regex
+		UnIndentedLinePattern        Regex
+		CancelCompletion             Regex
 		ShowInSymbolList             int
 		ShowInIndexedSymbolList      int
-		SymbolTransformation         string
-		SymbolIndexTransformation    string
-		ShellVariables               ShellVariable
+		SymbolTransformation         Regex
+		SymbolIndexTransformation    Regex
+		ShellVariables               ShellVariables
 	}
 
-	ShellVariable map[string]string
+	ShellVariables map[string]string
 )
 
 func LoadMetadata(filename string) (*Metadata, error) {
@@ -48,10 +49,51 @@ func LoadMetadata(filename string) (*Metadata, error) {
 	return &md, nil
 }
 
-func (m *Metadata) String() string {
-	ret := fmt.Sprintln("%s - %s", m.Name, m.UUID)
-	ret += fmt.Sprintln("\tScope\n\t\t%s", m.Scope)
-	ret += fmt.Sprintf("%s", m.Settings)
-
+func (m Metadata) String() string {
+	ret := fmt.Sprintf("%s - %s\n", m.Name, m.UUID)
+	ret += fmt.Sprintf("Scope: %s\n", m.Scope)
+	ret += fmt.Sprintf("Settings\n%s", m.Settings)
 	return ret
+}
+
+func (m MetaSettings) String() string {
+	ret := fmt.Sprintf("\tIncreaseIndentPattern\n\t\t%s\n", m.IncreaseIndentPattern)
+	ret += fmt.Sprintf("\tDecreaseIndentPattern\n\t\t%s\n", m.DecreaseIndentPattern)
+	ret += fmt.Sprintf("\tBracketIndentNextLinePattern\n\t\t%s\n", m.BracketIndentNextLinePattern)
+	ret += fmt.Sprintf("\tDisableIndentNextLinePattern\n\t\t%s\n", m.DisableIndentNextLinePattern)
+	ret += fmt.Sprintf("\tUnIndentedLinePattern\n\t\t%s\n", m.UnIndentedLinePattern)
+	ret += fmt.Sprintf("\tCancelCompletion\n\t\t%s\n", m.CancelCompletion)
+	ret += fmt.Sprintf("\tShowInSymbolList\n\t\t%d\n", m.ShowInSymbolList)
+	ret += fmt.Sprintf("\tShowInIndexedSymbolList\n\t\t%d\n", m.ShowInIndexedSymbolList)
+	ret += fmt.Sprintf("\tSymbolTransformation\n\t\t%s\n", m.SymbolTransformation)
+	ret += fmt.Sprintf("\tSymbolIndexTransformation\n\t\t%s\n", m.SymbolIndexTransformation)
+	ret += fmt.Sprintf("\tShellVariables\n%s", m.ShellVariables)
+	return ret
+}
+
+func (s *ShellVariables) UnmarshalJSON(data []byte) error {
+	*s = make(ShellVariables)
+	tmp := []struct {
+		Name  string
+		Value string
+	}{}
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	for _, st := range tmp {
+		(*s)[st.Name] = st.Value
+	}
+	return nil
+}
+
+func (s ShellVariables) String() (ret string) {
+	keys := make([]string, 0, len(s))
+	for k, _ := range s {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		ret += fmt.Sprintf("\t\t%s: '%s'\n", key, s[key])
+	}
+	return
 }
