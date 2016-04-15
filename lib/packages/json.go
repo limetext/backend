@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/limetext/lime-backend/lib/loaders"
+	"github.com/limetext/loaders"
 )
 
 // Helper type for loading json files(e.g keymaps settings)
