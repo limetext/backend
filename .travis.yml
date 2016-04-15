@@ -20,9 +20,6 @@ matrix:
   allow_failures:
   - go: tip
 
-env:
-- GO15VENDOREXPERIMENT=1
-
 addons:
   apt:
     sources:
