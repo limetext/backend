@@ -1,9 +1,6 @@
 package: github.com/limetext/lime-backend
 import:
 - package: github.com/atotto/clipboard
-- package: github.com/limetext/gopy
-  subpackages:
-  - lib
 - package: github.com/limetext/log4go
 - package: github.com/limetext/util
 - package: github.com/limetext/rubex

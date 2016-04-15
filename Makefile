@@ -30,7 +30,6 @@ ifeq ($(TRAVIS_OS_NAME),osx)
 	brew install oniguruma python3
 endif
 
-travis_test: GO15VENDOREXPERIMENT=1
 travis_test: test cover report_cover
 
 cover:

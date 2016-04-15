@@ -3,10 +3,6 @@ updated: 2016-03-26T13:39:04.664375001Z
 imports:
 - name: github.com/atotto/clipboard
   version: bb272b845f1112e10117e3e45ce39f690c0001ad
-- name: github.com/limetext/gopy
-  version: 953f768831d5f6389aacdc9c016ff2fb8c2ca579
-  subpackages:
-  - lib
 - name: github.com/limetext/log4go
   version: 2aba105a605a9ebe476f35d7610704e4e723d4ab
 - name: github.com/limetext/util

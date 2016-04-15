@@ -6,13 +6,13 @@ matrix:
   include:
     - go: 1.5
       os: linux
-      env: REPORT_COVERAGE=false
+      env: REPORT_COVERAGE=true GO15VENDOREXPERIMENT=1
     - go: 1.5
       os: osx
-      env: REPORT_COVERAGE=false
+      env: REPORT_COVERAGE=false GO15VENDOREXPERIMENT=1
     - go: tip
       os: linux
-      env: REPORT_COVERAGE=true
+      env: REPORT_COVERAGE=false
     - go: tip
       os: osx
       env: REPORT_COVERAGE=false
@@ -35,8 +35,8 @@ install:
 
 script:
   - make travis_test
-  - make checkfmt
-  - make checklisence
+  - make check_fmt
+  - make check_lisence
 
 notifications:
   webhooks:
