@@ -28,12 +28,12 @@ addons:
       - xclip
 
 install:
-  - ./tasks/general/ci/install.sh
+  - make travis cover_dep glide
 
 script:
-  - ./tasks/general/ci/run_tests.sh lib
-  - ./tasks/local/ci/check_gen.sh
-  - ./tasks/general/ci/check_fmt.sh
+  - make travis_test
+  - make checkfmt
+  - make checklisence
 
 notifications:
   webhooks:
