@@ -2,10 +2,6 @@ sudo: false
 
 language: go
 
-env:
-  global:
-    - PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PWD/vendor/github.com/limetext/rubex:$GOPATH/src/github.com/limetext/rubex
-
 matrix:
   include:
     - go: 1.5

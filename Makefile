@@ -30,6 +30,7 @@ ifeq ($(TRAVIS_OS_NAME),osx)
 	brew install oniguruma python3
 endif
 
+travis_test: export PKG_CONFIG_PATH += $(PWD)/vendor/github.com/limetext/rubex:$(GOPATH)/src/github.com/limetext/rubex
 travis_test: test cover report_cover
 
 cover:
