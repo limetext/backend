@@ -16,6 +16,12 @@ matrix:
     - go: tip
       os: osx
       env: REPORT_COVERAGE=false
+  fast_finish: true
+  allow_failures:
+  - go: tip
+
+env:
+- GO15VENDOREXPERIMENT=1
 
 addons:
   apt:

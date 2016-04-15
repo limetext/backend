@@ -10,5 +10,4 @@ import:
 - package: github.com/limetext/text
 - package: github.com/quarnster/parser
 - package: gopkg.in/fsnotify.v1
-excludeDirs:
-- tasks
+- package: github.com/limetext/loaders

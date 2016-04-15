@@ -5,15 +5,15 @@ test:
 fmt:
 	@go fmt ./lib/...
 license:
-	@go run license.go lib
+	@go run gen_license.go lib
 
-checkfmt:
+check_fmt:
 ifneq ($(shell gofmt -l lib),)
 	$(error code not fmted, run make fmt. $(shell gofmt -l lib))
 endif
 
-checklisence:
-ifneq ($(shell go run license.go lib),)
+check_lisence:
+ifneq ($(shell go run gen_license.go lib),)
 	$(error license is not added to all files, run make license)
 endif
 
