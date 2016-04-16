@@ -12,7 +12,7 @@ ifneq ($(shell gofmt -l lib),)
 	$(error code not fmted, run make fmt. $(shell gofmt -l lib))
 endif
 
-check_lisence:
+check_license:
 ifneq ($(shell go run gen_license.go lib),)
 	$(error license is not added to all files, run make license)
 endif

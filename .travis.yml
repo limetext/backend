@@ -36,7 +36,7 @@ install:
 script:
   - make travis_test
   - make check_fmt
-  - make check_lisence
+  - make check_license
 
 notifications:
   webhooks:
