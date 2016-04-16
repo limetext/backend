@@ -26,8 +26,6 @@ addons:
       - deadsnakes
     packages:
       - libonig-dev
-      - python3.5
-      - python3.5-dev
       - xclip
 
 install:
