@@ -98,8 +98,8 @@ func newView(w *Window) *View {
 		syn, _ := v.Settings().Get("syntax", "").(string)
 		if syn != v.cursyntax {
 			v.cursyntax = syn
-			v.reparse(true)
 			v.loadSettings()
+			v.reparse(true)
 		}
 	})
 	go v.parsethread()
@@ -698,14 +698,20 @@ func (v *View) UndoStack() *UndoStack {
 	return &v.undoStack
 }
 
-// Transform() takes a ColourScheme and a viewport and returns a Recipe suitable
-// for rendering the contents of this View that is visible in that viewport.
-func (v *View) Transform(scheme render.ColourScheme, viewport Region) render.Recipe {
+// Transform() takes a viewport, gets a colour scheme from editor and
+// returns a Recipe suitable for rendering the contents of this View
+// that is visible in that viewport.
+func (v *View) Transform(viewport Region) render.Recipe {
 	pe := Prof.Enter("view.Transform")
 	defer pe.Exit()
 	v.lock.Lock()
 	defer v.lock.Unlock()
 	if v.syntax == nil {
+		return nil
+	}
+	cs := v.Settings().Get("color_scheme", "").(string)
+	scheme := ed.GetColorScheme(cs)
+	if scheme == nil {
 		return nil
 	}
 	rr := make(render.ViewRegionMap)

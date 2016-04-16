@@ -92,7 +92,6 @@ func (w *Window) OpenFile(filename string, flags int) *View {
 	v.SetScratch(false)
 
 	OnLoad.Call(v)
-	w.SetActiveView(v)
 
 	return v
 }
