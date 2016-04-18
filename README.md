@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/limetext/lime-backend.svg?branch=master)](https://travis-ci.org/limetext/lime-backend)
-[![Coverage Status](https://img.shields.io/coveralls/limetext/lime-backend.svg?branch=master)](https://coveralls.io/r/limetext/lime-backend?branch=master)
-[![Go Report Card](http://goreportcard.com/badge/limetext/lime-backend)](http://goreportcard.com/report/limetext/lime-backend)
+[![Build Status](https://travis-ci.org/limetext/backend.svg?branch=master)](https://travis-ci.org/limetext/backend)
+[![Coverage Status](https://img.shields.io/coveralls/limetext/backend.svg?branch=master)](https://coveralls.io/r/limetext/backend?branch=master)
+[![Go Report Card](http://goreportcard.com/badge/limetext/backend)](http://goreportcard.com/report/limetext/backend)
 
 [![GoDoc](https://godoc.org/github.com/limetext/backend?status.svg)](https://godoc.org/github.com/limetext/backend)
 
