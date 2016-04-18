@@ -8,9 +8,9 @@ import (
 	"path"
 	"testing"
 
-	"github.com/limetext/lime-backend/lib/keys"
-	"github.com/limetext/lime-backend/lib/parser"
-	"github.com/limetext/lime-backend/lib/render"
+	"github.com/limetext/backend/keys"
+	"github.com/limetext/backend/parser"
+	"github.com/limetext/backend/render"
 	qp "github.com/quarnster/parser"
 )
 

@@ -1,4 +1,4 @@
-package: github.com/limetext/lime-backend
+package: github.com/limetext/backend
 import:
 - package: github.com/atotto/clipboard
 - package: github.com/limetext/log4go

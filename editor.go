@@ -12,10 +12,10 @@ import (
 	"sync"
 
 	"github.com/atotto/clipboard"
-	"github.com/limetext/lime-backend/lib/keys"
-	"github.com/limetext/lime-backend/lib/log"
-	"github.com/limetext/lime-backend/lib/packages"
-	"github.com/limetext/lime-backend/lib/watch"
+	"github.com/limetext/backend/keys"
+	"github.com/limetext/backend/log"
+	"github.com/limetext/backend/packages"
+	"github.com/limetext/backend/watch"
 	. "github.com/limetext/text"
 	. "github.com/limetext/util"
 )

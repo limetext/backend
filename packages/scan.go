@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"path"
 
-	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/backend/log"
 )
 
 // A helper struct to implement File*Callback interfaces and

@@ -20,7 +20,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/limetext/lime-backend/lib/render"
+	"github.com/limetext/backend/render"
 	"github.com/limetext/text"
 	"github.com/quarnster/parser"
 )
