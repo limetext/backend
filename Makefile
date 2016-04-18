@@ -1,19 +1,19 @@
 default: test
 
 test:
-	@go test -race ./lib/...
+	@go test -race $(shell go list ./... | grep -v vendor)
 fmt:
-	@go fmt ./lib/...
+	@go fmt $(shell go list ./... | grep -v vendor)
 license:
-	@go run gen_license.go lib
+	@go run gen_license.go ./
 
 check_fmt:
-ifneq ($(shell gofmt -l lib),)
-	$(error code not fmted, run make fmt. $(shell gofmt -l lib))
+ifneq ($(shell gofmt -l ./ | grep -v vendor | grep -v testdata),)
+	$(error code not fmted, run make fmt. $(shell gofmt -l ./ | grep -v vendor | grep -v testdata))
 endif
 
 check_license:
-ifneq ($(shell go run gen_license.go lib),)
+ifneq ($(shell go run gen_license.go ./),)
 	$(error license is not added to all files, run make license)
 endif
 
@@ -35,7 +35,7 @@ travis_test: test cover report_cover
 
 cover:
 	@echo "mode: count" > coverage.cov; \
-	for pkg in $(shell go list "./lib/..." | grep -v /vendor/); do \
+	for pkg in $(shell go list "./..." | grep -v /vendor/); do \
 		go test -covermode=count -coverprofile=tmp.cov $$pkg; \
 		sed 1d tmp.cov >> coverage.cov; \
 		rm tmp.cov; \
