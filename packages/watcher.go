@@ -5,8 +5,8 @@
 package packages
 
 import (
-	"github.com/limetext/lime-backend/lib/log"
-	wch "github.com/limetext/lime-backend/lib/watch"
+	"github.com/limetext/backend/log"
+	wch "github.com/limetext/backend/watch"
 )
 
 // Responsible for watching all loaded packages

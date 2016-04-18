@@ -6,16 +6,19 @@ matrix:
   include:
     - go: 1.5
       os: linux
-      env: REPORT_COVERAGE=false
+      env: REPORT_COVERAGE=true GO15VENDOREXPERIMENT=1
     - go: 1.5
       os: osx
-      env: REPORT_COVERAGE=false
+      env: REPORT_COVERAGE=false GO15VENDOREXPERIMENT=1
     - go: tip
       os: linux
-      env: REPORT_COVERAGE=true
+      env: REPORT_COVERAGE=false
     - go: tip
       os: osx
       env: REPORT_COVERAGE=false
+  fast_finish: true
+  allow_failures:
+  - go: tip
 
 addons:
   apt:
@@ -23,17 +26,15 @@ addons:
       - deadsnakes
     packages:
       - libonig-dev
-      - python3.5
-      - python3.5-dev
       - xclip
 
 install:
-  - ./tasks/general/ci/install.sh
+  - make travis cover_dep glide
 
 script:
-  - ./tasks/general/ci/run_tests.sh lib
-  - ./tasks/local/ci/check_gen.sh
-  - ./tasks/general/ci/check_fmt.sh
+  - make travis_test
+  - make check_fmt
+  - make check_license
 
 notifications:
   webhooks:

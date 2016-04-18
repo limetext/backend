@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/limetext/lime-backend/lib/log"
+	"github.com/limetext/backend/log"
 	. "github.com/limetext/util"
 )
 
