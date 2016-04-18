@@ -216,7 +216,7 @@ func TestSaveAsOpenFile(t *testing.T) {
 		},
 		{
 			true,
-			"../file0",
+			"testdata/file0",
 		},
 		{
 			true,
@@ -260,7 +260,6 @@ func TestSaveAsOpenFile(t *testing.T) {
 		}
 
 		v.Close()
-
 		if err := os.Remove(test.as); err != nil {
 			t.Errorf("Test %d: Couldn't remove test file %s", i, test.as)
 		}

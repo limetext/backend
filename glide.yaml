@@ -1,10 +1,10 @@
 package: github.com/limetext/backend
 import:
 - package: github.com/atotto/clipboard
+- package: github.com/limetext/loaders
 - package: github.com/limetext/log4go
-- package: github.com/limetext/util
 - package: github.com/limetext/rubex
 - package: github.com/limetext/text
+- package: github.com/limetext/util
 - package: github.com/quarnster/parser
 - package: gopkg.in/fsnotify.v1
-- package: github.com/limetext/loaders

@@ -1,20 +1,23 @@
-hash: 51cab33d9efcb4fd311bf75b86f28f4405643407b1f2532a850c53c4f1cac3dd
-updated: 2016-03-26T13:39:04.664375001Z
+hash: d9bdb6f7e8f53aa5733180da699d55206390d2dd1aaa443e0e3b97e0c0066246
+updated: 2016-04-18T12:32:54.507524501+04:30
 imports:
 - name: github.com/atotto/clipboard
   version: bb272b845f1112e10117e3e45ce39f690c0001ad
-- name: github.com/limetext/log4go
-  version: 2aba105a605a9ebe476f35d7610704e4e723d4ab
-- name: github.com/limetext/util
-  version: 20e1a4a3505f50a45c7f92456d889d899272ac14
 - name: github.com/limetext/loaders
   version: 476e7b192526e3b2cc4302f78ab167eca21279c9
+  subpackages:
+  - json
+  - plist
+- name: github.com/limetext/log4go
+  version: 41f52bba2191d3bfa764c6867968eb06acbd8f3c
 - name: github.com/limetext/rubex
   version: 3fc130e580797e3d9c6fdab36e6a961141f9fd5f
 - name: github.com/limetext/text
   version: 06ae8177eb526ccd7877df1d16909b4e48b75e0f
+- name: github.com/limetext/util
+  version: 20e1a4a3505f50a45c7f92456d889d899272ac14
 - name: github.com/quarnster/parser
   version: 8991807ce6d383a41077a642b7b381eba1df7064
 - name: gopkg.in/fsnotify.v1
-  version: 7be54206639f256967dd82fa767397ba5f8f48f5
+  version: 836bfd95fecc0f1511dd66bdbf2b5b61ab8b00b6
 devImports: []

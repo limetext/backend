@@ -577,9 +577,8 @@ func (v *View) SaveAs(name string) (err error) {
 	log.Fine("SaveAs(%s)", name)
 	v.Settings().Set("lime.saving", true)
 	defer v.Settings().Erase("lime.saving")
-	var atomic bool
 	OnPreSave.Call(v)
-	if atomic, _ = v.Settings().Get("atomic_save", true).(bool); v.FileName() == "" || !atomic {
+	if atomic := v.Settings().Get("atomic_save", true).(bool); v.FileName() == "" || !atomic {
 		if err := v.nonAtomicSave(name); err != nil {
 			return err
 		}
