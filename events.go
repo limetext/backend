@@ -53,10 +53,10 @@ type (
 	InitEvent []InitCallback
 
 	// Dealing with package events
-	PackagesPathEventCallback func(string)
+	PathEventCallback func(string)
 
-	// A PackagesPathEvent is simply a bunch of PackagesPathEventCallbacks.
-	PackagesPathEvent []PackagesPathEventCallback
+	// A PathEvent is simply a bunch of PathEventCallbacks.
+	PathEvent []PathEventCallback
 )
 
 const (
@@ -131,11 +131,11 @@ func (we *WindowEvent) Call(w *Window) {
 	}
 }
 
-func (pe *PackagesPathEvent) Add(cb PackagesPathEventCallback) {
+func (pe *PathEvent) Add(cb PathEventCallback) {
 	*pe = append(*pe, cb)
 }
 
-func (pe *PackagesPathEvent) call(p string) {
+func (pe *PathEvent) call(p string) {
 	log.Finest("%s(%v)", pkgPathevNames[pe], p)
 	for _, ev := range *pe {
 		ev(p)
@@ -158,10 +158,10 @@ var (
 	OnQueryContext QueryContextEvent //< Called when context is being queried.
 	OnInit         InitEvent         //< Called once at program startup
 
-	OnPackagesPathAdd       PackagesPathEvent
-	OnPackagesPathRemove    PackagesPathEvent
-	OnDefaultPackagePathAdd PackagesPathEvent
-	OnUserPackagePathAdd    PackagesPathEvent
+	OnPackagesPathAdd    PathEvent
+	OnPackagesPathRemove PathEvent
+	OnDefaultPathAdd     PathEvent
+	OnUserPathAdd        PathEvent
 )
 
 var (
@@ -180,7 +180,7 @@ var (
 	wevNames = map[*WindowEvent]string{
 		&OnNewWindow: "OnNewWindow",
 	}
-	pkgPathevNames = map[*PackagesPathEvent]string{
+	pkgPathevNames = map[*PathEvent]string{
 		&OnPackagesPathAdd:    "OnPackagesPathAdd",
 		&OnPackagesPathRemove: "OnPackagesPathRemove",
 	}

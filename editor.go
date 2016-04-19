@@ -45,7 +45,9 @@ type (
 		defaultKB        *keys.HasKeyBindings
 		platformKB       *keys.HasKeyBindings
 		userKB           *keys.HasKeyBindings
-		pkgsPaths        map[string]string
+		defaultPath      string
+		userPath         string
+		pkgsPaths        []string
 		colorSchemes     map[string]ColorScheme
 		syntaxes         map[string]Syntax
 		filetypes        map[string]string
@@ -130,7 +132,7 @@ func GetEditor() *Editor {
 			defaultKB:        new(keys.HasKeyBindings),
 			platformKB:       new(keys.HasKeyBindings),
 			userKB:           new(keys.HasKeyBindings),
-			pkgsPaths:        make(map[string]string),
+			pkgsPaths:        make([]string, 0),
 			colorSchemes:     make(map[string]ColorScheme),
 			syntaxes:         make(map[string]Syntax),
 			filetypes:        make(map[string]string),
@@ -181,10 +183,10 @@ func (e *Editor) Init() {
 	e.SetClipboardFuncs(setClipboard, getClipboard)
 
 	OnPackagesPathAdd.Add(packages.Scan)
-	OnDefaultPackagePathAdd.Add(e.loadDefaultSettings)
-	OnDefaultPackagePathAdd.Add(e.loadDefaultKeyBindings)
-	OnUserPackagePathAdd.Add(e.loadUserSettings)
-	OnUserPackagePathAdd.Add(e.loadUserKeyBindings)
+	OnDefaultPathAdd.Add(e.loadDefaultSettings)
+	OnDefaultPathAdd.Add(e.loadDefaultKeyBindings)
+	OnUserPathAdd.Add(e.loadUserSettings)
+	OnUserPathAdd.Add(e.loadUserKeyBindings)
 
 	OnInit.call()
 }
@@ -234,8 +236,8 @@ func (e *Editor) loadUserSettings(dir string) {
 	packages.LoadJSON(p, e.Settings())
 }
 
-func (e *Editor) PackagesPath(key string) string {
-	return e.pkgsPaths[key]
+func (e *Editor) PackagesPath() string {
+	return e.pkgsPaths[0]
 }
 
 func (e *Editor) Console() *View {
@@ -441,28 +443,32 @@ func (e *Editor) handleLog(s string) {
 	c.EndEdit(edit)
 }
 
-func (e *Editor) AddPackagesPath(key, p string) {
-	if p0, ok := e.pkgsPaths[key]; ok {
-		log.Debug("Changing package path %s: %s to %s", key, p0, p)
-		e.RemovePackagesPath(key)
-	} else {
-		log.Debug("Adding package path %s: %s", key, p)
-	}
-	e.pkgsPaths[key] = p
+func (e *Editor) AddPackagesPath(p string) {
+	e.pkgsPaths = append(e.pkgsPaths, p)
 	OnPackagesPathAdd.call(p)
-	if key == "default" {
-		OnDefaultPackagePathAdd.call(p)
-	} else if key == "user" {
-		OnUserPackagePathAdd.call(p)
-	}
 }
 
-func (e *Editor) RemovePackagesPath(key string) {
-	if p, ok := e.pkgsPaths[key]; ok {
-		log.Debug("Removing package path %s: %s", key, p)
-		OnPackagesPathRemove.call(p)
-	}
-	delete(e.pkgsPaths, key)
+func (e *Editor) RemovePackagesPath(p string) {
+	e.pkgsPaths = Remove(e.pkgsPaths, p)
+	OnPackagesPathRemove.call(p)
+}
+
+func (e *Editor) DefaultPath() string {
+	return e.defaultPath
+}
+
+func (e *Editor) UserPath() string {
+	return e.userPath
+}
+
+func (e *Editor) SetDefaultPath(p string) {
+	e.defaultPath = p
+	OnDefaultPathAdd.call(p)
+}
+
+func (e *Editor) SetUserPath(p string) {
+	e.userPath = p
+	OnUserPathAdd.call(p)
 }
 
 func (e *Editor) AddColorScheme(path string, cs ColorScheme) {

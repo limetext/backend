@@ -224,7 +224,7 @@ func TestSyntaxes(t *testing.T) {
 func init() {
 	ed := GetEditor()
 	ed.Init()
-	ed.AddPackagesPath("shipped", path.Join("testdata", "shipped"))
-	ed.AddPackagesPath("default", path.Join("testdata", "default"))
-	ed.AddPackagesPath("user", path.Join("testdata", "user"))
+	ed.AddPackagesPath(path.Join("testdata", "Packages"))
+	ed.SetDefaultPath(path.Join("testdata", "Packages", "Default"))
+	ed.SetUserPath(path.Join("testdata", "Packages", "User"))
 }
