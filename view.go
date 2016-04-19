@@ -20,8 +20,8 @@ import (
 	"github.com/limetext/backend/parser"
 	"github.com/limetext/backend/render"
 	"github.com/limetext/rubex"
-	. "github.com/limetext/text"
-	. "github.com/limetext/util"
+	"github.com/limetext/text"
+	"github.com/limetext/util"
 )
 
 type (
@@ -29,11 +29,11 @@ type (
 	// with its own set of selections, settings, viewport, etc.
 	// Multiple Views can share the same underlying data buffer.
 	View struct {
-		HasSettings
-		HasId
+		text.HasSettings
+		text.HasId
 		window           *Window
-		buffer           Buffer
-		selection        RegionSet
+		buffer           text.Buffer
+		selection        text.RegionSet
 		undoStack        UndoStack
 		scratch          bool
 		overwrite        bool
@@ -44,9 +44,9 @@ type (
 		lock             sync.Mutex
 		reparseChan      chan parseReq
 		status           map[string]string
-		defaultSettings  *HasSettings
-		platformSettings *HasSettings
-		userSettings     *HasSettings
+		defaultSettings  *text.HasSettings
+		platformSettings *text.HasSettings
+		userSettings     *text.HasSettings
 	}
 	parseReq struct {
 		forced bool
@@ -76,9 +76,9 @@ func newView(w *Window) *View {
 		regions:          make(render.ViewRegionMap),
 		status:           make(map[string]string),
 		reparseChan:      make(chan parseReq, 32),
-		defaultSettings:  new(HasSettings),
-		platformSettings: new(HasSettings),
-		userSettings:     new(HasSettings),
+		defaultSettings:  new(text.HasSettings),
+		platformSettings: new(text.HasSettings),
+		userSettings:     new(text.HasSettings),
 	}
 	// Initializing keybidings hierarchy
 	// window <- default <- platform <- user <- view
@@ -113,7 +113,7 @@ func (v *View) String() string {
 	return fmt.Sprintf("View{id:%d, buffer: %s}", v.Id(), v.buffer)
 }
 
-func (v *View) setBuffer(b Buffer) error {
+func (v *View) setBuffer(b text.Buffer) error {
 	if v.buffer != nil {
 		return fmt.Errorf("There is already a buffer set")
 	}
@@ -125,11 +125,11 @@ func (v *View) setBuffer(b Buffer) error {
 
 // BufferObserver
 
-func (v *View) Erased(changed_buffer Buffer, region_removed Region, data_removed []rune) {
+func (v *View) Erased(changed_buffer text.Buffer, region_removed text.Region, data_removed []rune) {
 	v.flush(region_removed.B, region_removed.A-region_removed.B)
 }
 
-func (v *View) Inserted(changed_buffer Buffer, region_inserted Region, data_inserted []rune) {
+func (v *View) Inserted(changed_buffer text.Buffer, region_inserted text.Region, data_inserted []rune) {
 	v.flush(region_inserted.A, region_inserted.B-region_inserted.A)
 }
 
@@ -144,7 +144,7 @@ func (v *View) flush(position, delta int) {
 		v.lock.Lock()
 		defer v.lock.Unlock()
 
-		e := Prof.Enter("view.flush")
+		e := util.Prof.Enter("view.flush")
 		defer e.Exit()
 		// TODO(.): issue #211
 		v.selection.Adjust(position, delta)
@@ -182,7 +182,7 @@ func (v *View) parsethread() {
 	pc := 0
 	lastParse := -1
 	doparse := func() (ret bool) {
-		p := Prof.Enter("syntax.parse")
+		p := util.Prof.Enter("syntax.parse")
 		defer p.Exit()
 		defer func() {
 			if r := recover(); r != nil {
@@ -194,7 +194,7 @@ func (v *View) parsethread() {
 			}
 		}()
 
-		sub := v.Substr(Region{0, v.Size()})
+		sub := v.Substr(text.Region{0, v.Size()})
 		source, _ := v.Settings().Get("syntax", "").(string)
 		if len(source) == 0 {
 			return
@@ -319,13 +319,13 @@ func (v *View) ScopeName(point int) string {
 
 // Returns the Region of the innermost scope that contains "point".
 // See package backend/parser for details.
-func (v *View) ExtractScope(point int) Region {
+func (v *View) ExtractScope(point int) text.Region {
 	v.lock.Lock()
 	defer v.lock.Unlock()
 	if v.syntax != nil {
 		return v.syntax.ScopeExtent(point)
 	}
-	return Region{}
+	return text.Region{}
 }
 
 // ScoreSelector() takes a point and a selector string and returns a score
@@ -362,7 +362,7 @@ func (v *View) ScoreSelector(point int, selector string) int {
 // but also selects/highlights the first character. Think holding shift and pressing left on your keyboard.
 // In this instance Region.A = 1, Region.B = 0, Region.Start() returns 0 and Region.End() returns 1.
 //
-func (v *View) Sel() *RegionSet {
+func (v *View) Sel() *text.RegionSet {
 	// BUG(.): Sometimes Sel becomes empty. There should always be at a minimum 1 valid cursor.
 	return &v.selection
 }
@@ -405,7 +405,7 @@ func (v *View) Insert(edit *Edit, point int, value string) int {
 		}
 		value = strings.Join(lines, "\n")
 	}
-	edit.composite.AddExec(NewInsertAction(v.buffer, point, value))
+	edit.composite.AddExec(text.NewInsertAction(v.buffer, point, value))
 	// TODO(.): I think this should rather be the number of runes inserted?
 	// The spec states that len() of a string returns the number of bytes,
 	// which isn't very useful as all other buffer values are IIRC in runes.
@@ -414,13 +414,13 @@ func (v *View) Insert(edit *Edit, point int, value string) int {
 }
 
 // Adds an Erase action of the given Region to the provided Edit object.
-func (v *View) Erase(edit *Edit, r Region) {
-	edit.composite.AddExec(NewEraseAction(v.buffer, r))
+func (v *View) Erase(edit *Edit, r text.Region) {
+	edit.composite.AddExec(text.NewEraseAction(v.buffer, r))
 }
 
 // Adds a Replace action of the given Region to the provided Edit object.
-func (v *View) Replace(edit *Edit, r Region, value string) {
-	edit.composite.AddExec(NewReplaceAction(v.buffer, r, value))
+func (v *View) Replace(edit *Edit, r text.Region, value string) {
+	edit.composite.AddExec(text.NewReplaceAction(v.buffer, r, value))
 }
 
 // Creates a new Edit object. Think of it a bit like starting an SQL transaction.
@@ -562,7 +562,7 @@ func (v *View) FileChanged(filename string) {
 	} else {
 		edit := v.BeginEdit()
 		end := v.Size()
-		v.Replace(edit, Region{0, end}, string(d))
+		v.Replace(edit, text.Region{0, end}, string(d))
 		v.EndEdit(edit)
 	}
 }
@@ -619,7 +619,7 @@ func (v *View) SaveAs(name string) (err error) {
 }
 
 func (v *View) nonAtomicSave(name string) error {
-	data := []byte(v.Substr(Region{0, v.Size()}))
+	data := []byte(v.Substr(text.Region{0, v.Size()}))
 	if err := ioutil.WriteFile(name, data, 0644); err != nil {
 		return err
 	}
@@ -652,7 +652,7 @@ func (v *View) runCommand(cmd TextCommand, name string) error {
 			log.Error("Paniced while running text command %s %v: %v\n%s", name, cmd, r, string(debug.Stack()))
 		}
 	}()
-	p := Prof.Enter("view.cmd." + name)
+	p := util.Prof.Enter("view.cmd." + name)
 	defer p.Exit()
 	return cmd.Run(v, e)
 }
@@ -665,7 +665,7 @@ func (v *View) runCommand(cmd TextCommand, name string) error {
 // warnings, etc.
 //
 // The regions will be automatically adjusted as appropriate when the underlying buffer is changed.
-func (v *View) AddRegions(key string, regions []Region, scope, icon string, flags render.ViewRegionFlags) {
+func (v *View) AddRegions(key string, regions []text.Region, scope, icon string, flags render.ViewRegionFlags) {
 	vr := render.ViewRegions{Scope: scope, Icon: icon, Flags: flags}
 	vr.Regions.AddAll(regions)
 
@@ -675,12 +675,12 @@ func (v *View) AddRegions(key string, regions []Region, scope, icon string, flag
 }
 
 // Returns the Regions associated with the given key.
-func (v *View) GetRegions(key string) (ret []Region) {
+func (v *View) GetRegions(key string) (ret []text.Region) {
 	v.lock.Lock()
 	defer v.lock.Unlock()
 	vr := v.regions[key]
 	rs := vr.Regions.Regions()
-	ret = make([]Region, len(rs))
+	ret = make([]text.Region, len(rs))
 	copy(ret, rs)
 	return
 }
@@ -700,8 +700,8 @@ func (v *View) UndoStack() *UndoStack {
 // Transform() takes a viewport, gets a colour scheme from editor and
 // returns a Recipe suitable for rendering the contents of this View
 // that is visible in that viewport.
-func (v *View) Transform(viewport Region) render.Recipe {
-	pe := Prof.Enter("view.Transform")
+func (v *View) Transform(viewport text.Region) render.Recipe {
+	pe := util.Prof.Enter("view.Transform")
 	defer pe.Exit()
 	v.lock.Lock()
 	defer v.lock.Unlock()
@@ -792,10 +792,10 @@ func (v *View) Classify(point int) (res int) {
 	var a, b string = "", ""
 	ws := v.Settings().Get("word_separators", DEFAULT_SEPARATORS).(string)
 	if point > 0 {
-		a = v.Substr(Region{point - 1, point})
+		a = v.Substr(text.Region{point - 1, point})
 	}
 	if point < v.Size() {
-		b = v.Substr(Region{point, point + 1})
+		b = v.Substr(text.Region{point, point + 1})
 	}
 
 	// Out of range
@@ -940,7 +940,7 @@ func (v *View) FindByClass(point int, forward bool, classes int) int {
 }
 
 // Expands the selection until the point on each side matches the given classes
-func (v *View) ExpandByClass(r Region, classes int) Region {
+func (v *View) ExpandByClass(r text.Region, classes int) text.Region {
 	// Sublime doesn't consider the points the region starts on.
 	// If not already on edge of buffer, expand by 1 in both directions.
 	a := r.A
@@ -962,7 +962,7 @@ func (v *View) ExpandByClass(r Region, classes int) Region {
 	}
 	for ; b < size && (v.Classify(b)&classes == 0); b += 1 {
 	}
-	return Region{a, b}
+	return text.Region{a, b}
 }
 
 const (
@@ -970,8 +970,8 @@ const (
 	IGNORECASE
 )
 
-func (v *View) Find(pat string, pos int, flags int) Region {
-	r := Region{pos, v.Size()}
+func (v *View) Find(pat string, pos int, flags int) text.Region {
+	r := text.Region{pos, v.Size()}
 	s := v.Substr(r)
 
 	if flags&LITERAL != 0 {
@@ -987,9 +987,9 @@ func (v *View) Find(pat string, pos int, flags int) Region {
 	if re, err := regexp.Compile(pat); err != nil {
 		log.Error(err)
 	} else if loc := re.FindStringIndex(s); loc != nil {
-		return Region{pos + loc[0], pos + loc[1]}
+		return text.Region{pos + loc[0], pos + loc[1]}
 	}
-	return Region{-1, -1}
+	return text.Region{-1, -1}
 }
 
 func (v *View) Status() map[string]string {
@@ -1033,35 +1033,35 @@ func (v *View) FileName() string {
 	return v.buffer.FileName()
 }
 
-func (v *View) Substr(r Region) string {
+func (v *View) Substr(r text.Region) string {
 	return v.buffer.Substr(r)
 }
 
-func (v *View) SubstrR(r Region) []rune {
+func (v *View) SubstrR(r text.Region) []rune {
 	return v.buffer.SubstrR(r)
 }
 
-func (v *View) FullLine(off int) Region {
+func (v *View) FullLine(off int) text.Region {
 	return v.buffer.FullLine(off)
 }
 
-func (v *View) FullLineR(r Region) Region {
+func (v *View) FullLineR(r text.Region) text.Region {
 	return v.buffer.FullLineR(r)
 }
 
-func (v *View) BufferId() Id {
+func (v *View) BufferId() text.Id {
 	return v.buffer.Id()
 }
 
-func (v *View) Line(off int) Region {
+func (v *View) Line(off int) text.Region {
 	return v.buffer.Line(off)
 }
 
-func (v *View) LineR(r Region) Region {
+func (v *View) LineR(r text.Region) text.Region {
 	return v.buffer.LineR(r)
 }
 
-func (v *View) Lines(r Region) []Region {
+func (v *View) Lines(r text.Region) []text.Region {
 	return v.buffer.Lines(r)
 }
 
@@ -1097,14 +1097,14 @@ func (v *View) Size() int {
 	return v.buffer.Size()
 }
 
-func (v *View) Word(off int) Region {
+func (v *View) Word(off int) text.Region {
 	return v.buffer.Word(off)
 }
 
-func (v *View) WordR(r Region) Region {
+func (v *View) WordR(r text.Region) text.Region {
 	return v.buffer.WordR(r)
 }
 
-func (v *View) AddObserver(ob BufferObserver) error {
+func (v *View) AddObserver(ob text.BufferObserver) error {
 	return v.buffer.AddObserver(ob)
 }

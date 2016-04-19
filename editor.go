@@ -16,8 +16,8 @@ import (
 	"github.com/limetext/backend/log"
 	"github.com/limetext/backend/packages"
 	"github.com/limetext/backend/watch"
-	. "github.com/limetext/text"
-	. "github.com/limetext/util"
+	"github.com/limetext/text"
+	"github.com/limetext/util"
 )
 
 func init() {
@@ -27,7 +27,7 @@ func init() {
 
 type (
 	Editor struct {
-		HasSettings
+		text.HasSettings
 		keys.HasKeyBindings
 		*watch.Watcher
 		windows          []*Window
@@ -40,8 +40,8 @@ type (
 		clipboardSetter  func(string) error
 		clipboardGetter  func() (string, error)
 		clipboard        string
-		defaultSettings  *HasSettings
-		platformSettings *HasSettings
+		defaultSettings  *text.HasSettings
+		platformSettings *text.HasSettings
 		defaultKB        *keys.HasKeyBindings
 		platformKB       *keys.HasKeyBindings
 		userKB           *keys.HasKeyBindings
@@ -58,11 +58,11 @@ type (
 	Frontend interface {
 		// Probe the frontend for the currently
 		// visible region of the given view.
-		VisibleRegion(v *View) Region
+		VisibleRegion(v *View) text.Region
 
 		// Make the frontend show the specified region of the
 		// given view.
-		Show(v *View, r Region)
+		Show(v *View, r text.Region)
 
 		// Sets the status message shown in the status bar
 		StatusMessage(string)
@@ -102,8 +102,8 @@ func (h *DummyFrontend) OkCancelDialog(msg string, button string) bool {
 	defer h.m.Unlock()
 	return h.defaultAction
 }
-func (h *DummyFrontend) Show(v *View, r Region)       {}
-func (h *DummyFrontend) VisibleRegion(v *View) Region { return Region{} }
+func (h *DummyFrontend) Show(v *View, r text.Region)       {}
+func (h *DummyFrontend) VisibleRegion(v *View) text.Region { return text.Region{} }
 
 var (
 	ed  *Editor
@@ -123,12 +123,12 @@ func GetEditor() *Editor {
 			},
 			frontend: &DummyFrontend{},
 			console: &View{
-				buffer:  NewBuffer(),
+				buffer:  text.NewBuffer(),
 				scratch: true,
 			},
 			keyInput:         make(chan keys.KeyPress, 32),
-			defaultSettings:  new(HasSettings),
-			platformSettings: new(HasSettings),
+			defaultSettings:  new(text.HasSettings),
+			platformSettings: new(text.HasSettings),
 			defaultKB:        new(keys.HasKeyBindings),
 			platformKB:       new(keys.HasKeyBindings),
 			userKB:           new(keys.HasKeyBindings),
@@ -330,7 +330,7 @@ func (e *Editor) inputthread() {
 				pc++
 			}
 		}()
-		p := Prof.Enter("hi")
+		p := util.Prof.Enter("hi")
 		defer p.Exit()
 
 		lvl := log.FINE
@@ -354,12 +354,12 @@ func (e *Editor) inputthread() {
 			v = wnd.ActiveView()
 		}
 
-		qc := func(key string, operator Op, operand interface{}, match_all bool) bool {
+		qc := func(key string, operator util.Op, operand interface{}, match_all bool) bool {
 			return OnQueryContext.Call(v, key, operator, operand, match_all) == True
 		}
 
 		if action := possible_actions.Action(qc); action != nil {
-			p2 := Prof.Enter("hi.perform")
+			p2 := util.Prof.Enter("hi.perform")
 			e.RunCommand(action.Command, action.Args)
 			p2.Exit()
 		} else if possible_actions.SeqIndex() > 1 {
@@ -367,7 +367,7 @@ func (e *Editor) inputthread() {
 			lastBindings = *e.KeyBindings()
 			goto try_again
 		} else if kp.IsCharacter() {
-			p2 := Prof.Enter("hi.character")
+			p2 := util.Prof.Enter("hi.character")
 			log.Finest("[editor.inputthread] kp: |%s|, pos: %v", kp.Text, possible_actions)
 			if err := e.CommandHandler().RunTextCommand(v, "insert", Args{"characters": kp.Text}); err != nil {
 				log.Debug("Couldn't run textcommand: %s", err)
@@ -449,7 +449,7 @@ func (e *Editor) AddPackagesPath(p string) {
 }
 
 func (e *Editor) RemovePackagesPath(p string) {
-	e.pkgsPaths = Remove(e.pkgsPaths, p)
+	e.pkgsPaths = util.Remove(e.pkgsPaths, p)
 	OnPackagesPathRemove.call(p)
 }
 
