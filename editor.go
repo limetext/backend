@@ -187,6 +187,10 @@ func (e *Editor) Init() {
 	OnDefaultPathAdd.Add(e.loadDefaultKeyBindings)
 	OnUserPathAdd.Add(e.loadUserSettings)
 	OnUserPathAdd.Add(e.loadUserKeyBindings)
+	ed.Settings().AddOnChange("lime.editor.ignored_packages", func(name string) {
+		// TODO: load the package that is removed from ignored_packages
+		// settings, unload the package that is added
+	})
 
 	OnInit.call()
 }

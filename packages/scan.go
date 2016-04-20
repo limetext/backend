@@ -50,8 +50,7 @@ func Scan(dir string) {
 	// is ready
 	func() {
 		for _, pkg := range pkgs {
-			pkg.Load()
-			watch(pkg)
+			load(pkg)
 		}
 	}()
 }

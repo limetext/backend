@@ -47,3 +47,8 @@ func record(path string) Package {
 	}
 	return nil
 }
+
+func load(pkg Package) {
+	pkg.Load()
+	watch(pkg)
+}
