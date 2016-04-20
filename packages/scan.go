@@ -31,6 +31,8 @@ func watchDir(dir string) {
 	}
 }
 
+var loaded = make(map[string]Package)
+
 func Scan(dir string) {
 	log.Debug("Scanning %s for packages", dir)
 	fis, err := ioutil.ReadDir(dir)
@@ -41,7 +43,11 @@ func Scan(dir string) {
 
 	var pkgs []Package
 	for _, fi := range fis {
-		if pkg := record(path.Join(dir, fi.Name())); pkg != nil {
+		pkgPath := path.Join(dir, fi.Name())
+		if _, ok := loaded[pkgPath]; ok {
+			continue
+		}
+		if pkg := record(pkgPath); pkg != nil {
 			pkgs = append(pkgs, pkg)
 		}
 	}
@@ -51,6 +57,7 @@ func Scan(dir string) {
 	func() {
 		for _, pkg := range pkgs {
 			load(pkg)
+			loaded[pkg.Path()] = pkg
 		}
 	}()
 }

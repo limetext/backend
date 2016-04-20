@@ -290,7 +290,7 @@ func (v *View) loadSettings() {
 	if r, err := rubex.Compile(`([A-Za-z]+?)\.(?:[^.]+)$`); err != nil {
 		log.Error(err)
 		// TODO: should we match syntax file name or the syntax name
-	} else if s := r.FindStringSubmatch(syntax); len(s) > 2 {
+	} else if s := r.FindStringSubmatch(syntax); len(s) > 1 {
 		// TODO: the syntax folder should be the package path and name
 		p := path.Join(ed.PackagesPath(), s[1], s[1]+".sublime-settings")
 		log.Fine("Loading %s for view", p)
