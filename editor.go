@@ -154,6 +154,20 @@ func GetEditor() *Editor {
 		ed.userKB.KeyBindings().SetParent(ed.platformKB)
 		ed.platformKB.KeyBindings().SetParent(ed.defaultKB)
 
+		OnDefaultPathAdd.Add(e.loadDefaultSettings)
+		OnDefaultPathAdd.Add(e.loadDefaultKeyBindings)
+		OnUserPathAdd.Add(e.loadUserSettings)
+		OnUserPathAdd.Add(e.loadUserKeyBindings)
+		ed.Settings().AddOnChange("lime.editor.ignored_packages", func(name string) {
+			// TODO: unload the package that is added to ignored_packages
+			if name != "ignored_packages" {
+				return
+			}
+			for _, path := range ed.pkgsPaths {
+				packages.Scan(path)
+			}
+		})
+
 		log.AddFilter("console", log.DEBUG, log.NewLogWriter(ed.handleLog))
 		go ed.inputthread()
 		go ed.Observe()
@@ -181,23 +195,8 @@ func (e *Editor) Init() {
 	log.Info("Initializing")
 	// TODO: shouldn't we move SetClipboardFuncs to frontends?
 	e.SetClipboardFuncs(setClipboard, getClipboard)
-
-	OnPackagesPathAdd.Add(packages.Scan)
-	OnDefaultPathAdd.Add(e.loadDefaultSettings)
-	OnDefaultPathAdd.Add(e.loadDefaultKeyBindings)
-	OnUserPathAdd.Add(e.loadUserSettings)
-	OnUserPathAdd.Add(e.loadUserKeyBindings)
-	ed.Settings().AddOnChange("lime.editor.ignored_packages", func(name string) {
-		// TODO: unload the package that is added to ignored_packages
-		if name != "ignored_packages" {
-			return
-		}
-		for _, path := range ed.pkgsPaths {
-			packages.Scan(path)
-		}
-	})
-
 	OnInit.call()
+	OnPackagesPathAdd.Add(packages.Scan)
 }
 
 func (e *Editor) SetClipboardFuncs(setter func(string) error, getter func() (string, error)) {
