@@ -256,6 +256,9 @@ func (e *Editor) loadUserSettings(dir string) {
 }
 
 func (e *Editor) PackagesPath() string {
+	if len(e.pkgsPaths) == 0 {
+		return ""
+	}
 	return e.pkgsPaths[0]
 }
 
