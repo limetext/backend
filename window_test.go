@@ -5,6 +5,7 @@
 package backend
 
 import (
+	"path/filepath"
 	"testing"
 )
 
@@ -31,15 +32,12 @@ func TestWindowRemove(t *testing.T) {
 	defer v0.Close()
 
 	v1 := w.NewFile()
-	defer v1.Close()
-
 	v2 := w.NewFile()
 	defer v2.Close()
 
 	l := len(w.Views())
 
 	w.remove(v1)
-
 	if len(w.Views()) != l-1 {
 		t.Errorf("Expected %d open views, but got %d", l-1, len(w.Views()))
 	}
@@ -155,5 +153,35 @@ func TestWindowCloseAllViewsFail(t *testing.T) {
 
 	if len(w.Views()) != l {
 		t.Error("Expected only one view to close, but more did")
+	}
+}
+
+func TestOpenFile(t *testing.T) {
+	abs := func(path string) string {
+		abs, _ := filepath.Abs(path)
+		return abs
+	}
+	tests := []struct {
+		in  string
+		exp string
+	}{
+		{
+			"testdata/file",
+			abs("testdata/file"),
+		},
+		{
+			"/nonexistdir/o",
+			"/nonexistdir/o",
+		},
+	}
+
+	w := GetEditor().NewWindow()
+	defer w.Close()
+	for i, test := range tests {
+		v := w.OpenFile(test.in, 0644)
+		if out := v.FileName(); out != test.exp {
+			t.Errorf("Test %d: Expected view file name %s, but got %s", i, test.exp, out)
+		}
+		v.Close()
 	}
 }

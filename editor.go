@@ -88,23 +88,6 @@ type (
 	}
 )
 
-func (h *DummyFrontend) SetDefaultAction(action bool) {
-	h.m.Lock()
-	defer h.m.Unlock()
-	h.defaultAction = action
-}
-func (h *DummyFrontend) StatusMessage(msg string) { log.Info(msg) }
-func (h *DummyFrontend) ErrorMessage(msg string)  { log.Error(msg) }
-func (h *DummyFrontend) MessageDialog(msg string) { log.Info(msg) }
-func (h *DummyFrontend) OkCancelDialog(msg string, button string) bool {
-	log.Info(msg)
-	h.m.Lock()
-	defer h.m.Unlock()
-	return h.defaultAction
-}
-func (h *DummyFrontend) Show(v *View, r text.Region)       {}
-func (h *DummyFrontend) VisibleRegion(v *View) text.Region { return text.Region{} }
-
 var (
 	ed  *Editor
 	edl sync.Mutex

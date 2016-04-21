@@ -494,9 +494,7 @@ func TestSetBufferTwice(t *testing.T) {
 	b2 := text.NewBuffer()
 	b2.SetName("test2")
 
-	err := v.setBuffer(b2)
-
-	if err == nil {
+	if err := v.setBuffer(b2); err == nil {
 		t.Errorf("Expected setting the second buffer to cause an error, but it didn't.")
 	}
 
@@ -512,7 +510,6 @@ func TestWindow(t *testing.T) {
 	v := w.NewFile()
 	defer func() {
 		v.SetScratch(true)
-		v.Close()
 	}()
 
 	if v.Window() != w {
@@ -527,7 +524,6 @@ func TestSetScratch(t *testing.T) {
 	v := w.NewFile()
 	defer func() {
 		v.SetScratch(true)
-		v.Close()
 	}()
 
 	def := v.IsScratch()
