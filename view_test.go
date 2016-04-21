@@ -197,6 +197,7 @@ func TestSaveAsNewFile(t *testing.T) {
 }
 
 func TestSaveAsOpenFile(t *testing.T) {
+	t.Skip("We have a deadlock in fsnotify see #86")
 	buf, err := ioutil.ReadFile(testfile)
 	if err != nil {
 		t.Fatalf("Can't read test file `%s`: %s", testfile, err)
