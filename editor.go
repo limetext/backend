@@ -154,17 +154,28 @@ func GetEditor() *Editor {
 		ed.userKB.KeyBindings().SetParent(ed.platformKB)
 		ed.platformKB.KeyBindings().SetParent(ed.defaultKB)
 
-		OnDefaultPathAdd.Add(e.loadDefaultSettings)
-		OnDefaultPathAdd.Add(e.loadDefaultKeyBindings)
-		OnUserPathAdd.Add(e.loadUserSettings)
-		OnUserPathAdd.Add(e.loadUserKeyBindings)
+		OnDefaultPathAdd.Add(ed.loadDefaultSettings)
+		OnDefaultPathAdd.Add(ed.loadDefaultKeyBindings)
+		OnUserPathAdd.Add(ed.loadUserSettings)
+		OnUserPathAdd.Add(ed.loadUserKeyBindings)
 		ed.Settings().AddOnChange("lime.editor.ignored_packages", func(name string) {
-			// TODO: unload the package that is added to ignored_packages
 			if name != "ignored_packages" {
 				return
 			}
+			// If a package is removed from ignored_packages it will
+			// be loaded by re scanning
 			for _, path := range ed.pkgsPaths {
 				packages.Scan(path)
+			}
+
+			ignoreds, ok := ed.Settings().Get("ignored_packages").([]interface{})
+			if !ok {
+				return
+			}
+			for _, ignored := range ignoreds {
+				if name, ok := ignored.(string); ok {
+					packages.UnLoad(name)
+				}
 			}
 		})
 

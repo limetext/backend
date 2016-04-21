@@ -40,6 +40,10 @@ func (j *JSON) Load() {
 	j.err = loaders.LoadJSON(data, j.marshal)
 }
 
+func (j *JSON) UnLoad() {
+	json.Unmarshal([]byte(``), j.marshal)
+}
+
 func (j *JSON) Name() string { return j.path }
 
 func (j *JSON) Path() string { return j.path }
