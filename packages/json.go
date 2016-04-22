@@ -7,12 +7,14 @@ package packages
 import (
 	"encoding/json"
 	"io/ioutil"
+	"sync"
 
 	"github.com/limetext/loaders"
 )
 
 // Helper type for loading json files(e.g keymaps settings)
 type JSON struct {
+	sync.Mutex
 	path    string
 	err     error
 	marshal json.Unmarshaler
@@ -31,16 +33,19 @@ func LoadJSON(path string, marshal json.Unmarshaler) error {
 }
 
 func (j *JSON) Load() {
-	j.err = nil
-	data, err := ioutil.ReadFile(j.Path())
-	if err != nil {
-		j.err = err
+	j.Lock()
+	defer j.Unlock()
+	var data []byte
+	data, j.err = ioutil.ReadFile(j.Path())
+	if j.err != nil {
 		return
 	}
 	j.err = loaders.LoadJSON(data, j.marshal)
 }
 
 func (j *JSON) UnLoad() {
+	j.Lock()
+	defer j.Unlock()
 	j.err = json.Unmarshal([]byte(`null`), j.marshal)
 }
 

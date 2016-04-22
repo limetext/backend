@@ -6,6 +6,7 @@ package packages
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -46,13 +47,31 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error reading %s: %s", testFile, err)
 	}
-	defer ioutil.WriteFile(testFile, data, 0644)
 
+	// FileChanged
 	if err := ioutil.WriteFile(testFile, testData, 0644); err != nil {
 		t.Fatalf("Error writing to file %s: %s", testFile, err)
 	}
 	time.Sleep(100 * time.Millisecond)
 	if got, exp := set.Get("font_face").(string), "test"; got != exp {
+		t.Errorf("Expected font_face %s, but got %s", exp, got)
+	}
+
+	// FileRemoved
+	if err := os.Remove(testFile); err != nil {
+		t.Fatalf("Couldn't remove %s: %s", testFile, err)
+	}
+	time.Sleep(100 * time.Millisecond)
+	if set.Has("font_face") {
+		t.Error("Expected setting to be empty but has font_face")
+	}
+
+	// FileCreated
+	if err := ioutil.WriteFile(testFile, data, 0644); err != nil {
+		t.Fatalf("Error writing to file %s: %s", testFile, err)
+	}
+	time.Sleep(100 * time.Millisecond)
+	if got, exp := set.Get("font_face").(string), "Monospace"; got != exp {
 		t.Errorf("Expected font_face %s, but got %s", exp, got)
 	}
 }
