@@ -80,12 +80,6 @@ type (
 		// cancel was pressed.
 		OkCancelDialog(msg string, okname string) bool
 	}
-
-	DummyFrontend struct {
-		m sync.Mutex
-		// Default return value for OkCancelDialog
-		defaultAction bool
-	}
 )
 
 var (
@@ -104,7 +98,6 @@ func GetEditor() *Editor {
 				WindowCommands:      make(wndcmd),
 				verbose:             true,
 			},
-			frontend: &DummyFrontend{},
 			console: &View{
 				buffer:  text.NewBuffer(),
 				scratch: true,

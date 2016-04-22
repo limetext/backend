@@ -619,7 +619,9 @@ func TestCloseView(t *testing.T) {
 }
 
 func TestCloseView2(t *testing.T) {
-	fe := GetEditor().Frontend()
+	ed := GetEditor()
+	ed.SetFrontend(&DummyFrontend{})
+	fe := ed.Frontend()
 	if dfe, ok := fe.(*DummyFrontend); ok {
 		// Make it trigger a reload
 		dfe.SetDefaultAction(true)

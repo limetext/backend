@@ -6,6 +6,7 @@ package backend
 
 import (
 	"path"
+	"sync"
 	"testing"
 
 	"github.com/limetext/backend/keys"
@@ -15,6 +16,12 @@ import (
 	"github.com/limetext/text"
 	qp "github.com/quarnster/parser"
 )
+
+type DummyFrontend struct {
+	m sync.Mutex
+	// Default return value for OkCancelDialog
+	defaultAction bool
+}
 
 func (h *DummyFrontend) SetDefaultAction(action bool) {
 	h.m.Lock()
