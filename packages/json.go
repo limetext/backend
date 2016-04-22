@@ -41,14 +41,21 @@ func (j *JSON) Load() {
 }
 
 func (j *JSON) UnLoad() {
-	json.Unmarshal([]byte(``), j.marshal)
+	j.err = json.Unmarshal([]byte(`null`), j.marshal)
 }
 
 func (j *JSON) Name() string { return j.path }
 
 func (j *JSON) Path() string { return j.path }
 
-// TODO(.): add actions for other events like delete and create
 func (j *JSON) FileChanged(name string) {
 	j.Load()
+}
+
+func (j *JSON) FileCreated(name string) {
+	j.Load()
+}
+
+func (j *JSON) FileRemoved(name string) {
+	j.UnLoad()
 }

@@ -19,6 +19,12 @@ func watch(pkg Package) {
 	}
 }
 
+func unWatch(pkg Package) {
+	if err := watcher.UnWatch(pkg.Path(), pkg); err != nil {
+		log.Warn("Couldnt unwatch %s: %s", pkg.Path(), err)
+	}
+}
+
 // A helper struct to implement File*Callback interfaces and
 // watching all scaned directories for new packages
 type scanDir struct {
@@ -27,7 +33,9 @@ type scanDir struct {
 
 // TODO: are we checking new folders to?
 func (p *scanDir) FileCreated(name string) {
-	record(name)
+	if pkg := record(name); pkg != nil {
+		load(pkg)
+	}
 }
 
 // watches scaned directory

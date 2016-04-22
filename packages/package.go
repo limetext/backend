@@ -74,7 +74,6 @@ func Scan(dir string) {
 	func() {
 		for _, pkg := range pkgs {
 			load(pkg)
-			loaded[pkg.Path()] = pkg
 		}
 	}()
 }
@@ -82,7 +81,7 @@ func Scan(dir string) {
 func UnLoad(name string) {
 	for _, pkg := range loaded {
 		if pkg.Name() == name {
-			pkg.UnLoad()
+			unLoad(pkg)
 			break
 		}
 	}
@@ -101,4 +100,11 @@ func record(path string) Package {
 func load(pkg Package) {
 	pkg.Load()
 	watch(pkg)
+	loaded[pkg.Path()] = pkg
+}
+
+func unLoad(pkg Package) {
+	pkg.UnLoad()
+	unWatch(pkg)
+	delete(loaded, pkg.Path())
 }
