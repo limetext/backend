@@ -1007,6 +1007,7 @@ func (v *View) SetStatus(key string, val string) {
 	v.lock.Lock()
 	defer v.lock.Unlock()
 	v.status[key] = val
+	OnStatusChanged.Call(v)
 }
 
 func (v *View) GetStatus(key string) string {
@@ -1019,6 +1020,7 @@ func (v *View) EraseStatus(key string) {
 	v.lock.Lock()
 	defer v.lock.Unlock()
 	delete(v.status, key)
+	OnStatusChanged.Call(v)
 }
 
 func (v *View) SetSyntaxFile(file string) {

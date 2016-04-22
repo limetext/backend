@@ -153,6 +153,7 @@ var (
 	OnPostSave          ViewEvent //< Called after a view's buffer has been saved.
 	OnModified          ViewEvent //< Called when the contents of a view's underlying buffer has changed.
 	OnSelectionModified ViewEvent //< Called when a view's Selection/cursor has changed.
+	OnStatusChanged     ViewEvent //< Called when a view's status has changed.
 
 	OnNewWindow    WindowEvent       //< Called when a new window has been created.
 	OnQueryContext QueryContextEvent //< Called when context is being queried.
