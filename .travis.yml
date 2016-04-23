@@ -29,7 +29,7 @@ addons:
       - xclip
 
 install:
-  - make travis cover_dep glide
+  - make travis cover_dep glide tasks
 
 script:
   - make travis_test

@@ -61,6 +61,7 @@ func Scan(dir string) {
 	fis, err := ioutil.ReadDir(dir)
 	if err != nil {
 		log.Error("Error while scanning %s: %s", dir, err)
+		return
 	}
 	watchDir(dir)
 

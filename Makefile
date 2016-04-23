@@ -1,11 +1,11 @@
 all: fmt license
 
 test:
-	@go test -race $(shell go list ./... | grep -v vendor)
+	@go test -race $$(go list ./... | grep -v vendor)
 fmt:
-	@go fmt $(shell go list ./... | grep -v vendor)
+	@go fmt $$(go list ./... | grep -v vendor)
 license:
-	@go run gen_license.go ./
+	@go run $(GOPATH)/src/github.com/limetext/tasks/gen_license.go
 
 check_fmt:
 ifneq ($(shell gofmt -l ./ | grep -v vendor | grep -v testdata),)
@@ -13,9 +13,10 @@ ifneq ($(shell gofmt -l ./ | grep -v vendor | grep -v testdata),)
 endif
 
 check_license:
-ifneq ($(shell go run gen_license.go ./),)
-	$(error license is not added to all files, run make license)
-endif
+	@go run $(GOPATH)/src/github.com/limetext/tasks/gen_license.go -check
+
+tasks:
+	go get -d -u github.com/limetext/tasks
 
 glide:
 	go get -v -u github.com/Masterminds/glide
@@ -35,7 +36,7 @@ travis_test: test cover report_cover
 
 cover:
 	@echo "mode: count" > coverage.cov; \
-	for pkg in $(shell go list "./..." | grep -v /vendor/); do \
+	for pkg in $$(go list "./..." | grep -v /vendor/); do \
 		go test -covermode=count -coverprofile=tmp.cov $$pkg; \
 		sed 1d tmp.cov >> coverage.cov; \
 		rm tmp.cov; \
@@ -43,6 +44,6 @@ cover:
 
 report_cover:
 ifeq ($(REPORT_COVERAGE),true)
-	$(shell go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.cov -service=travis-ci
+	$$(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.cov -service=travis-ci
 endif
 	rm coverage.cov
