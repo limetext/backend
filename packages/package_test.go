@@ -4,14 +4,36 @@
 
 package packages
 
-import "testing"
+import (
+	"sync"
+	"testing"
+)
 
-type dummyPackage struct{}
+type dummyPackage struct {
+	path    string
+	loaded  bool
+	watcher bool
+	sync.Mutex
+}
 
-func (d *dummyPackage) Load()        {}
-func (d *dummyPackage) UnLoad()      {}
-func (d *dummyPackage) Name() string { return "" }
-func (d *dummyPackage) Path() string { return "" }
+func (d *dummyPackage) Load() {
+	d.Lock()
+	defer d.Unlock()
+	d.loaded = true
+}
+func (d *dummyPackage) UnLoad() {
+	d.Lock()
+	defer d.Unlock()
+	d.loaded = false
+}
+func (d *dummyPackage) IsLoaded() bool {
+	d.Lock()
+	defer d.Unlock()
+	return d.loaded
+}
+func (d *dummyPackage) Name() string           { return d.path }
+func (d *dummyPackage) Path() string           { return d.path }
+func (d *dummyPackage) FileChanged(str string) { d.watcher = true }
 
 func TestRecordCheckAction(t *testing.T) {
 	count := 0
@@ -27,6 +49,7 @@ func TestRecordCheckAction(t *testing.T) {
 	}
 
 	Register(rec)
+	defer Unregister(rec)
 	for _, path := range paths {
 		record(path)
 	}
@@ -61,5 +84,57 @@ func TestRegisterUnregister(t *testing.T) {
 	Unregister(r2)
 	if len(recs) != 0 {
 		t.Errorf("Expected len of records be 0, but got: %d", len(recs))
+	}
+}
+
+func TestLoadUnLoadPackage(t *testing.T) {
+	pkg := &dummyPackage{path: "test"}
+
+	load(pkg)
+	if !pkg.IsLoaded() {
+		t.Error("Expected package be loaded")
+	}
+	if _, ok := loaded["test"]; !ok {
+		t.Error("Expected 'test' in loaded packages")
+	}
+
+	unLoad(pkg)
+	if pkg.IsLoaded() {
+		t.Error("Expected package be unloaded")
+	}
+	if _, ok := loaded["test"]; ok {
+		t.Error("Didn't expect 'test' in loaded packages")
+	}
+}
+
+func TestUnLoad(t *testing.T) {
+	pkg := &dummyPackage{path: "test"}
+	load(pkg)
+
+	UnLoad(pkg.Name())
+	if pkg.IsLoaded() {
+		t.Error("Expected package be unloaded")
+	}
+}
+
+func TestScan(t *testing.T) {
+	path := "testdata/Preferences.sublime-settings"
+	pkg := &dummyPackage{path: path}
+	rec := &Record{func(s string) bool { return s == path },
+		func(s string) Package { return pkg }}
+
+	Register(rec)
+	defer Unregister(rec)
+
+	loaded[path] = nil
+	Scan("testdata")
+	if pkg.IsLoaded() {
+		t.Error("Expected not loading package when it exists in loaded packages")
+	}
+
+	delete(loaded, path)
+	Scan("testdata")
+	if !pkg.IsLoaded() {
+		t.Error("Expected package be loaded")
 	}
 }

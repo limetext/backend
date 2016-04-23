@@ -13,7 +13,7 @@ import (
 	"github.com/limetext/text"
 )
 
-func TestLoadUnLoad(t *testing.T) {
+func TestLoadUnLoadJSON(t *testing.T) {
 	set := text.NewSettings()
 	j := NewJSON("testdata/Preferences.sublime-settings", &set)
 

@@ -7,6 +7,7 @@ package packages
 import (
 	"io/ioutil"
 	"path"
+	"sync"
 
 	"github.com/limetext/backend/log"
 )
@@ -33,15 +34,20 @@ type (
 var (
 	// Registered records
 	recs []*Record
+	recl sync.Mutex
 	// Loaded packages
 	loaded = make(map[string]Package)
 )
 
 func Register(r *Record) {
+	recl.Lock()
+	defer recl.Unlock()
 	recs = append(recs, r)
 }
 
 func Unregister(r *Record) {
+	recl.Lock()
+	defer recl.Unlock()
 	for i, rec := range recs {
 		if rec == r {
 			recs, recs[len(recs)-1] = append(recs[:i], recs[i+1:]...), nil
@@ -82,17 +88,18 @@ func UnLoad(name string) {
 	for _, pkg := range loaded {
 		if pkg.Name() == name {
 			unLoad(pkg)
-			break
+			return
 		}
 	}
 }
 
 func record(path string) Package {
+	recl.Lock()
+	defer recl.Unlock()
 	for _, rec := range recs {
-		if !rec.Check(path) {
-			continue
+		if rec.Check(path) {
+			return rec.Action(path)
 		}
-		return rec.Action(path)
 	}
 	return nil
 }
