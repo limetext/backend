@@ -40,8 +40,8 @@ func (w *Window) NewFile() *View {
 	v.selection.Add(text.Region{A: 0, B: 0})
 	v.Settings().Set("lime.last_save_change_count", v.ChangeCount())
 
-	OnNew.Call(v)
 	w.SetActiveView(v)
+	OnNew.Call(v)
 
 	return v
 }

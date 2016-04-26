@@ -88,7 +88,7 @@ func newView(w *Window) *View {
 	v.Settings().SetParent(v.userSettings)
 
 	v.loadSettings()
-	v.Settings().AddOnChange("lime.view.syntax", func(name string) {
+	v.Settings().AddOnChange("backend.view.syntax", func(name string) {
 		v.lock.Lock()
 		defer v.lock.Unlock()
 

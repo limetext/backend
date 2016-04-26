@@ -134,7 +134,7 @@ func GetEditor() *Editor {
 		OnDefaultPathAdd.Add(ed.loadDefaultKeyBindings)
 		OnUserPathAdd.Add(ed.loadUserSettings)
 		OnUserPathAdd.Add(ed.loadUserKeyBindings)
-		ed.Settings().AddOnChange("lime.editor.ignored_packages", func(name string) {
+		ed.Settings().AddOnChange("backend.editor.ignored_packages", func(name string) {
 			if name != "ignored_packages" {
 				return
 			}

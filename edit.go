@@ -7,7 +7,7 @@ package backend
 import (
 	"fmt"
 
-	. "github.com/limetext/text"
+	"github.com/limetext/text"
 )
 
 type (
@@ -18,8 +18,8 @@ type (
 	// Think of it a bit like an SQL transaction.
 	Edit struct {
 		invalid    bool
-		composite  CompositeAction
-		savedSel   RegionSet
+		composite  text.CompositeAction
+		savedSel   text.RegionSet
 		savedCount int
 		command    string
 		args       Args

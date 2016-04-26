@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/limetext/backend/log"
-	. "github.com/limetext/util"
+	"github.com/limetext/util"
 )
 
 type (
@@ -39,7 +39,7 @@ type (
 
 func DefaultName(cmd interface{}) string {
 	name := reflect.TypeOf(cmd).Elem().Name()
-	return PascalCaseToSnakeCase(strings.TrimSuffix(name, "Command"))
+	return util.PascalCaseToSnakeCase(strings.TrimSuffix(name, "Command"))
 }
 
 // If the cmd implements the CustomInit interface, its Init function
@@ -58,7 +58,7 @@ func (ch *commandHandler) init(cmd interface{}, args Args) error {
 		if ft.Anonymous || !f.CanSet() {
 			continue
 		}
-		key := PascalCaseToSnakeCase(ft.Name)
+		key := util.PascalCaseToSnakeCase(ft.Name)
 		fv, ok := args[key]
 		if !ok {
 			fv = reflect.Zero(ft.Type).Interface()
@@ -83,7 +83,7 @@ func (ch *commandHandler) init(cmd interface{}, args Args) error {
 
 func (ch *commandHandler) RunWindowCommand(wnd *Window, name string, args Args) error {
 	lvl := log.FINE
-	p := Prof.Enter("wc")
+	p := util.Prof.Enter("wc")
 	defer p.Exit()
 	if ch.log {
 		lvl = log.DEBUG
@@ -108,7 +108,7 @@ func (ch *commandHandler) RunWindowCommand(wnd *Window, name string, args Args) 
 
 func (ch *commandHandler) RunTextCommand(view *View, name string, args Args) error {
 	lvl := log.FINE
-	p := Prof.Enter("tc")
+	p := util.Prof.Enter("tc")
 	defer p.Exit()
 	t := time.Now()
 	if ch.log {
@@ -136,7 +136,7 @@ func (ch *commandHandler) RunTextCommand(view *View, name string, args Args) err
 }
 
 func (ch *commandHandler) RunApplicationCommand(name string, args Args) error {
-	p := Prof.Enter("ac")
+	p := util.Prof.Enter("ac")
 	defer p.Exit()
 	if ch.log {
 		log.Info("Running application command: %s %v", name, args)
