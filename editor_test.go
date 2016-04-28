@@ -182,6 +182,7 @@ func (d *dummyColorSc) Name() string {
 }
 
 func (d *dummyColorSc) Spice(*render.ViewRegions) render.Flavour { return render.Flavour{} }
+func (d *dummyColorSc) Global() render.Global                    { return render.Global{} }
 
 func TestAddColorScheme(t *testing.T) {
 	cs := new(dummyColorSc)

@@ -5,7 +5,6 @@
 package render
 
 import (
-	"image/color"
 	"sort"
 
 	"github.com/limetext/text"
@@ -13,9 +12,6 @@ import (
 )
 
 type (
-	// Colour represented by a underlying color.RGBA structure
-	Colour color.RGBA
-
 	// The Flavour struct contains the specific settings
 	// used to style a particular Region.
 	Flavour struct {
@@ -44,6 +40,9 @@ type (
 		// Takes a ViewRegions pointer as input and uses the data contained in it
 		// to determine the Flavour it should be rendered with.
 		Spice(*ViewRegions) Flavour
+
+		// Returns global settings that we should use to render
+		Global() Global
 	}
 
 	Renderer interface {

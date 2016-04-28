@@ -1,4 +1,4 @@
-all: fmt license
+precommit: fmt license test
 
 test:
 	@go test -race $$(go list ./... | grep -v vendor)
@@ -21,6 +21,7 @@ tasks:
 glide:
 	go get -v -u github.com/Masterminds/glide
 	glide install
+
 cover_dep:
 	go get -v -u github.com/mattn/goveralls
 	go get -v -u github.com/axw/gocov/gocov
