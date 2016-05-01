@@ -16,31 +16,38 @@ import (
 )
 
 type (
+	// Wrapper around fsnotify watcher to suit lime needs
+	// 	- Watching directories, we will have less individual watchers
+	// 	- Have multiple subscribers on single file or directory
+	// 	- Watching a path which doesn't exist yet
+	// 	- Watching and applying action on certain events
+	Watcher struct {
+		sync.Mutex
+		wchr     *fsnotify.Watcher
+		watched  map[string][]interface{}
+		watchers []string // paths we created watcher on
+		dirs     []string // dirs we are watching
+	}
+
+	// Called on file change directories won't recieve this callback
 	FileChangedCallback interface {
 		FileChanged(string)
 	}
+	// Called on a file or directory is created
 	FileCreatedCallback interface {
 		FileCreated(string)
 	}
+	// Called on a file or directory is removed
 	FileRemovedCallback interface {
 		FileRemoved(string)
 	}
+	// Called when a directory or file is renamed
+	// TODO: fsnotify behavior after rename is obscure
+	// if we have foo dir with a bar file inside and we are watching foo dir,
+	// on renaming foo to boo we will get rename event for foo dir but if we
+	// delete boo/bar we will get remove event for foo/bar not boo/bar
 	FileRenamedCallback interface {
 		FileRenamed(string)
-	}
-
-	// Wrapper around fsnotify watcher to suit lime needs
-	// Enables:
-	// 		- Watching directories, we will have less individual watchers
-	// 		- Have multiple subscribers on one file or directory resolves #285
-	// 		- Watching a path which doesn't exist yet
-	// 		- Watching and applying action on certain events
-	Watcher struct {
-		wchr     *fsnotify.Watcher
-		watched  map[string][]interface{}
-		watchers []string // helper variable for paths we created watcher on
-		dirs     []string // helper variable for dirs we are watching
-		lock     sync.Mutex
 	}
 )
 
@@ -69,8 +76,8 @@ func (w *Watcher) Watch(name string, cb interface{}) error {
 			return err
 		}
 	}
-	w.lock.Lock()
-	defer w.lock.Unlock()
+	w.Lock()
+	defer w.Unlock()
 	if err := w.add(name, cb); err != nil {
 		if !isDir {
 			return err
@@ -144,8 +151,8 @@ func (w *Watcher) flushDir(name string) {
 
 func (w *Watcher) UnWatch(name string, cb interface{}) error {
 	log.Finest("UnWatch(%s)", name)
-	w.lock.Lock()
-	defer w.lock.Unlock()
+	w.Lock()
+	defer w.Unlock()
 	if cb == nil {
 		return w.unWatch(name)
 	}
@@ -205,8 +212,8 @@ func (w *Watcher) Observe() {
 				break
 			}
 			func() {
-				w.lock.Lock()
-				defer w.lock.Unlock()
+				w.Lock()
+				defer w.Unlock()
 				w.apply(ev)
 				name := ev.Name
 				// currently fsnotify pushs remove event for files
@@ -227,9 +234,9 @@ func (w *Watcher) Observe() {
 				// file is created again
 				if ev.Op&fsnotify.Remove != 0 {
 					w.watchers = util.Remove(w.watchers, name)
-					w.lock.Unlock()
+					w.Unlock()
 					w.Watch(dir, nil)
-					w.lock.Lock()
+					w.Lock()
 				}
 				// If the event is create we will apply FileCreated callback
 				// for the parent directory to because when new file is created
@@ -238,9 +245,9 @@ func (w *Watcher) Observe() {
 				if cbs, exist := w.watched[dir]; ev.Op&fsnotify.Create != 0 && exist {
 					for _, cb := range cbs {
 						if c, ok := cb.(FileCreatedCallback); ok {
-							w.lock.Unlock()
+							w.Unlock()
 							c.FileCreated(name)
-							w.lock.Lock()
+							w.Lock()
 						}
 					}
 				}
