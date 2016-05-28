@@ -496,4 +496,6 @@ func (e *Editor) FileTypeSyntax(ext string) string {
 }
 
 // TODO: should generate sth like sublime text syntaxes menu
+// the name in the menu should come from defined name inside syntax file or
+// the syntax file name
 func (e *Editor) Syntaxes() {}
