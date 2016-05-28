@@ -1088,15 +1088,7 @@ func (v *View) SetName(n string) error {
 }
 
 func (v *View) RowCol(point int) (int, int) {
-	r, c := v.buffer.RowCol(point)
-	// If there is tabs in the line, buffer counts them as 1 character but
-	// we need to count them as tab_size from settings
-	s := v.Substr(v.Line(point))
-	tabs := strings.Count(s, "\t")
-	if size, ok := v.Settings().Get("tab_size", 4).(int); ok {
-		c += tabs*size - tabs
-	}
-	return r, c
+	return v.buffer.RowCol(point)
 }
 
 func (v *View) TextPoint(row, col int) int {
