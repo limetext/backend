@@ -51,23 +51,6 @@ type (
 	parseReq struct {
 		forced bool
 	}
-
-	// Any color scheme view should implement this interface
-	// also it should register it self from editor.AddColorSCheme
-	ColorScheme interface {
-		render.ColourScheme
-		Name() string
-	}
-
-	// Any syntax definition for view should implement this interface
-	// also it should register it self from editor.AddSyntax
-	Syntax interface {
-		// provides parser for creating syntax highlighter
-		Parser(data string) (parser.Parser, error)
-		Name() string
-		// filetypes this syntax supports
-		FileTypes() []string
-	}
 )
 
 func newView(w *Window) *View {
@@ -194,24 +177,11 @@ func (v *View) parsethread() {
 			}
 		}()
 
-		sub := v.Substr(text.Region{0, v.Size()})
-		source, _ := v.Settings().Get("syntax", "").(string)
-		if len(source) == 0 {
-			return
-		}
-		syn := GetEditor().GetSyntax(source)
-		if syn == nil {
-			log.Error("No syntax %s", source)
-			return
-		}
-		pr, err := syn.Parser(sub)
+		data := v.Substr(text.Region{0, v.Size()})
+		syntax, _ := v.Settings().Get("syntax", "").(string)
+		sh, err := syntaxHighlighter(syntax, data)
 		if err != nil {
-			log.Error("Couldn't get parser from syntax: %s", err)
-			return
-		}
-		synh, err := parser.NewSyntaxHighlighter(pr)
-		if err != nil {
-			log.Error("Couldn't create syntaxhighlighter: %v", err)
+			log.Error(err)
 			return
 		}
 
@@ -225,14 +195,14 @@ func (v *View) parsethread() {
 		v.lock.Lock()
 		defer v.lock.Unlock()
 
-		v.syntax = synh
+		v.syntax = sh
 		for k := range v.regions {
 			if strings.HasPrefix(k, "lime.syntax") {
 				delete(v.regions, k)
 			}
 		}
 
-		for k, v2 := range synh.Flatten() {
+		for k, v2 := range sh.Flatten() {
 			if v2.Regions.HasNonEmpty() {
 				v.regions[k] = v2
 			}
@@ -708,9 +678,9 @@ func (v *View) Transform(viewport text.Region) render.Recipe {
 	if v.syntax == nil {
 		return nil
 	}
-	cs := v.Settings().Get("color_scheme", "").(string)
-	scheme := ed.GetColorScheme(cs)
-	if scheme == nil {
+	cs, _ := v.Settings().Get("color_scheme", "").(string)
+	scheme, err := colorScheme(cs)
+	if err != nil {
 		return nil
 	}
 	rr := make(render.ViewRegionMap)

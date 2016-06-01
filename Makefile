@@ -6,6 +6,8 @@ fmt:
 	@go fmt $$(go list ./... | grep -v vendor)
 license:
 	@go run $(GOPATH)/src/github.com/limetext/tasks/gen_license.go
+fast_test:
+	@go test $$(go list ./... | grep -v vendor)
 
 check_fmt:
 ifneq ($(shell gofmt -l ./ | grep -v vendor | grep -v testdata),)
