@@ -79,6 +79,10 @@ type (
 		// Returns true when ok was pressed, and false when
 		// cancel was pressed.
 		OkCancelDialog(msg string, okname string) bool
+
+		// Displays file dialog, returns the selected files.
+		// folder is the path file dialog will show.
+		Prompt(title, folder string) []string
 	}
 )
 
@@ -263,6 +267,7 @@ func (e *Editor) NewWindow() *Window {
 	e.windows = append(e.windows, &Window{})
 	w := e.windows[len(e.windows)-1]
 	edl.Unlock()
+	// TODO: parent should be project settings
 	w.Settings().SetParent(e)
 	e.SetActiveWindow(w)
 	OnNewWindow.Call(w)
