@@ -1,6 +1,5 @@
 package: github.com/limetext/backend
 import:
-- package: github.com/atotto/clipboard
 - package: github.com/limetext/loaders
 - package: github.com/limetext/log4go
 - package: github.com/limetext/rubex

@@ -11,7 +11,6 @@ import (
 	"runtime/debug"
 	"sync"
 
-	"github.com/atotto/clipboard"
 	"github.com/limetext/backend/keys"
 	"github.com/limetext/backend/log"
 	"github.com/limetext/backend/packages"
@@ -122,6 +121,13 @@ func GetEditor() *Editor {
 			log.Error("Couldn't create watcher: %s", err)
 		}
 
+		ed.clipboardSetter = func(s string) error {
+			return fmt.Errorf("clipboard functions has not been set")
+		}
+		ed.clipboardGetter = func() (string, error) {
+			return "", fmt.Errorf("clipboard functions has not been set")
+		}
+
 		ed.console.Settings().Set("is_widget", true)
 		// Initializing settings hierarchy
 		// default <- platform <- user(editor)
@@ -174,18 +180,8 @@ func (e *Editor) SetFrontend(f Frontend) {
 	e.frontend = f
 }
 
-func setClipboard(n string) error {
-	return clipboard.WriteAll(n)
-}
-
-func getClipboard() (string, error) {
-	return clipboard.ReadAll()
-}
-
 func (e *Editor) Init() {
 	log.Info("Initializing")
-	// TODO: shouldn't we move SetClipboardFuncs to frontends?
-	e.SetClipboardFuncs(setClipboard, getClipboard)
 	OnInit.call()
 	OnPackagesPathAdd.Add(packages.Scan)
 }
@@ -429,13 +425,12 @@ func (e *Editor) SetClipboard(n string) {
 }
 
 func (e *Editor) GetClipboard() string {
-	if n, err := e.clipboardGetter(); err == nil {
-		return n
-	} else {
+	n, err := e.clipboardGetter()
+	if err != nil {
 		log.Error("Could not get clipboard: %v", err)
+		return e.clipboard
 	}
-
-	return e.clipboard
+	return n
 }
 
 func (e *Editor) handleLog(s string) {
