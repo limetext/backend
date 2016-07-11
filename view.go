@@ -72,12 +72,12 @@ func newView(w *Window) *View {
 
 	v.loadSettings()
 	v.Settings().AddOnChange("backend.view.syntax", func(name string) {
-		v.lock.Lock()
-		defer v.lock.Unlock()
-
 		if name != "syntax" {
 			return
 		}
+		v.lock.Lock()
+		defer v.lock.Unlock()
+
 		syn, _ := v.Settings().Get("syntax", "").(string)
 		if syn != v.cursyntax {
 			v.cursyntax = syn
@@ -179,11 +179,7 @@ func (v *View) parsethread() {
 
 		data := v.Substr(text.Region{0, v.Size()})
 		syntax, _ := v.Settings().Get("syntax", "").(string)
-		sh, err := syntaxHighlighter(syntax, data)
-		if err != nil {
-			log.Error(err)
-			return
-		}
+		sh := syntaxHighlighter(syntax, data)
 
 		// Only set if it isn't invalid already, otherwise the
 		// current syntax highlighting will be more accurate
@@ -679,10 +675,7 @@ func (v *View) Transform(viewport text.Region) render.Recipe {
 		return nil
 	}
 	cs, _ := v.Settings().Get("color_scheme", "").(string)
-	scheme, err := colorScheme(cs)
-	if err != nil {
-		return nil
-	}
+	scheme := colorScheme(cs)
 	rr := make(render.ViewRegionMap)
 	for k, v := range v.regions {
 		rr[k] = *v.Clone()

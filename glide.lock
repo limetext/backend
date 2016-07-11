@@ -11,7 +11,7 @@ imports:
 - name: github.com/limetext/rubex
   version: 3fc130e580797e3d9c6fdab36e6a961141f9fd5f
 - name: github.com/limetext/text
-  version: 06ae8177eb526ccd7877df1d16909b4e48b75e0f
+  version: 9b0a609785b4de3db9872f2f1b5c52b19cf1f877
 - name: github.com/limetext/util
   version: 20e1a4a3505f50a45c7f92456d889d899272ac14
 - name: github.com/quarnster/parser
