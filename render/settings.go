@@ -15,7 +15,7 @@ import (
 
 // Color scheme global settings
 // http://docs.sublimetext.info/en/latest/reference/color_schemes.html#global-settings-ordered-by-type
-type Global struct {
+type Settings struct {
 	Foreground                Colour
 	Background                Colour
 	Caret                     Colour

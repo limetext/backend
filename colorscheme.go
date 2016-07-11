@@ -5,8 +5,7 @@
 package backend
 
 import (
-	"fmt"
-
+	"github.com/limetext/backend/log"
 	"github.com/limetext/backend/render"
 )
 
@@ -17,13 +16,44 @@ type ColorScheme interface {
 	Name() string
 }
 
-func colorScheme(name string) (ColorScheme, error) {
+func colorScheme(name string) render.ColourScheme {
 	if name == "" {
-		// TODO bring the default color scheme up
+		return defaultScheme()
 	}
+
 	scheme := ed.GetColorScheme(name)
 	if scheme == nil {
-		return nil, fmt.Errorf("No color scheme %s in editor", name)
+		log.Error("No color scheme %s in editor falling back to default color scheme", name)
+		return defaultScheme()
 	}
-	return scheme, nil
+	return scheme
+}
+
+type scheme struct {
+	settings render.Settings
+}
+
+func (s *scheme) Spice(*render.ViewRegions) render.Flavour {
+	return render.Flavour{
+		Background: s.Settings().Background,
+		Foreground: s.Settings().Foreground,
+	}
+}
+
+func (s *scheme) Settings() render.Settings {
+	return s.settings
+}
+
+// default colorscheme used when there is a problem
+var colorscheme *scheme
+
+func defaultScheme() render.ColourScheme {
+	if colorscheme == nil {
+		colorscheme = &scheme{
+			render.Settings{
+				Background: render.Colour{255, 255, 255, 1},
+			},
+		}
+	}
+	return colorscheme
 }

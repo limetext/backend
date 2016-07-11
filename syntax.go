@@ -7,7 +7,10 @@ package backend
 import (
 	"fmt"
 
+	"github.com/limetext/backend/log"
 	"github.com/limetext/backend/parser"
+	"github.com/limetext/backend/render"
+	"github.com/limetext/text"
 )
 
 // Any syntax definition for view should implement this interface
@@ -20,10 +23,19 @@ type Syntax interface {
 	FileTypes() []string
 }
 
-func syntaxHighlighter(name, data string) (parser.SyntaxHighlighter, error) {
+func syntaxHighlighter(name, data string) parser.SyntaxHighlighter {
 	if name == "" {
-		// TODO bring the default syntax up
+		return defaultSyntax()
 	}
+	sh, err := getHighlighter(name, data)
+	if err != nil {
+		log.Error("%s falling back to default syntax", err)
+		return defaultSyntax()
+	}
+	return sh
+}
+
+func getHighlighter(name, data string) (parser.SyntaxHighlighter, error) {
 	syn := GetEditor().GetSyntax(name)
 	if syn == nil {
 		return nil, fmt.Errorf("No syntax %s in editor", name)
@@ -34,7 +46,33 @@ func syntaxHighlighter(name, data string) (parser.SyntaxHighlighter, error) {
 	}
 	sh, err := parser.NewSyntaxHighlighter(pr)
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't create syntaxhighlighter: %v", err)
+		return nil, fmt.Errorf("Couldn't create syntaxhighlighter: %s", err)
 	}
 	return sh, nil
+}
+
+type syntax struct{}
+
+func (s *syntax) Adjust(position, delta int) {}
+
+func (s *syntax) ScopeExtent(point int) text.Region {
+	return text.Region{}
+}
+
+func (s *syntax) ScopeName(p int) string {
+	return "text.plain"
+}
+
+func (s *syntax) Flatten() render.ViewRegionMap {
+	return nil
+}
+
+// default syntax highlighter used when there is a problem
+var syntaxhighlighter *syntax
+
+func defaultSyntax() parser.SyntaxHighlighter {
+	if syntaxhighlighter == nil {
+		syntaxhighlighter = &syntax{}
+	}
+	return syntaxhighlighter
 }

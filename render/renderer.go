@@ -42,7 +42,7 @@ type (
 		Spice(*ViewRegions) Flavour
 
 		// Returns global settings that we should use to render
-		Global() Global
+		Settings() Settings
 	}
 
 	Renderer interface {
