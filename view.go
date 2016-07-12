@@ -675,7 +675,7 @@ func (v *View) Transform(viewport text.Region) render.Recipe {
 		return nil
 	}
 	cs, _ := v.Settings().Get("color_scheme", "").(string)
-	scheme := colorScheme(cs)
+	scheme := ed.GetColorScheme(cs)
 	rr := make(render.ViewRegionMap)
 	for k, v := range v.regions {
 		rr[k] = *v.Clone()
@@ -1036,7 +1036,7 @@ func (v *View) SetFileName(n string) error {
 	}
 	if ext := path.Ext(n); ext == "" {
 		return nil
-	} else if file := GetEditor().FileTypeSyntax(ext[1:]); file != "" {
+	} else if file := GetEditor().fileTypeSyntax(ext[1:]); file != "" {
 		v.SetSyntaxFile(file)
 	}
 	return nil

@@ -37,9 +37,13 @@ func (h *DummyFrontend) OkCancelDialog(msg string, button string) bool {
 	defer h.m.Unlock()
 	return h.defaultAction
 }
-func (h *DummyFrontend) Show(v *View, r text.Region)          {}
-func (h *DummyFrontend) VisibleRegion(v *View) text.Region    { return text.Region{} }
-func (h *DummyFrontend) Prompt(title, folder string) []string { return nil }
+func (h *DummyFrontend) Show(v *View, r text.Region) {}
+func (h *DummyFrontend) VisibleRegion(v *View) text.Region {
+	return text.Region{}
+}
+func (h *DummyFrontend) Prompt(title, folder string, flags int) []string {
+	return nil
+}
 
 func TestGetEditor(t *testing.T) {
 	ed := GetEditor()
@@ -180,7 +184,7 @@ func (d *dummyColorSc) Name() string {
 func (d *dummyColorSc) Spice(*render.ViewRegions) render.Flavour {
 	return render.Flavour{}
 }
-func (d *dummyColorSc) Settings() render.Settings {
+func (d *dummyColorSc) GlobalSettings() render.Settings {
 	return render.Settings{}
 }
 

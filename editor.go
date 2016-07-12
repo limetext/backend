@@ -24,66 +24,32 @@ func init() {
 	GetEditor()
 }
 
-type (
-	Editor struct {
-		text.HasSettings
-		keys.HasKeyBindings
-		*watch.Watcher
-		windows          []*Window
-		activeWindow     *Window
-		logInput         bool
-		cmdHandler       commandHandler
-		console          *View
-		frontend         Frontend
-		keyInput         chan (keys.KeyPress)
-		clipboardSetter  func(string) error
-		clipboardGetter  func() (string, error)
-		clipboard        string
-		defaultSettings  *text.HasSettings
-		platformSettings *text.HasSettings
-		defaultKB        *keys.HasKeyBindings
-		platformKB       *keys.HasKeyBindings
-		userKB           *keys.HasKeyBindings
-		defaultPath      string
-		userPath         string
-		pkgsPaths        []string
-		colorSchemes     map[string]ColorScheme
-		syntaxes         map[string]Syntax
-		filetypes        map[string]string
-	}
-
-	// The Frontend interface defines the API
-	// for functionality that is frontend specific.
-	Frontend interface {
-		// Probe the frontend for the currently
-		// visible region of the given view.
-		VisibleRegion(v *View) text.Region
-
-		// Make the frontend show the specified region of the
-		// given view.
-		Show(v *View, r text.Region)
-
-		// Sets the status message shown in the status bar
-		StatusMessage(string)
-
-		// Displays an error message to the user
-		ErrorMessage(string)
-
-		// Displays a message dialog to the user
-		MessageDialog(string)
-
-		// Displays an ok / cancel dialog to the user.
-		// "okname" if provided will be used as the text
-		// instead of "Ok" for the ok button.
-		// Returns true when ok was pressed, and false when
-		// cancel was pressed.
-		OkCancelDialog(msg string, okname string) bool
-
-		// Displays file dialog, returns the selected files.
-		// folder is the path file dialog will show.
-		Prompt(title, folder string) []string
-	}
-)
+type Editor struct {
+	text.HasSettings
+	keys.HasKeyBindings
+	*watch.Watcher
+	windows          []*Window
+	activeWindow     *Window
+	logInput         bool
+	cmdHandler       commandHandler
+	console          *View
+	frontend         Frontend
+	keyInput         chan (keys.KeyPress)
+	clipboardSetter  func(string) error
+	clipboardGetter  func() (string, error)
+	clipboard        string
+	defaultSettings  *text.HasSettings
+	platformSettings *text.HasSettings
+	defaultKB        *keys.HasKeyBindings
+	platformKB       *keys.HasKeyBindings
+	userKB           *keys.HasKeyBindings
+	defaultPath      string
+	userPath         string
+	pkgsPaths        []string
+	colorSchemes     map[string]ColorScheme
+	syntaxes         map[string]Syntax
+	filetypes        map[string]string
+}
 
 var (
 	ed  *Editor
@@ -474,7 +440,16 @@ func (e *Editor) AddColorScheme(path string, cs ColorScheme) {
 }
 
 func (e *Editor) GetColorScheme(path string) ColorScheme {
-	return e.colorSchemes[path]
+	if path == "" {
+		return defaultScheme()
+	}
+
+	scheme := e.colorSchemes[path]
+	if scheme == nil {
+		log.Error("No color scheme %s in editor falling back to default color scheme", path)
+		return defaultScheme()
+	}
+	return scheme
 }
 
 // TODO: should generate sth like sublime text color schemes menu
@@ -487,11 +462,11 @@ func (e *Editor) AddSyntax(path string, s Syntax) {
 	}
 }
 
-func (e *Editor) GetSyntax(path string) Syntax {
+func (e *Editor) getSyntax(path string) Syntax {
 	return e.syntaxes[path]
 }
 
-func (e *Editor) FileTypeSyntax(ext string) string {
+func (e *Editor) fileTypeSyntax(ext string) string {
 	return e.filetypes[ext]
 }
 

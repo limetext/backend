@@ -27,16 +27,16 @@ func syntaxHighlighter(name, data string) parser.SyntaxHighlighter {
 	if name == "" {
 		return defaultSyntax()
 	}
-	sh, err := getHighlighter(name, data)
+	sh, err := syntaxProvider(name, data)
 	if err != nil {
-		log.Error("%s falling back to default syntax", err)
+		log.Error("%s, falling back to default syntax", err)
 		return defaultSyntax()
 	}
 	return sh
 }
 
-func getHighlighter(name, data string) (parser.SyntaxHighlighter, error) {
-	syn := GetEditor().GetSyntax(name)
+func syntaxProvider(name, data string) (parser.SyntaxHighlighter, error) {
+	syn := GetEditor().getSyntax(name)
 	if syn == nil {
 		return nil, fmt.Errorf("No syntax %s in editor", name)
 	}
