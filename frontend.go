@@ -40,9 +40,9 @@ type Frontend interface {
 
 const (
 	// Prompt save as dialog
-	SaveAs = 1 << iota
+	PROMPT_SAVE_AS = 1 << iota
 	// User should only be able to select folders
-	OnlyFolder
+	PROMPT_ONLY_FOLDER
 	// User can select multiple files
-	SelectMultiple
+	PROMPT_SELECT_MULTIPLE
 )
