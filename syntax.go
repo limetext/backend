@@ -36,7 +36,7 @@ func syntaxHighlighter(name, data string) parser.SyntaxHighlighter {
 }
 
 func syntaxProvider(name, data string) (parser.SyntaxHighlighter, error) {
-	syn := GetEditor().getSyntax(name)
+	syn := GetEditor().GetSyntax(name)
 	if syn == nil {
 		return nil, fmt.Errorf("No syntax %s in editor", name)
 	}

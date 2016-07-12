@@ -462,7 +462,7 @@ func (e *Editor) AddSyntax(path string, s Syntax) {
 	}
 }
 
-func (e *Editor) getSyntax(path string) Syntax {
+func (e *Editor) GetSyntax(path string) Syntax {
 	return e.syntaxes[path]
 }
 
