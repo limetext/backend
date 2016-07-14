@@ -76,7 +76,17 @@ func (ch *commandHandler) init(cmd interface{}, args Args) error {
 				continue
 			}
 		}
-		f.Set(reflect.ValueOf(fv))
+		rv := reflect.ValueOf(fv)
+		rvtype := rv.Type()
+		ftype := f.Type()
+		if !rvtype.AssignableTo(ftype) {
+			if rvtype.ConvertibleTo(ftype) {
+				rv = rv.Convert(ftype)
+			} else {
+				return fmt.Errorf("Command %v arg %v of type %v not assignable or convertable to %v of type %v", t, rv, rvtype, ft.Name, ftype)
+			}
+		}
+		f.Set(rv)
 	}
 	return nil
 }
@@ -107,6 +117,12 @@ func (ch *commandHandler) RunWindowCommand(wnd *Window, name string, args Args) 
 }
 
 func (ch *commandHandler) RunTextCommand(view *View, name string, args Args) error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("Panic in RunTextCommand: %v\n%v %#v %#v", r, view, name, args)
+			panic(r)
+		}
+	}()
 	lvl := log.FINE
 	p := util.Prof.Enter("tc")
 	defer p.Exit()
