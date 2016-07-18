@@ -157,10 +157,6 @@ func TestWindowCloseAllViewsFail(t *testing.T) {
 }
 
 func TestOpenFile(t *testing.T) {
-	abs := func(path string) string {
-		abs, _ := filepath.Abs(path)
-		return abs
-	}
 	tests := []struct {
 		in  string
 		exp string
@@ -184,4 +180,19 @@ func TestOpenFile(t *testing.T) {
 		}
 		v.Close()
 	}
+}
+
+func TestOpenProject(t *testing.T) {
+	w := GetEditor().NewWindow()
+	defer w.Close()
+
+	p := w.OpenProject("project/testdata/project")
+	if got, exp := p.FileName(), abs("project/testdata/project"); got != exp {
+		t.Errorf("Expected project file name %s, but got %s", exp, got)
+	}
+}
+
+func abs(path string) string {
+	abs, _ := filepath.Abs(path)
+	return abs
 }

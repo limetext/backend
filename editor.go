@@ -229,8 +229,8 @@ func (e *Editor) NewWindow() *Window {
 	e.windows = append(e.windows, &Window{})
 	w := e.windows[len(e.windows)-1]
 	edl.Unlock()
-	// TODO: parent should be project settings
 	w.Settings().SetParent(e)
+	w.Project().Settings().SetParent(w)
 	e.SetActiveWindow(w)
 	OnNewWindow.Call(w)
 	return w

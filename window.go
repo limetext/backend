@@ -5,6 +5,7 @@
 package backend
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -12,14 +13,16 @@ import (
 	"sync"
 
 	"github.com/limetext/backend/log"
+	"github.com/limetext/backend/project"
 	"github.com/limetext/text"
 )
 
 type Window struct {
-	text.HasId
 	text.HasSettings
+	text.HasId
 	views       []*View
 	active_view *View
+	project     *project.Project
 	lock        sync.Mutex
 }
 
@@ -140,4 +143,27 @@ func (w *Window) runCommand(c WindowCommand, name string) error {
 		}
 	}()
 	return c.Run(w)
+}
+
+func (w *Window) OpenProject(name string) *project.Project {
+	if data, err := ioutil.ReadFile(name); err != nil {
+		log.Error("Couldn't read file %s: %s", name, err)
+		return nil
+	} else if err := json.Unmarshal(data, w.Project()); err != nil {
+		log.Error("Couldn't unmarshal project data\n%s\n%s", data, err)
+		return nil
+	}
+	if abs, err := filepath.Abs(name); err != nil {
+		w.Project().SetName(name)
+	} else {
+		w.Project().SetName(abs)
+	}
+	return w.Project()
+}
+
+func (w *Window) Project() *project.Project {
+	if w.project == nil {
+		w.project = project.New()
+	}
+	return w.project
 }

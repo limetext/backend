@@ -1,0 +1,26 @@
+{
+	"folders":
+	[
+		{
+			"path": "src",
+			"folder_exclude_patterns": ["backup"],
+			"follow_symlinks": true
+		},
+		{
+			"path": "docs",
+			"name": "Documentation",
+			"file_exclude_patterns": ["*.css"]
+		}
+	],
+	"settings":
+	{
+		"tab_size": 8
+	},
+	"build_systems":
+	[
+		{
+			"name": "List",
+			"shell_cmd": "ls -l"
+		}
+	]
+}

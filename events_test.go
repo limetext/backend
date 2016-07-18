@@ -5,10 +5,11 @@
 package backend
 
 import (
-	. "github.com/limetext/text"
 	"os"
 	"reflect"
 	"testing"
+
+	. "github.com/limetext/text"
 )
 
 func TestOnSelectionModified(t *testing.T) {
@@ -70,7 +71,6 @@ func TestOnPreSave(t *testing.T) {
 	defer w.Close()
 
 	v := w.NewFile()
-	defer v.Close()
 
 	OnPreSave.Add(func(v *View) {
 		callCount++
