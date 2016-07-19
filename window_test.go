@@ -186,8 +186,8 @@ func TestOpenProject(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
 
-	p := w.OpenProject("project/testdata/project")
-	if got, exp := p.FileName(), abs("project/testdata/project"); got != exp {
+	p := w.OpenProject("testdata/project")
+	if got, exp := p.FileName(), abs("testdata/project"); got != exp {
 		t.Errorf("Expected project file name %s, but got %s", exp, got)
 	}
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-package project
+package backend
 
 import (
 	"bytes"
@@ -23,6 +23,7 @@ type (
 		// TODO: build_systems
 	}
 
+	// Represents each folder in sublime-project file
 	Folder struct {
 		Path                string   `json:"path"`
 		Name                string   `json:"name"`
@@ -37,15 +38,14 @@ type (
 )
 
 func New() *Project {
-	p := &Project{}
-	p.folders = make(Folders, 0)
-	return p
+	return &Project{folders: make(Folders, 0)}
 }
 
 func (p *Project) Close() {
 	p = New()
 }
 
+// Marshals project struct to json then writes it to a file with given name
 func (p *Project) SaveAs(name string) error {
 	if data, err := json.Marshal(p); err != nil {
 		return err
@@ -60,13 +60,13 @@ func (p *Project) SaveAs(name string) error {
 	return nil
 }
 
-func (p *Project) AddFolder(name string) {
-	p.folders = append(p.folders, &Folder{Path: name})
+func (p *Project) AddFolder(path string) {
+	p.folders = append(p.folders, &Folder{Path: path})
 }
 
-func (p *Project) RemoveFolder(name string) {
+func (p *Project) RemoveFolder(path string) {
 	for i, folder := range p.folders {
-		if name == folder.Path {
+		if path == folder.Path {
 			p.folders[i] = p.folders[len(p.folders)-1]
 			p.folders[len(p.folders)-1] = nil
 			p.folders = p.folders[:len(p.folders)-1]

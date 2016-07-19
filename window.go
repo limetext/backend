@@ -13,7 +13,6 @@ import (
 	"sync"
 
 	"github.com/limetext/backend/log"
-	"github.com/limetext/backend/project"
 	"github.com/limetext/text"
 )
 
@@ -22,7 +21,7 @@ type Window struct {
 	text.HasId
 	views       []*View
 	active_view *View
-	project     *project.Project
+	project     *Project
 	lock        sync.Mutex
 }
 
@@ -145,7 +144,7 @@ func (w *Window) runCommand(c WindowCommand, name string) error {
 	return c.Run(w)
 }
 
-func (w *Window) OpenProject(name string) *project.Project {
+func (w *Window) OpenProject(name string) *Project {
 	if data, err := ioutil.ReadFile(name); err != nil {
 		log.Error("Couldn't read file %s: %s", name, err)
 		return nil
@@ -161,9 +160,9 @@ func (w *Window) OpenProject(name string) *project.Project {
 	return w.Project()
 }
 
-func (w *Window) Project() *project.Project {
+func (w *Window) Project() *Project {
 	if w.project == nil {
-		w.project = project.New()
+		w.project = New()
 	}
 	return w.project
 }
