@@ -53,10 +53,14 @@ type (
 	InitEvent []InitCallback
 
 	// Dealing with package events
-	PathEventCallback func(string)
+	PathEventCallback func(name string)
 
 	// A PathEvent is simply a bunch of PathEventCallbacks.
 	PathEvent []PathEventCallback
+
+	ProjectEventCallback func(w *Window, name string)
+
+	ProjectEvent []ProjectEventCallback
 )
 
 const (
@@ -142,6 +146,17 @@ func (pe *PathEvent) call(p string) {
 	}
 }
 
+func (pe *ProjectEvent) Add(cb ProjectEventCallback) {
+	*pe = append(*pe, cb)
+}
+
+func (pe *ProjectEvent) call(w *Window, p string) {
+	log.Finest("%s(%v, %s)", projectevNames[pe], w, p)
+	for _, ev := range *pe {
+		ev(w, p)
+	}
+}
+
 var (
 	OnNew               ViewEvent //< Called when a new view is created
 	OnLoad              ViewEvent //< Called when loading a view's buffer has finished
@@ -155,14 +170,20 @@ var (
 	OnSelectionModified ViewEvent //< Called when a view's Selection/cursor has changed.
 	OnStatusChanged     ViewEvent //< Called when a view's status has changed.
 
-	OnNewWindow    WindowEvent       //< Called when a new window has been created.
+	OnNewWindow      WindowEvent //< Called when a new window has been created.
+	OnProjectChanged WindowEvent
+
 	OnQueryContext QueryContextEvent //< Called when context is being queried.
-	OnInit         InitEvent         //< Called once at program startup
+
+	OnInit InitEvent //< Called once at program startup
 
 	OnPackagesPathAdd    PathEvent
 	OnPackagesPathRemove PathEvent
 	OnDefaultPathAdd     PathEvent
 	OnUserPathAdd        PathEvent
+
+	OnAddFolder    ProjectEvent
+	OnRemoveFolder ProjectEvent
 )
 
 var (
@@ -179,11 +200,16 @@ var (
 		&OnSelectionModified: "OnSelectionModified",
 	}
 	wevNames = map[*WindowEvent]string{
-		&OnNewWindow: "OnNewWindow",
+		&OnNewWindow:      "OnNewWindow",
+		&OnProjectChanged: "OnProjectChanged",
 	}
 	pkgPathevNames = map[*PathEvent]string{
 		&OnPackagesPathAdd:    "OnPackagesPathAdd",
 		&OnPackagesPathRemove: "OnPackagesPathRemove",
+	}
+	projectevNames = map[*ProjectEvent]string{
+		&OnAddFolder:    "OnAddFolder",
+		&OnRemoveFolder: "OnRemoveFolder",
 	}
 )
 

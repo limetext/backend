@@ -153,14 +153,16 @@ func (w *Window) OpenProject(name string) *Project {
 	} else {
 		w.Project().SetName(abs)
 	}
+
 	GetEditor().Watch(w.Project().FileName(), w.Project())
+	OnProjectChanged.Call(w)
 
 	return w.Project()
 }
 
 func (w *Window) Project() *Project {
 	if w.project == nil {
-		w.project = New()
+		w.project = New(w)
 	}
 	return w.project
 }

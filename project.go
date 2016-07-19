@@ -19,6 +19,7 @@ import (
 type (
 	Project struct {
 		text.HasSettings
+		window   *Window
 		filename string
 		folders  Folders
 		// TODO: build_systems
@@ -38,13 +39,13 @@ type (
 	Folders []*Folder
 )
 
-func New() *Project {
-	return &Project{folders: make(Folders, 0)}
+func New(w *Window) *Project {
+	return &Project{window: w, folders: make(Folders, 0)}
 }
 
 func (p *Project) Close() {
 	GetEditor().UnWatch(p.FileName(), p)
-	p = New()
+	p = New(p.Window())
 }
 
 // Marshals project struct to json then writes it to a file with given name
@@ -66,6 +67,7 @@ func (p *Project) SaveAs(name string) error {
 func (p *Project) AddFolder(path string) {
 	log.Fine("Adding folder %s to project %s", path, p.FileName())
 	p.folders = append(p.folders, &Folder{Path: path})
+	OnAddFolder.call(p.Window(), path)
 }
 
 func (p *Project) RemoveFolder(path string) {
@@ -75,6 +77,7 @@ func (p *Project) RemoveFolder(path string) {
 			p.folders[i] = p.folders[len(p.folders)-1]
 			p.folders[len(p.folders)-1] = nil
 			p.folders = p.folders[:len(p.folders)-1]
+			OnRemoveFolder.call(p.Window(), path)
 			break
 		}
 	}
@@ -104,6 +107,10 @@ func (p *Project) FileName() string {
 func (p *Project) SetName(name string) {
 	log.Finest("Setting project name %s", name)
 	p.filename = name
+}
+
+func (p *Project) Window() *Window {
+	return p.window
 }
 
 func (p *Project) UnmarshalJSON(data []byte) error {
@@ -175,4 +182,5 @@ func (p *Project) Load(name string) error {
 
 func (p *Project) FileChanged(name string) {
 	p.Load(name)
+	OnProjectChanged.Call(p.Window())
 }
