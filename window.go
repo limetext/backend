@@ -5,7 +5,6 @@
 package backend
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -145,11 +144,8 @@ func (w *Window) runCommand(c WindowCommand, name string) error {
 }
 
 func (w *Window) OpenProject(name string) *Project {
-	if data, err := ioutil.ReadFile(name); err != nil {
-		log.Error("Couldn't read file %s: %s", name, err)
-		return nil
-	} else if err := json.Unmarshal(data, w.Project()); err != nil {
-		log.Error("Couldn't unmarshal project data\n%s\n%s", data, err)
+	if err := w.Project().Load(name); err != nil {
+		log.Error(err)
 		return nil
 	}
 	if abs, err := filepath.Abs(name); err != nil {
@@ -157,6 +153,8 @@ func (w *Window) OpenProject(name string) *Project {
 	} else {
 		w.Project().SetName(abs)
 	}
+	GetEditor().Watch(w.Project().FileName(), w.Project())
+
 	return w.Project()
 }
 

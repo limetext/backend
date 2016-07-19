@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/limetext/backend/log"
 	"github.com/limetext/text"
 )
 
@@ -42,11 +43,13 @@ func New() *Project {
 }
 
 func (p *Project) Close() {
+	GetEditor().UnWatch(p.FileName(), p)
 	p = New()
 }
 
 // Marshals project struct to json then writes it to a file with given name
 func (p *Project) SaveAs(name string) error {
+	log.Fine("Saving project as %s", name)
 	if data, err := json.Marshal(p); err != nil {
 		return err
 	} else if err := ioutil.WriteFile(name, data, 0644); err != nil {
@@ -61,10 +64,12 @@ func (p *Project) SaveAs(name string) error {
 }
 
 func (p *Project) AddFolder(path string) {
+	log.Fine("Adding folder %s to project %s", path, p.FileName())
 	p.folders = append(p.folders, &Folder{Path: path})
 }
 
 func (p *Project) RemoveFolder(path string) {
+	log.Fine("Removing folder %s from project %s", path, p.FileName())
 	for i, folder := range p.folders {
 		if path == folder.Path {
 			p.folders[i] = p.folders[len(p.folders)-1]
@@ -97,6 +102,7 @@ func (p *Project) FileName() string {
 }
 
 func (p *Project) SetName(name string) {
+	log.Finest("Setting project name %s", name)
 	p.filename = name
 }
 
@@ -156,4 +162,17 @@ func (p *Project) MarshalJSON() ([]byte, error) {
 	}
 	buf.WriteString("\n}\n")
 	return buf.Bytes(), nil
+}
+
+func (p *Project) Load(name string) error {
+	if data, err := ioutil.ReadFile(name); err != nil {
+		return fmt.Errorf("Couldn't read file %s: %s", name, err)
+	} else if err := json.Unmarshal(data, p); err != nil {
+		return fmt.Errorf("Couldn't unmarshal project data\n%s\n%s", data, err)
+	}
+	return nil
+}
+
+func (p *Project) FileChanged(name string) {
+	p.Load(name)
 }
