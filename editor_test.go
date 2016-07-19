@@ -64,15 +64,15 @@ func TestLoadSettings(t *testing.T) {
 	ed := GetEditor()
 	switch ed.Platform() {
 	case "windows":
-		if res := ed.Settings().Get("font_face", ""); res != "Consolas" {
+		if res := ed.Settings().String("font_face", ""); res != "Consolas" {
 			t.Errorf("Expected windows font_face be Consolas, but is %s", res)
 		}
 	case "darwin":
-		if res := ed.Settings().Get("font_face", ""); res != "Menlo" {
+		if res := ed.Settings().String("font_face", ""); res != "Menlo" {
 			t.Errorf("Expected OSX font_face be Menlo, but is %s", res)
 		}
 	default:
-		if res := ed.Settings().Get("font_face", ""); res != "Monospace" {
+		if res := ed.Settings().String("font_face", ""); res != "Monospace" {
 			t.Errorf("Expected Linux font_face be Monospace, but is %s", res)
 		}
 	}

@@ -67,7 +67,9 @@ func (p *Project) AddFolder(name string) {
 func (p *Project) RemoveFolder(name string) {
 	for i, folder := range p.folders {
 		if name == folder.Path {
-			p.folders = append(p.folders[:i], p.folders[i+1:]...)
+			p.folders[i] = p.folders[len(p.folders)-1]
+			p.folders[len(p.folders)-1] = nil
+			p.folders = p.folders[:len(p.folders)-1]
 			break
 		}
 	}

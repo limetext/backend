@@ -78,8 +78,7 @@ func newView(w *Window) *View {
 		v.lock.Lock()
 		defer v.lock.Unlock()
 
-		syn, _ := v.Settings().Get("syntax", "").(string)
-		if syn != v.cursyntax {
+		if syn := v.Settings().String("syntax", ""); syn != v.cursyntax {
 			v.cursyntax = syn
 			v.loadSettings()
 			v.reparse(true)
@@ -178,7 +177,7 @@ func (v *View) parsethread() {
 		}()
 
 		data := v.Substr(text.Region{0, v.Size()})
-		syntax, _ := v.Settings().Get("syntax", "").(string)
+		syntax := v.Settings().String("syntax", "")
 		sh := syntaxHighlighter(syntax, data)
 
 		// Only set if it isn't invalid already, otherwise the
@@ -251,7 +250,7 @@ func (v *View) reparse(forced bool) {
 // Packages/User/Python.sublime-settings
 // <Buffer Specific Settings>
 func (v *View) loadSettings() {
-	syntax := v.Settings().Get("syntax", "").(string)
+	syntax := v.Settings().String("syntax", "")
 	ed := GetEditor()
 	if r, err := rubex.Compile(`([A-Za-z]+?)\.(?:[^.]+)$`); err != nil {
 		log.Error(err)
@@ -342,12 +341,8 @@ func (v *View) Window() *Window {
 // Tabs are (sometimes, depending on the View's settings) translated to spaces.
 // The return value is the length of the string that was inserted.
 func (v *View) Insert(edit *Edit, point int, value string) int {
-	if t, ok := v.Settings().Get("translate_tabs_to_spaces", false).(bool); ok && t && strings.Contains(value, "\t") {
-		tab_size, ok := v.Settings().Get("tab_size", 4).(int)
-		if !ok {
-			tab_size = 4
-		}
-
+	if t := v.Settings().Bool("translate_tabs_to_spaces", false); t && strings.Contains(value, "\t") {
+		tab_size := v.Settings().Int("tab_size", 4)
 		lines := strings.Split(value, "\n")
 		for i, li := range lines {
 			for {
@@ -508,14 +503,14 @@ func (v *View) IsDirty() bool {
 	if v.IsScratch() {
 		return false
 	}
-	lastSave, _ := v.Settings().Get("lime.last_save_change_count", -1).(int)
+	lastSave := v.Settings().Int("lime.last_save_change_count", -1)
 	return v.ChangeCount() != lastSave
 }
 
 func (v *View) FileChanged(filename string) {
 	log.Finest("Reloading %s", filename)
 
-	if saving, ok := v.Settings().Get("lime.saving", false).(bool); ok && saving {
+	if saving := v.Settings().Bool("lime.saving", false); saving {
 		// This reload was triggered by ourselves saving to this file, so don't reload it
 		return
 	}
@@ -544,7 +539,7 @@ func (v *View) SaveAs(name string) (err error) {
 	v.Settings().Set("lime.saving", true)
 	defer v.Settings().Erase("lime.saving")
 	OnPreSave.Call(v)
-	if atomic := v.Settings().Get("atomic_save", true).(bool); v.FileName() == "" || !atomic {
+	if atomic := v.Settings().Bool("atomic_save", true); v.FileName() == "" || !atomic {
 		if err := v.nonAtomicSave(name); err != nil {
 			return err
 		}
@@ -674,7 +669,7 @@ func (v *View) Transform(viewport text.Region) render.Recipe {
 	if v.syntax == nil {
 		return nil
 	}
-	cs, _ := v.Settings().Get("color_scheme", "").(string)
+	cs := v.Settings().String("color_scheme", "")
 	scheme := ed.GetColorScheme(cs)
 	rr := make(render.ViewRegionMap)
 	for k, v := range v.regions {
@@ -753,7 +748,7 @@ const (
 // Classifies point, returning a bitwise OR of zero or more of defined flags
 func (v *View) Classify(point int) (res int) {
 	var a, b string = "", ""
-	ws := v.Settings().Get("word_separators", DEFAULT_SEPARATORS).(string)
+	ws := v.Settings().String("word_separators", DEFAULT_SEPARATORS)
 	if point > 0 {
 		a = v.Substr(text.Region{point - 1, point})
 	}

@@ -64,7 +64,7 @@ func TestUnmarshalJSON(t *testing.T) {
 		t.Fatalf("Error on unmarshaling data to project: %s", err)
 	}
 
-	if got, exp := int(p.Settings().Get("tab_size", 4).(float64)), 8; got != exp {
+	if got, exp := p.Settings().Int("tab_size", 4), 8; got != exp {
 		t.Errorf("Expected project settings %d, but got %d", exp, got)
 	}
 	if got := len(p.folders); got != 2 {

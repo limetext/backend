@@ -655,12 +655,12 @@ func TestViewLoadSettings(t *testing.T) {
 		v.Close()
 	}()
 
-	if v.Settings().Get("translate_tabs_to_spaces", true).(bool) != false {
+	if v.Settings().Bool("translate_tabs_to_spaces", true) != false {
 		t.Error("Expected `translate_tabs_to_spaces` be false for a new view but is true")
 	}
 
 	v.Settings().Set("syntax", "testdata/Python.tmLanguage")
-	if v.Settings().Get("translate_tabs_to_spaces", false).(bool) != true {
+	if v.Settings().Bool("translate_tabs_to_spaces", false) != true {
 		t.Error("Expected `translate_tabs_to_spaces` be true for python syntax but is false")
 	}
 }

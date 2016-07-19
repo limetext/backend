@@ -191,8 +191,7 @@ func init() {
 	// Register functionality dealing with a couple of built in contexts
 	OnQueryContext.Add(func(v *View, key string, operator util.Op, operand interface{}, match_all bool) QueryContextReturn {
 		if strings.HasPrefix(key, "setting.") && operator == util.OpEqual {
-			c, ok := v.Settings().Get(key[8:]).(bool)
-			if c && ok {
+			if v.Settings().Bool(key[8:]) {
 				return True
 			}
 			return False

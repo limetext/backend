@@ -107,12 +107,9 @@ func TestRegisterAndRunTextCommand(t *testing.T) {
 
 	w := ed.NewWindow()
 	defer w.Close()
-
 	v := w.NewFile()
-	defer v.Close()
 
 	err = ch.RunTextCommand(v, name, Args{})
-
 	if err == nil {
 		t.Errorf("Expected %s to run, but it didn't", name)
 	} else if err.Error() != "Ran" {
