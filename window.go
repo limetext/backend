@@ -162,7 +162,7 @@ func (w *Window) OpenProject(name string) *Project {
 
 func (w *Window) Project() *Project {
 	if w.project == nil {
-		w.project = New(w)
+		w.project = NewProject(w)
 	}
 	return w.project
 }

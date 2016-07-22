@@ -16,7 +16,7 @@ import (
 func TestSaveAs(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
-	p := New(w)
+	p := NewProject(w)
 	p.AddFolder(".")
 	p.SaveAs("testdata/saved_project")
 	defer os.Remove("testdata/saved_project")
@@ -37,7 +37,7 @@ func TestSaveAs(t *testing.T) {
 func TestAddFolder(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
-	p := New(w)
+	p := NewProject(w)
 	p.AddFolder("/test/path")
 
 	if got := len(p.Folders()); got != 1 {
@@ -51,7 +51,7 @@ func TestAddFolder(t *testing.T) {
 func TestRemoveFolder(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
-	p := New(w)
+	p := NewProject(w)
 	p.AddFolder("/test/path")
 	p.RemoveFolder("/test/path")
 
@@ -67,7 +67,7 @@ func TestUnmarshalJSON(t *testing.T) {
 	}
 	w := GetEditor().NewWindow()
 	defer w.Close()
-	p := New(w)
+	p := NewProject(w)
 	if err = p.UnmarshalJSON(data); err != nil {
 		t.Fatalf("Error on unmarshaling data to project: %s", err)
 	}
@@ -111,7 +111,7 @@ func TestUnmarshalJSON(t *testing.T) {
 func TestMarshalJSON(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
-	p := New(w)
+	p := NewProject(w)
 	p.Settings().Set("font_size", 12)
 	p.AddFolder("./testdata")
 
