@@ -16,7 +16,7 @@ import (
 func TestSaveAs(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
-	p := NewProject(w)
+	p := newProject(w)
 	p.AddFolder(".")
 	p.SaveAs("testdata/saved_project")
 	defer os.Remove("testdata/saved_project")
@@ -37,7 +37,7 @@ func TestSaveAs(t *testing.T) {
 func TestAddFolder(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
-	p := NewProject(w)
+	p := newProject(w)
 	p.AddFolder("/test/path")
 
 	if got := len(p.Folders()); got != 1 {
@@ -51,7 +51,7 @@ func TestAddFolder(t *testing.T) {
 func TestRemoveFolder(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
-	p := NewProject(w)
+	p := newProject(w)
 	p.AddFolder("/test/path")
 	p.RemoveFolder("/test/path")
 
@@ -67,7 +67,7 @@ func TestUnmarshalJSON(t *testing.T) {
 	}
 	w := GetEditor().NewWindow()
 	defer w.Close()
-	p := NewProject(w)
+	p := newProject(w)
 	if err = p.UnmarshalJSON(data); err != nil {
 		t.Fatalf("Error on unmarshaling data to project: %s", err)
 	}
@@ -111,7 +111,7 @@ func TestUnmarshalJSON(t *testing.T) {
 func TestMarshalJSON(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
-	p := NewProject(w)
+	p := newProject(w)
 	p.Settings().Set("font_size", 12)
 	p.AddFolder("./testdata")
 
@@ -135,5 +135,22 @@ func TestMarshalJSON(t *testing.T) {
 	if diff := util.Diff(exp, string(data)); diff != "" {
 		t.Logf("Expected:\n%s\nGot:\n%s", exp, string(data))
 		t.Errorf("Marshaled project to json doesn't match expected result\n%s", diff)
+	}
+}
+
+func TestClose(t *testing.T) {
+	w := GetEditor().NewWindow()
+	defer w.Close()
+	p := newProject(w)
+
+	p.Settings().Set("font_size", 14)
+	p.AddFolder("./testdata")
+
+	p.Close()
+	if got := len(p.Folders()); got != 0 {
+		t.Errorf("Expected project folders after close be empty, but got %d", got)
+	}
+	if got, exp := p.Settings().Int("font_size", 12), 12; got != exp {
+		t.Errorf("Expected project font_size settings after close %d, but got %d", exp, got)
 	}
 }

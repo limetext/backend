@@ -39,13 +39,14 @@ type (
 	Folders []*Folder
 )
 
-func NewProject(w *Window) *Project {
+func newProject(w *Window) *Project {
 	return &Project{window: w, folders: make(Folders, 0)}
 }
 
 func (p *Project) Close() {
 	GetEditor().UnWatch(p.FileName(), p)
-	p = NewProject(p.Window())
+	*p = *newProject(p.Window())
+	OnProjectChanged.Call(p.Window())
 }
 
 // Marshals project struct to json then writes it to a file with given name
