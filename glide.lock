@@ -1,25 +1,31 @@
-hash: d9bdb6f7e8f53aa5733180da699d55206390d2dd1aaa443e0e3b97e0c0066246
-updated: 2016-05-01T13:09:12.856206679+01:00
+hash: d7f9cdd3be75ff299de9ce8a03e22923e54c46533d9d905e35063b0d8ef5b4cc
+updated: 2016-07-27T23:23:18.047924488+04:30
 imports:
 - name: github.com/limetext/loaders
-  version: 476e7b192526e3b2cc4302f78ab167eca21279c9
+  version: master
   subpackages:
   - json
   - plist
 - name: github.com/limetext/log4go
-  version: 41f52bba2191d3bfa764c6867968eb06acbd8f3c
+  version: master
 - name: github.com/limetext/rubex
-  version: 3fc130e580797e3d9c6fdab36e6a961141f9fd5f
+  version: master
 - name: github.com/limetext/text
-  version: 2e6d421985d98f7882bd0fe455cd199acc3915c1
+  version: master
 - name: github.com/limetext/util
-  version: 20e1a4a3505f50a45c7f92456d889d899272ac14
+  version: master
 - name: github.com/quarnster/parser
   version: 8991807ce6d383a41077a642b7b381eba1df7064
 - name: golang.org/x/sys
-  version: b776ec39b3e54652e09028aaaaac9757f4f8211a
+  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
   subpackages:
   - unix
 - name: gopkg.in/fsnotify.v1
   version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
-devImports: []
+testImports:
+- name: github.com/limetext/sublime
+  version: 276f107b2bc4778d945faf0485e72971d2707415
+  subpackages:
+  - textmate/language
+  - textmate/theme
+  - textmate

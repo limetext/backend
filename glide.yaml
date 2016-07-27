@@ -7,3 +7,8 @@ import:
 - package: github.com/limetext/util
 - package: github.com/quarnster/parser
 - package: gopkg.in/fsnotify.v1
+testImport:
+- package: github.com/limetext/sublime
+  subpackages:
+  - textmate/language
+  - textmate/theme
