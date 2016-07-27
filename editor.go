@@ -383,7 +383,7 @@ func (e *Editor) RunCommand(name string, args Args) {
 
 func (e *Editor) SetClipboard(n string) {
 	if err := e.clipboardSetter(n); err != nil {
-		log.Error("Could not set clipboard: %v", err)
+		log.Warn("Could not set clipboard: %v", err)
 	}
 
 	// Keep a local copy in case the system clipboard isn't working
@@ -393,7 +393,7 @@ func (e *Editor) SetClipboard(n string) {
 func (e *Editor) GetClipboard() string {
 	n, err := e.clipboardGetter()
 	if err != nil {
-		log.Error("Could not get clipboard: %v", err)
+		log.Warn("Could not get clipboard: %v", err)
 		return e.clipboard
 	}
 	return n

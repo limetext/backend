@@ -6,44 +6,10 @@ package backend
 
 import (
 	"path"
-	"sync"
 	"testing"
 
 	"github.com/limetext/backend/keys"
-	"github.com/limetext/backend/log"
-	"github.com/limetext/backend/parser"
-	"github.com/limetext/backend/render"
-	"github.com/limetext/text"
-	qp "github.com/quarnster/parser"
 )
-
-type DummyFrontend struct {
-	m sync.Mutex
-	// Default return value for OkCancelDialog
-	defaultAction bool
-}
-
-func (h *DummyFrontend) SetDefaultAction(action bool) {
-	h.m.Lock()
-	defer h.m.Unlock()
-	h.defaultAction = action
-}
-func (h *DummyFrontend) StatusMessage(msg string) { log.Info(msg) }
-func (h *DummyFrontend) ErrorMessage(msg string)  { log.Error(msg) }
-func (h *DummyFrontend) MessageDialog(msg string) { log.Info(msg) }
-func (h *DummyFrontend) OkCancelDialog(msg string, button string) bool {
-	log.Info(msg)
-	h.m.Lock()
-	defer h.m.Unlock()
-	return h.defaultAction
-}
-func (h *DummyFrontend) Show(v *View, r text.Region) {}
-func (h *DummyFrontend) VisibleRegion(v *View) text.Region {
-	return text.Region{}
-}
-func (h *DummyFrontend) Prompt(title, folder string, flags int) []string {
-	return nil
-}
 
 func TestGetEditor(t *testing.T) {
 	ed := GetEditor()
@@ -130,13 +96,13 @@ func TestSetActiveWindow(t *testing.T) {
 }
 
 func TestSetFrontend(t *testing.T) {
-	f := DummyFrontend{}
+	f := dummyFrontend{}
 
 	ed := GetEditor()
 	ed.SetFrontend(&f)
 
 	if ed.Frontend() != &f {
-		t.Errorf("Expected a DummyFrontend to be set, but got %T", ed.Frontend())
+		t.Errorf("Expected a dummyFrontend to be set, but got %T", ed.Frontend())
 	}
 }
 
@@ -173,59 +139,25 @@ func TestHandleInput(t *testing.T) {
 	}
 }
 
-type dummyColorSc struct {
-	name string
-}
-
-func (d *dummyColorSc) Name() string {
-	return d.name
-}
-
-func (d *dummyColorSc) Spice(*render.ViewRegions) render.Flavour {
-	return render.Flavour{}
-}
-func (d *dummyColorSc) GlobalSettings() render.Settings {
-	return render.Settings{}
-}
-
 func TestAddColorScheme(t *testing.T) {
-	cs := new(dummyColorSc)
+	csPath := "testdata/Monokai.tmTheme"
+	cs := newDummyColorScheme(t, csPath)
 	ed := GetEditor()
 
-	ed.AddColorScheme("test/path", cs)
-	if ret := ed.colorSchemes["test/path"]; ret != cs {
-		t.Errorf("Expected 'test/path' color scheme %v, but got %v", cs, ret)
+	ed.AddColorScheme(csPath, cs)
+	if ret := ed.colorSchemes[csPath]; ret != cs {
+		t.Errorf("Expected '%s' color scheme %v, but got %v", csPath, cs, ret)
 	}
 }
 
-type dummySyntax struct {
-	name      string
-	filetypes []string
-	data      string
-}
-
-func (d *dummySyntax) Name() string {
-	return d.name
-}
-
-func (d *dummySyntax) FileTypes() []string {
-	return d.filetypes
-}
-
-func (d *dummySyntax) Parser(data string) (parser.Parser, error) {
-	d.data = data
-	return d, nil
-}
-
-func (d *dummySyntax) Parse() (*qp.Node, error) { return nil, nil }
-
 func TestAddSyntax(t *testing.T) {
-	syn := new(dummySyntax)
+	synPath := "testdata/Go.tmLanguage"
+	syn := newDummySytax(t, synPath)
 	ed := GetEditor()
 
-	ed.AddSyntax("test/path", syn)
-	if ret := ed.syntaxes["test/path"]; ret != syn {
-		t.Errorf("Expected 'test/path' syntax %v, but got %v", syn, ret)
+	ed.AddSyntax(synPath, syn)
+	if ret := ed.syntaxes[synPath]; ret != syn {
+		t.Errorf("Expected '%s' syntax %v, but got %v", synPath, syn, ret)
 	}
 }
 

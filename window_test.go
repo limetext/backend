@@ -77,9 +77,9 @@ func TestWindowClose(t *testing.T) {
 
 func TestWindowCloseFail(t *testing.T) {
 	ed := GetEditor()
-	ed.SetFrontend(&DummyFrontend{})
+	ed.SetFrontend(&dummyFrontend{})
 	fe := ed.Frontend()
-	if dfe, ok := fe.(*DummyFrontend); ok {
+	if dfe, ok := fe.(*dummyFrontend); ok {
 		dfe.SetDefaultAction(false)
 	}
 
@@ -121,9 +121,9 @@ func TestWindowCloseAllViews(t *testing.T) {
 
 func TestWindowCloseAllViewsFail(t *testing.T) {
 	ed := GetEditor()
-	ed.SetFrontend(&DummyFrontend{})
+	ed.SetFrontend(&dummyFrontend{})
 	fe := ed.Frontend()
-	if dfe, ok := fe.(*DummyFrontend); ok {
+	if dfe, ok := fe.(*dummyFrontend); ok {
 		dfe.SetDefaultAction(false)
 	}
 

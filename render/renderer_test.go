@@ -11,11 +11,9 @@ import (
 	"github.com/limetext/text"
 )
 
-type (
-	DummyColourScheme struct {
-		ColourScheme
-	}
-)
+type dummyColourScheme struct {
+	ColourScheme
+}
 
 var (
 	flavourDef = Flavour{Background: Colour{0, 0, 0, 0}}
@@ -24,7 +22,7 @@ var (
 	flavourC   = Flavour{Background: Colour{0, 0, 1, 0}}
 )
 
-func (cs DummyColourScheme) Spice(vr *ViewRegions) (f Flavour) {
+func (cs dummyColourScheme) Spice(vr *ViewRegions) (f Flavour) {
 	switch vr.Scope {
 	case "A":
 		f = flavourA
@@ -99,7 +97,7 @@ func TestTransform(t *testing.T) {
 			}
 		}
 
-		rec := Transform(DummyColourScheme{}, test.vrmap, test.viewport)
+		rec := Transform(dummyColourScheme{}, test.vrmap, test.viewport)
 
 		for _, f := range test.expflav {
 			if _, ok := rec[f]; !ok {
