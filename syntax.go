@@ -25,12 +25,12 @@ type Syntax interface {
 
 func syntaxHighlighter(name, data string) parser.SyntaxHighlighter {
 	if name == "" {
-		return defaultSyntax()
+		return &syntax{}
 	}
 	sh, err := syntaxProvider(name, data)
 	if err != nil {
 		log.Error("%s, falling back to default syntax", err)
-		return defaultSyntax()
+		return &syntax{}
 	}
 	return sh
 }
@@ -65,14 +65,4 @@ func (s *syntax) ScopeName(p int) string {
 
 func (s *syntax) Flatten() render.ViewRegionMap {
 	return nil
-}
-
-// default syntax highlighter used when there is a problem
-var syntaxhighlighter *syntax
-
-func defaultSyntax() parser.SyntaxHighlighter {
-	if syntaxhighlighter == nil {
-		syntaxhighlighter = &syntax{}
-	}
-	return syntaxhighlighter
 }
