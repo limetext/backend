@@ -6,13 +6,14 @@ package watch
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
 
 	"github.com/limetext/backend/log"
 	"github.com/limetext/util"
-	"gopkg.in/fsnotify.v1"
+	"github.com/rjeczalik/notify"
 )
 
 type (
@@ -23,7 +24,7 @@ type (
 	// 	- Watching and applying action on certain events
 	Watcher struct {
 		sync.Mutex
-		wchr     *fsnotify.Watcher
+		fsEvent  chan notify.EventInfo
 		watched  map[string][]interface{}
 		watchers []string // paths we created watcher on
 		dirs     []string // dirs we are watching
@@ -52,11 +53,7 @@ type (
 )
 
 func NewWatcher() (*Watcher, error) {
-	wchr, err := fsnotify.NewWatcher()
-	if err != nil {
-		return nil, err
-	}
-	w := &Watcher{wchr: wchr}
+	w := &Watcher{fsEvent: make(chan notify.EventInfo, 5)}
 	w.watched = make(map[string][]interface{})
 	w.watchers = make([]string, 0)
 	w.dirs = make([]string, 0)
@@ -95,7 +92,7 @@ func (w *Watcher) Watch(name string, cb interface{}) error {
 	if util.Exists(w.watchers, name) || (!isDir && util.Exists(w.dirs, filepath.Dir(name))) {
 		return nil
 	}
-	if err := w.watch(name); err != nil {
+	if err := w.watch(name, isDir); err != nil {
 		return err
 	}
 	if isDir {
@@ -125,8 +122,12 @@ func (w *Watcher) add(name string, cb interface{}) error {
 	return nil
 }
 
-func (w *Watcher) watch(name string) error {
-	if err := w.wchr.Add(name); err != nil {
+func (w *Watcher) watch(name string, isDir bool) error {
+	watchPath := name
+	if isDir {
+		watchPath = filepath.Join(watchPath, "...")
+	}
+	if err := notify.Watch(watchPath, w.fsEvent, notify.All); err != nil {
 		return err
 	}
 	w.watchers = append(w.watchers, name)
@@ -179,9 +180,12 @@ func (w *Watcher) unWatch(name string) error {
 }
 
 func (w *Watcher) removeWatch(name string) error {
-	if err := w.wchr.Remove(name); err != nil {
-		return err
-	}
+	// TODO: notify.Stop(w.fsEvent) would stop ALL watchers
+	// What to do?
+	fmt.Println("TODO: removeWatch ", name)
+	// if err := w.wchr.Remove(name); err != nil {
+	// 	return err
+	// }
 	w.watchers = util.Remove(w.watchers, name)
 	if util.Exists(w.dirs, name) {
 		w.removeDir(name)
@@ -193,7 +197,11 @@ func (w *Watcher) removeWatch(name string) error {
 func (w *Watcher) removeDir(name string) {
 	for p, _ := range w.watched {
 		if filepath.Dir(p) == name {
-			if err := w.watch(p); err != nil {
+			stat, err := os.Stat(p)
+			if err != nil {
+				log.Error("Stat error: %s", err)
+			}
+			if err := w.watch(p, stat.IsDir()); err != nil {
 				log.Error("Could not watch: %s", err)
 				continue
 			}
@@ -207,33 +215,33 @@ func (w *Watcher) removeDir(name string) {
 func (w *Watcher) Observe() {
 	for {
 		select {
-		case ev, ok := <-w.wchr.Events:
+		case ev, ok := <-w.fsEvent:
 			if !ok {
 				break
 			}
 			func() {
+				fmt.Println("fsEvent: ", ev)
 				w.Lock()
 				defer w.Unlock()
-				w.apply(ev)
-				name := ev.Name
+				path := ev.Path()
+				w.apply(path, ev.Event())
 				// currently fsnotify pushs remove event for files
 				// inside directory when a directory is removed but
 				// when the directory is renamed there is no event for
 				// files inside directory
-				if ev.Op&fsnotify.Rename != 0 && util.Exists(w.dirs, name) {
+				if ev.Event()&notify.Rename != 0 && util.Exists(w.dirs, path) {
 					for p, _ := range w.watched {
-						if filepath.Dir(p) == name {
-							ev.Name = p
-							w.apply(ev)
+						if filepath.Dir(p) == path {
+							w.apply(p, ev.Event())
 						}
 					}
 				}
-				dir := filepath.Dir(name)
+				dir := filepath.Dir(path)
 				// The watcher will be removed if the file is deleted
 				// so we need to watch the parent directory for when the
 				// file is created again
-				if ev.Op&fsnotify.Remove != 0 {
-					w.watchers = util.Remove(w.watchers, name)
+				if ev.Event()&notify.Remove != 0 {
+					w.watchers = util.Remove(w.watchers, path)
 					w.Unlock()
 					w.Watch(dir, nil)
 					w.Lock()
@@ -242,46 +250,46 @@ func (w *Watcher) Observe() {
 				// for the parent directory to because when new file is created
 				// inside directory we won't get any event for the watched directory.
 				// we need this feature to detect new packages(plugins, settings, etc)
-				if cbs, exist := w.watched[dir]; ev.Op&fsnotify.Create != 0 && exist {
+				if cbs, exist := w.watched[dir]; ev.Event()&notify.Create != 0 && exist {
 					for _, cb := range cbs {
 						if c, ok := cb.(FileCreatedCallback); ok {
 							w.Unlock()
-							c.FileCreated(name)
+							c.FileCreated(path)
 							w.Lock()
 						}
 					}
 				}
 
 			}()
-		case err, ok := <-w.wchr.Errors:
-			if !ok {
-				break
-			}
-			log.Warn("Watcher error: %s", err)
+			// case err, ok := <-w.wchr.Errors:
+			// 	if !ok {
+			// 		break
+			// 	}
+			// 	log.Warn("Watcher error: %s", err)
 		}
 	}
 }
 
-func (w *Watcher) apply(ev fsnotify.Event) {
-	for _, cb := range w.watched[ev.Name] {
-		if ev.Op&fsnotify.Create != 0 {
+func (w *Watcher) apply(path string, flags notify.Event) {
+	for _, cb := range w.watched[path] {
+		if flags&notify.Create != 0 {
 			if c, ok := cb.(FileCreatedCallback); ok {
-				c.FileCreated(ev.Name)
+				c.FileCreated(path)
 			}
 		}
-		if ev.Op&fsnotify.Write != 0 {
+		if flags&notify.Write != 0 {
 			if c, ok := cb.(FileChangedCallback); ok {
-				c.FileChanged(ev.Name)
+				c.FileChanged(path)
 			}
 		}
-		if ev.Op&fsnotify.Remove != 0 {
+		if flags&notify.Remove != 0 {
 			if c, ok := cb.(FileRemovedCallback); ok {
-				c.FileRemoved(ev.Name)
+				c.FileRemoved(path)
 			}
 		}
-		if ev.Op&fsnotify.Rename != 0 {
+		if flags&notify.Rename != 0 {
 			if c, ok := cb.(FileRenamedCallback); ok {
-				c.FileRenamed(ev.Name)
+				c.FileRenamed(path)
 			}
 		}
 	}
