@@ -1,6 +1,15 @@
-hash: d7f9cdd3be75ff299de9ce8a03e22923e54c46533d9d905e35063b0d8ef5b4cc
-updated: 2016-08-15T13:28:09.111951709+01:00
+hash: a03ffc44dad602f6e1ab6f90a3e8440dac69dbdf37a39d2a50424121e15a8184
+updated: 2016-08-13T16:41:41.079730172-06:00
 imports:
+- name: github.com/limetext/backend
+  version: 46bc1848b6ed8f69ae13bb815fc396ed81cfbca1
+  subpackages:
+  - keys
+  - log
+  - packages
+  - parser
+  - render
+  - watch
 - name: github.com/limetext/loaders
   version: master
   subpackages:
@@ -16,6 +25,8 @@ imports:
   version: master
 - name: github.com/quarnster/parser
   version: 8991807ce6d383a41077a642b7b381eba1df7064
+- name: github.com/rjeczalik/notify
+  version: 48fbf980305bec9be7717fb46bb9bf2c5059c2e0
 - name: golang.org/x/sys
   version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
   subpackages:
