@@ -57,11 +57,28 @@ func NewWatcher() (*Watcher, error) {
 	w.watched = make(map[string][]interface{})
 	w.watchers = make([]string, 0)
 	w.dirs = make([]string, 0)
+	go w.observe()
 
 	return w, nil
 }
 
+func (w *Watcher) Close() {
+	notify.Stop(w.fsEvent)
+	close(w.fsEvent)
+	w.watched = nil
+	w.watchers = nil
+	w.dirs = nil
+	w.fsEvent = nil
+}
+
 func (w *Watcher) Watch(name string, cb interface{}) error {
+	if !filepath.IsAbs(name) {
+		var err error
+		name, err = filepath.Abs(name)
+		if err != nil {
+			return err
+		}
+	}
 	log.Finest("Watch(%s)", name)
 	fi, err := os.Stat(name)
 	isDir := err == nil && fi.IsDir()
@@ -123,6 +140,9 @@ func (w *Watcher) add(name string, cb interface{}) error {
 }
 
 func (w *Watcher) watch(name string, isDir bool) error {
+	if !filepath.IsAbs(name) {
+		return errors.New("watcher.watch requires an absolute path")
+	}
 	watchPath := name
 	if isDir {
 		watchPath = filepath.Join(watchPath, "...")
@@ -151,6 +171,13 @@ func (w *Watcher) flushDir(name string) {
 }
 
 func (w *Watcher) UnWatch(name string, cb interface{}) error {
+	if !filepath.IsAbs(name) {
+		var err error
+		name, err = filepath.Abs(name)
+		if err != nil {
+			return err
+		}
+	}
 	log.Finest("UnWatch(%s)", name)
 	w.Lock()
 	defer w.Unlock()
@@ -182,10 +209,8 @@ func (w *Watcher) unWatch(name string) error {
 func (w *Watcher) removeWatch(name string) error {
 	// TODO: notify.Stop(w.fsEvent) would stop ALL watchers
 	// What to do?
-	fmt.Println("TODO: removeWatch ", name)
-	// if err := w.wchr.Remove(name); err != nil {
-	// 	return err
-	// }
+	// fmt.Println("TODO: removeWatch ", name)
+
 	w.watchers = util.Remove(w.watchers, name)
 	if util.Exists(w.dirs, name) {
 		w.removeDir(name)
@@ -212,15 +237,15 @@ func (w *Watcher) removeDir(name string) {
 
 // Observe dispatches notifications received by the watcher. This function will
 // return when the watcher is closed.
-func (w *Watcher) Observe() {
+func (w *Watcher) observe() {
 	for {
 		select {
 		case ev, ok := <-w.fsEvent:
 			if !ok {
-				break
+				return
 			}
 			func() {
-				fmt.Println("fsEvent: ", ev)
+				// fmt.Println("fsEvent: ", ev)
 				w.Lock()
 				defer w.Unlock()
 				path := ev.Path()
