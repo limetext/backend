@@ -139,9 +139,6 @@ func (w *Watcher) add(name string, cb interface{}) error {
 }
 
 func (w *Watcher) watch(name string, isDir bool) error {
-	if !filepath.IsAbs(name) {
-		return errors.New("watcher.watch requires an absolute path")
-	}
 	watchPath := name
 	if isDir {
 		watchPath = filepath.Join(watchPath, "...")
