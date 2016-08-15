@@ -57,7 +57,9 @@ func (c *Clipboard) Get() (text string, autoExpanded bool) {
 		text = c.cachedText
 	}
 
-	autoExpanded = c.autoExpanded
+	if text == c.cachedText {
+		autoExpanded = c.autoExpanded
+	}
 
 	return
 }
