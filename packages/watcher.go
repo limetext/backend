@@ -52,6 +52,4 @@ func init() {
 	if watcher, err = wch.NewWatcher(); err != nil {
 		log.Warn("Couldn't create watcher: %s", err)
 	}
-
-	go watcher.Observe()
 }

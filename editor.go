@@ -133,7 +133,6 @@ func GetEditor() *Editor {
 
 		log.AddFilter("console", log.DEBUG, log.NewLogWriter(ed.handleLog))
 		go ed.inputthread()
-		go ed.Observe()
 	}
 	return ed
 }
