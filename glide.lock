@@ -1,5 +1,5 @@
 hash: d7f9cdd3be75ff299de9ce8a03e22923e54c46533d9d905e35063b0d8ef5b4cc
-updated: 2016-07-27T23:23:18.047924488+04:30
+updated: 2016-08-15T13:28:09.111951709+01:00
 imports:
 - name: github.com/limetext/loaders
   version: master
@@ -24,8 +24,8 @@ imports:
   version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
 testImports:
 - name: github.com/limetext/sublime
-  version: 276f107b2bc4778d945faf0485e72971d2707415
+  version: master
   subpackages:
+  - textmate
   - textmate/language
   - textmate/theme
-  - textmate
