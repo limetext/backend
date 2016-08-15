@@ -122,7 +122,7 @@ func TestClipboard(t *testing.T) {
 	}
 
 	if !ex {
-		t.Errorf("Expected the clipboard, to be flagged as auto expanded, but it wasn't")
+		t.Errorf("Expected the clipboard to be flagged as auto expanded, but it wasn't")
 	}
 
 	want = "test1"
@@ -135,7 +135,7 @@ func TestClipboard(t *testing.T) {
 	}
 
 	if !ex {
-		t.Errorf("Expected the clipboard, to be flagged as auto expanded, but it wasn't")
+		t.Errorf("Expected the clipboard to be flagged as auto expanded, but it wasn't")
 	}
 }
 
