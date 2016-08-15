@@ -109,19 +109,33 @@ func TestSetFrontend(t *testing.T) {
 func TestClipboard(t *testing.T) {
 	ed := GetEditor()
 	// Put back whatever was already there.
-	clip := ed.GetClipboard()
-	defer ed.SetClipboard(clip)
+	clip, ex := ed.GetClipboard()
+	defer ed.SetClipboard(clip, ex)
 
 	want := "test0"
-	ed.SetClipboard(want)
-	if got := ed.GetClipboard(); got != want {
+	ed.SetClipboard(want, true)
+
+	got, ex := ed.GetClipboard()
+
+	if got != want {
 		t.Errorf("Expected %q to be on the clipboard, but got %q", want, got)
 	}
 
+	if !ex {
+		t.Errorf("Expected the clipboard, to be flagged as auto expanded, but it wasn't")
+	}
+
 	want = "test1"
-	ed.SetClipboard(want)
-	if got := ed.GetClipboard(); got != want {
+	ed.SetClipboard(want, true)
+
+	got, ex = ed.GetClipboard()
+
+	if got != want {
 		t.Errorf("Expected %q to be on the clipboard, but got %q", want, got)
+	}
+
+	if !ex {
+		t.Errorf("Expected the clipboard, to be flagged as auto expanded, but it wasn't")
 	}
 }
 
