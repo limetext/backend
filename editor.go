@@ -36,7 +36,7 @@ type Editor struct {
 	console          *View
 	frontend         Frontend
 	keyInput         chan (keys.KeyPress)
-	clipboard        *clipboard.Clipboard
+	clipboard        clipboard.Clipboard
 	defaultSettings  *text.HasSettings
 	platformSettings *text.HasSettings
 	defaultKB        *keys.HasKeyBindings
@@ -71,7 +71,7 @@ func GetEditor() *Editor {
 				scratch: true,
 			},
 			keyInput:         make(chan keys.KeyPress, 32),
-			clipboard:        clipboard.New(),
+			clipboard:        clipboard.NewSystemClipboard(),
 			defaultSettings:  new(text.HasSettings),
 			platformSettings: new(text.HasSettings),
 			defaultKB:        new(keys.HasKeyBindings),
@@ -142,11 +142,6 @@ func (e *Editor) Init() {
 	log.Info("Initializing")
 	OnInit.call()
 	OnPackagesPathAdd.Add(packages.Scan)
-}
-
-func (e *Editor) SetClipboardFuncs(setter func(string) error, getter func() (string, error)) {
-	e.clipboard.SetGetter(getter)
-	e.clipboard.SetSetter(setter)
 }
 
 func (e *Editor) loadDefaultKeyBindings(dir string) {
@@ -376,6 +371,11 @@ func (e *Editor) RunCommand(name string, args Args) {
 // Clipboard returns the currently active clipboard.
 func (e *Editor) Clipboard() clipboard.Clipboard {
 	return e.clipboard
+}
+
+// UseClipboard replaces the existing clipboard with c.
+func (e *Editor) UseClipboard(c clipboard.Clipboard) {
+	e.clipboard = c
 }
 
 // GetClipboard returns the contents of the clipboard. It assumes the text was

@@ -5,54 +5,41 @@
 package clipboard
 
 import (
-	"fmt"
+	"github.com/atotto/clipboard"
 
 	"github.com/limetext/backend/log"
 )
 
-type Clipboard struct {
-	getter     func() (string, error)
-	setter     func(string) error
-	cachedText string
+type (
+	Clipboard interface {
+		// Get returns the text stored on the clipboard as well as whether or
+		// not it was created from an auto-expanded cursor.
+		Get() (text string, autoExpanded bool)
 
-	// autoExpanded tracks whether the contents was created from a single
-	// cursor expanded to a line, by a copy command, for example.
-	autoExpanded bool
-}
-
-func New() *Clipboard {
-	return &Clipboard{
-		getter: func() (string, error) {
-			return "", fmt.Errorf("Getter has not been set")
-		},
-		setter: func(s string) error {
-			return fmt.Errorf("Setter has not been set")
-		},
-	}
-}
-
-func (c *Clipboard) SetGetter(getter func() (string, error)) {
-	c.getter = getter
-}
-
-func (c *Clipboard) SetSetter(setter func(string) error) {
-	c.setter = setter
-}
-
-func (c *Clipboard) Set(text string, autoExpanded bool) {
-	if err := c.setter(text); err != nil {
-		log.Warn("Could not set system clipboard: %v", err)
+		// Set stores text on the clipboard as well as whether or not that text
+		// was created from an auto-expanded cursor.
+		Set(text string, autoExpanded bool)
 	}
 
-	// Keep a local copy in case the system clipboard isn't working.
-	c.cachedText = text
-	c.autoExpanded = autoExpanded
+	SystemClipboard struct {
+		// cachedText is a local copy in case the system clipboard
+		// isn't working.
+		cachedText string
+
+		// autoExpanded tracks whether the contents was created from a single
+		// cursor expanded to a line, by a copy command, for example.
+		autoExpanded bool
+	}
+)
+
+func NewSystemClipboard() *SystemClipboard {
+	return &SystemClipboard{}
 }
 
-func (c *Clipboard) Get() (text string, autoExpanded bool) {
+func (c *SystemClipboard) Get() (text string, autoExpanded bool) {
 	var err error
 
-	if text, err = c.getter(); err != nil {
+	if text, err = clipboard.ReadAll(); err != nil {
 		log.Warn("Could not get system clipboard: %v", err)
 		text = c.cachedText
 	}
@@ -62,4 +49,13 @@ func (c *Clipboard) Get() (text string, autoExpanded bool) {
 	}
 
 	return
+}
+
+func (c *SystemClipboard) Set(text string, autoExpanded bool) {
+	if err := clipboard.WriteAll(text); err != nil {
+		log.Warn("Could not set system clipboard: %v", err)
+	}
+
+	c.cachedText = text
+	c.autoExpanded = autoExpanded
 }
