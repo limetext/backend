@@ -373,12 +373,25 @@ func (e *Editor) RunCommand(name string, args Args) {
 	}
 }
 
-func (e *Editor) SetClipboard(text string, autoExpanded bool) {
-	e.clipboard.Set(text, autoExpanded)
+// Clipboard returns the currently active clipboard.
+func (e *Editor) Clipboard() clipboard.Clipboard {
+	return e.clipboard
 }
 
-func (e *Editor) GetClipboard() (text string, autoExpanded bool) {
-	return e.clipboard.Get()
+// GetClipboard returns the contents of the clipboard. It assumes the text was
+// not captured from an auto-expanded cursor. It exists for Sublime Text API
+// compatibility.
+func (e *Editor) GetClipboard() string {
+	s, _ := e.clipboard.Get()
+
+	return s
+}
+
+// SetClipboard modifies the contents of the clipboard. It assumes the text was
+// not captured from an auto-expanded cursor. It exists for Sublime Text API
+// compatibility.
+func (e *Editor) SetClipboard(s string) {
+	e.clipboard.Set(s, false)
 }
 
 func (e *Editor) handleLog(s string) {
