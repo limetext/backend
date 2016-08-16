@@ -6,7 +6,6 @@ import:
 - package: github.com/limetext/text
 - package: github.com/limetext/util
 - package: github.com/quarnster/parser
-- package: gopkg.in/fsnotify.v1
 - package: github.com/rjeczalik/notify
 testImport:
 - package: github.com/limetext/sublime
