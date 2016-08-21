@@ -8,11 +8,12 @@ import (
 	"os"
 	"testing"
 	"time"
+	"strings"
 )
 
 func TestWatchDir(t *testing.T) {
 	pkg := &dummyPackage{path: "testdata/file"}
-	rec := &Record{func(s string) bool { return s == "testdata/file" },
+	rec := &Record{func(s string) bool { return strings.Contains(s, "testdata/file") },
 		func(s string) Package { return pkg }}
 
 	Register(rec)
