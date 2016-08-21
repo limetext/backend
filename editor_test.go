@@ -108,19 +108,27 @@ func TestSetFrontend(t *testing.T) {
 
 func TestClipboard(t *testing.T) {
 	ed := GetEditor()
+	cb := ed.Clipboard()
+
 	// Put back whatever was already there.
-	clip := ed.GetClipboard()
-	defer ed.SetClipboard(clip)
+	clip, ex := cb.Get()
+	defer cb.Set(clip, ex)
 
 	want := "test0"
 	ed.SetClipboard(want)
-	if got := ed.GetClipboard(); got != want {
+
+	got := ed.GetClipboard()
+
+	if got != want {
 		t.Errorf("Expected %q to be on the clipboard, but got %q", want, got)
 	}
 
 	want = "test1"
 	ed.SetClipboard(want)
-	if got := ed.GetClipboard(); got != want {
+
+	got = ed.GetClipboard()
+
+	if got != want {
 		t.Errorf("Expected %q to be on the clipboard, but got %q", want, got)
 	}
 }

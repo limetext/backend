@@ -1,6 +1,8 @@
-hash: 5169db475edc07d21cddbb0e8efff6a21a963f646805d1c432c6240ad615ddc0
-updated: 2016-08-16T11:42:54.22984791+01:00
+hash: 74f49b5da1af48f6f8597e68f07a494e5a23c61286edf309d06187fc6a68358f
+updated: 2016-08-21T11:03:09.803539363+01:00
 imports:
+- name: github.com/atotto/clipboard
+  version: bb272b845f1112e10117e3e45ce39f690c0001ad
 - name: github.com/limetext/loaders
   version: master
   subpackages:

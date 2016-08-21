@@ -11,6 +11,7 @@ import (
 	"runtime/debug"
 	"sync"
 
+	"github.com/limetext/backend/clipboard"
 	"github.com/limetext/backend/keys"
 	"github.com/limetext/backend/log"
 	"github.com/limetext/backend/packages"
@@ -35,9 +36,7 @@ type Editor struct {
 	console          *View
 	frontend         Frontend
 	keyInput         chan (keys.KeyPress)
-	clipboardSetter  func(string) error
-	clipboardGetter  func() (string, error)
-	clipboard        string
+	clipboard        clipboard.Clipboard
 	defaultSettings  *text.HasSettings
 	platformSettings *text.HasSettings
 	defaultKB        *keys.HasKeyBindings
@@ -72,6 +71,7 @@ func GetEditor() *Editor {
 				scratch: true,
 			},
 			keyInput:         make(chan keys.KeyPress, 32),
+			clipboard:        clipboard.NewSystemClipboard(),
 			defaultSettings:  new(text.HasSettings),
 			platformSettings: new(text.HasSettings),
 			defaultKB:        new(keys.HasKeyBindings),
@@ -85,13 +85,6 @@ func GetEditor() *Editor {
 		var err error
 		if ed.Watcher, err = watch.NewWatcher(); err != nil {
 			log.Error("Couldn't create watcher: %s", err)
-		}
-
-		ed.clipboardSetter = func(s string) error {
-			return fmt.Errorf("clipboard functions has not been set")
-		}
-		ed.clipboardGetter = func() (string, error) {
-			return "", fmt.Errorf("clipboard functions has not been set")
 		}
 
 		ed.console.Settings().Set("is_widget", true)
@@ -149,11 +142,6 @@ func (e *Editor) Init() {
 	log.Info("Initializing")
 	OnInit.call()
 	OnPackagesPathAdd.Add(packages.Scan)
-}
-
-func (e *Editor) SetClipboardFuncs(setter func(string) error, getter func() (string, error)) {
-	e.clipboardSetter = setter
-	e.clipboardGetter = getter
 }
 
 func (e *Editor) loadDefaultKeyBindings(dir string) {
@@ -380,22 +368,30 @@ func (e *Editor) RunCommand(name string, args Args) {
 	}
 }
 
-func (e *Editor) SetClipboard(n string) {
-	if err := e.clipboardSetter(n); err != nil {
-		log.Warn("Could not set clipboard: %v", err)
-	}
-
-	// Keep a local copy in case the system clipboard isn't working
-	e.clipboard = n
+// Clipboard returns the currently active clipboard.
+func (e *Editor) Clipboard() clipboard.Clipboard {
+	return e.clipboard
 }
 
+// UseClipboard replaces the existing clipboard with c.
+func (e *Editor) UseClipboard(c clipboard.Clipboard) {
+	e.clipboard = c
+}
+
+// GetClipboard returns the contents of the clipboard. It assumes the text was
+// not captured from an auto-expanded cursor. It exists for Sublime Text API
+// compatibility.
 func (e *Editor) GetClipboard() string {
-	n, err := e.clipboardGetter()
-	if err != nil {
-		log.Warn("Could not get clipboard: %v", err)
-		return e.clipboard
-	}
-	return n
+	s, _ := e.clipboard.Get()
+
+	return s
+}
+
+// SetClipboard modifies the contents of the clipboard. It assumes the text was
+// not captured from an auto-expanded cursor. It exists for Sublime Text API
+// compatibility.
+func (e *Editor) SetClipboard(s string) {
+	e.clipboard.Set(s, false)
 }
 
 func (e *Editor) handleLog(s string) {
