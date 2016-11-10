@@ -21,7 +21,7 @@ func TestLoadUnLoadJSON(t *testing.T) {
 	if j.err != nil {
 		t.Fatalf("Error on loading json %s: %s", j.Name(), j.err)
 	}
-	if got, exp := set.Get("font_face").(string), "Monospace"; got != exp {
+	if got, exp := set.String("font_face"), "Monospace"; got != exp {
 		t.Errorf("Expected font_face %s, but got %s", exp, got)
 	}
 
@@ -53,7 +53,7 @@ func TestWatch(t *testing.T) {
 		t.Fatalf("Error writing to file %s: %s", testFile, err)
 	}
 	time.Sleep(100 * time.Millisecond)
-	if got, exp := set.Get("font_face").(string), "test"; got != exp {
+	if got, exp := set.String("font_face"), "test"; got != exp {
 		t.Errorf("Expected font_face %s, but got %s", exp, got)
 	}
 
@@ -71,7 +71,7 @@ func TestWatch(t *testing.T) {
 		t.Fatalf("Error writing to file %s: %s", testFile, err)
 	}
 	time.Sleep(100 * time.Millisecond)
-	if got, exp := set.Get("font_face").(string), "Monospace"; got != exp {
+	if got, exp := set.String("font_face"), "Monospace"; got != exp {
 		t.Errorf("Expected font_face %s, but got %s", exp, got)
 	}
 }
