@@ -186,9 +186,12 @@ func TestOpenProject(t *testing.T) {
 	w := GetEditor().NewWindow()
 	defer w.Close()
 
-	p := w.OpenProject("testdata/project")
-	if got, exp := p.FileName(), abs("testdata/project"); got != exp {
-		t.Errorf("Expected project file name %s, but got %s", exp, got)
+	if p := w.OpenProject("testdata/project"); p != nil {
+		if got, exp := p.FileName(), abs("testdata/project"); got != exp {
+			t.Errorf("Expected project file name %s, but got %s", exp, got)
+		}
+	} else {
+		t.Errorf("OpenProject failed. Project is nil")
 	}
 }
 
