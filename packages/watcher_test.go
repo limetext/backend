@@ -31,7 +31,7 @@ func TestWatchDir(t *testing.T) {
 		t.Fatalf("Error creating '%s' file: %s", testPath, err)
 	}
 	defer os.Remove(testPath)
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 	if !pkg.IsLoaded() {
 		t.Error("Expected package loaded")
 	}
