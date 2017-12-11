@@ -233,6 +233,13 @@ func (e *Editor) remove(w *Window) {
 				copy(e.windows[i:], e.windows[i+1:])
 			}
 			e.windows = e.windows[:end]
+			if e.ActiveWindow() == w {
+				if end != 0 {
+					e.SetActiveWindow(e.windows[end-1])
+				} else {
+					e.SetActiveWindow(nil)
+				}
+			}
 			return
 		}
 	}

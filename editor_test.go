@@ -75,6 +75,19 @@ func TestRemoveWindow(t *testing.T) {
 	}
 }
 
+func TestClosingActiveWindow(t *testing.T) {
+	ed := GetEditor()
+	w := ed.NewWindow()
+
+	if aw := ed.ActiveWindow(); aw != w {
+		t.Errorf("The active window should be the last opened window %s, but it's %s", w, aw)
+	}
+	ed.ActiveWindow().Close()
+	if aw := ed.ActiveWindow(); aw == w {
+		t.Errorf("After closing active window, active window stil points to same window")
+	}
+}
+
 func TestSetActiveWindow(t *testing.T) {
 	ed := GetEditor()
 
