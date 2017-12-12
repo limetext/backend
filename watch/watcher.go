@@ -63,11 +63,6 @@ func NewWatcher() (*Watcher, error) {
 
 func (w *Watcher) Close() {
 	notify.Stop(w.fsEvent)
-	close(w.fsEvent)
-	w.watched = nil
-	w.watchers = nil
-	w.dirs = nil
-	w.fsEvent = nil
 }
 
 func (w *Watcher) Watch(name string, cb interface{}) error {
@@ -206,10 +201,15 @@ func (w *Watcher) removeWatch(name string) error {
 	// TODO: notify.Stop(w.fsEvent) would stop ALL watchers
 	// What to do?
 	// fmt.Println("TODO: removeWatch ", name)
-
+	notify.Stop(w.fsEvent)
 	w.watchers = util.Remove(w.watchers, name)
 	if util.Exists(w.dirs, name) {
 		w.removeDir(name)
+	}
+	for watchPath := range w.watched {
+		if err := notify.Watch(watchPath, w.fsEvent, notify.All); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -238,6 +238,12 @@ func (w *Watcher) observe() {
 		select {
 		case ev, ok := <-w.fsEvent:
 			if !ok {
+				// We get here only when w.fsEvent is stopped when closing the watcher
+				w.watched = nil
+				w.watchers = nil
+				w.dirs = nil
+				close(w.fsEvent)
+				w.fsEvent = nil
 				return
 			}
 			func() {
