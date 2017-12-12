@@ -6,9 +6,9 @@ package packages
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
-	"path/filepath"
 )
 
 func TestWatchDir(t *testing.T) {
