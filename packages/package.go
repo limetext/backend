@@ -6,7 +6,7 @@ package packages
 
 import (
 	"io/ioutil"
-	"path"
+	"path/filepath"
 	"sync"
 
 	"github.com/limetext/backend/log"
@@ -57,6 +57,14 @@ func Unregister(r *Record) {
 }
 
 func Scan(dir string) {
+	if !filepath.IsAbs(dir) {
+		var err error
+		dir, err = filepath.Abs(dir)
+		if err != nil {
+			log.Error("Error on getting scanning dir absolute path: %s", err)
+			return
+		}
+	}
 	log.Debug("Scanning %s for packages", dir)
 	fis, err := ioutil.ReadDir(dir)
 	if err != nil {
@@ -67,7 +75,7 @@ func Scan(dir string) {
 
 	var pkgs []Package
 	for _, fi := range fis {
-		pkgPath := path.Join(dir, fi.Name())
+		pkgPath := filepath.Join(dir, fi.Name())
 		if _, ok := loaded[pkgPath]; ok {
 			continue
 		}

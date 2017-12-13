@@ -5,6 +5,7 @@
 package packages
 
 import (
+	"path/filepath"
 	"sync"
 	"testing"
 )
@@ -118,7 +119,11 @@ func TestUnLoad(t *testing.T) {
 }
 
 func TestScan(t *testing.T) {
-	path := "testdata/Preferences.sublime-settings"
+	path, err := filepath.Abs("testdata/Preferences.sublime-settings")
+	if err != nil {
+		t.Fatalf("Couldn't get absolute path for %s: %s", path, err)
+	}
+
 	pkg := &dummyPackage{path: path}
 	rec := &Record{func(s string) bool { return s == path },
 		func(s string) Package { return pkg }}
@@ -127,13 +132,13 @@ func TestScan(t *testing.T) {
 	defer Unregister(rec)
 
 	loaded[path] = nil
-	Scan("testdata")
+	Scan(filepath.Dir(path))
 	if pkg.IsLoaded() {
 		t.Error("Expected not loading package when it exists in loaded packages")
 	}
 
 	delete(loaded, path)
-	Scan("testdata")
+	Scan(filepath.Dir(path))
 	if !pkg.IsLoaded() {
 		t.Error("Expected package be loaded")
 	}

@@ -73,7 +73,7 @@ func (w *Watcher) Watch(name string, cb interface{}) error {
 			return err
 		}
 	}
-	log.Finest("Watch(%s)", name)
+	log.Fine("Watch(%s)", name)
 	fi, err := os.Stat(name)
 	isDir := err == nil && fi.IsDir()
 	// If the file doesn't exist currently we will add watcher for file
@@ -113,6 +113,7 @@ func (w *Watcher) Watch(name string, cb interface{}) error {
 }
 
 func (w *Watcher) add(name string, cb interface{}) error {
+	log.Fine("Adding %s callback", name)
 	numok := 0
 	if _, ok := cb.(FileChangedCallback); ok {
 		numok++
@@ -138,6 +139,7 @@ func (w *Watcher) watch(name string, isDir bool) error {
 	if isDir {
 		watchPath = filepath.Join(watchPath, "...")
 	}
+	log.Fine("Creating watcher on %s", name)
 	if err := notify.Watch(watchPath, w.fsEvent, notify.All); err != nil {
 		return err
 	}
@@ -148,9 +150,7 @@ func (w *Watcher) watch(name string, isDir bool) error {
 // Remove watchers created on files under this directory because
 // one watcher on the parent directory is enough for all of them
 func (w *Watcher) flushDir(name string) {
-	if util.Exists(w.dirs, name) {
-		return
-	}
+	log.Finest("Flusing watched directory %s", name)
 	w.dirs = append(w.dirs, name)
 	for _, p := range w.watchers {
 		if filepath.Dir(p) == name && !util.Exists(w.dirs, p) {
@@ -169,7 +169,7 @@ func (w *Watcher) UnWatch(name string, cb interface{}) error {
 			return err
 		}
 	}
-	log.Finest("UnWatch(%s)", name)
+	log.Fine("UnWatch(%s)", name)
 	w.Lock()
 	defer w.Unlock()
 	if cb == nil {
@@ -198,14 +198,14 @@ func (w *Watcher) unWatch(name string) error {
 }
 
 func (w *Watcher) removeWatch(name string) error {
-	// TODO: notify.Stop(w.fsEvent) would stop ALL watchers
-	// What to do?
-	// fmt.Println("TODO: removeWatch ", name)
+	log.Finest("removing watcher from %s", name)
 	notify.Stop(w.fsEvent)
 	w.watchers = util.Remove(w.watchers, name)
 	if util.Exists(w.dirs, name) {
 		w.removeDir(name)
 	}
+	// notify.Stop(w.fsEvent) would stop ALL watchers,
+	// so after stoping we should rewatch all watcheds
 	for watchPath := range w.watched {
 		if err := notify.Watch(watchPath, w.fsEvent, notify.All); err != nil {
 			return err
@@ -247,7 +247,7 @@ func (w *Watcher) observe() {
 				return
 			}
 			func() {
-				// fmt.Println("fsEvent: ", ev)
+				log.Finest("watcher event %s", ev)
 				w.Lock()
 				defer w.Unlock()
 				path := ev.Path()

@@ -35,22 +35,22 @@ func TestLoadUnLoadJSON(t *testing.T) {
 }
 
 func TestWatch(t *testing.T) {
-	testFile := "testdata/Preferences.sublime-settings"
-	testData := []byte(`{"font_face": "test"}`)
+	file := "testdata/Preferences.sublime-settings"
+	data := []byte(`{"font_face": "test"}`)
 
 	set := text.NewSettings()
-	if err := LoadJSON(testFile, &set); err != nil {
+	if err := LoadJSON(file, &set); err != nil {
 		t.Fatalf("Error LoadJSON: %s", err)
 	}
 
-	data, err := ioutil.ReadFile(testFile)
+	dataOrig, err := ioutil.ReadFile(file)
 	if err != nil {
-		t.Fatalf("Error reading %s: %s", testFile, err)
+		t.Fatalf("Error reading %s: %s", file, err)
 	}
 
 	// FileChanged
-	if err := ioutil.WriteFile(testFile, testData, 0644); err != nil {
-		t.Fatalf("Error writing to file %s: %s", testFile, err)
+	if err := ioutil.WriteFile(file, data, 0644); err != nil {
+		t.Fatalf("Error writing to file %s: %s", file, err)
 	}
 	time.Sleep(100 * time.Millisecond)
 	if got, exp := set.String("font_face"), "test"; got != exp {
@@ -58,8 +58,8 @@ func TestWatch(t *testing.T) {
 	}
 
 	// FileRemoved
-	if err := os.Remove(testFile); err != nil {
-		t.Fatalf("Couldn't remove %s: %s", testFile, err)
+	if err := os.Remove(file); err != nil {
+		t.Fatalf("Couldn't remove %s: %s", file, err)
 	}
 	time.Sleep(100 * time.Millisecond)
 	if set.Has("font_face") {
@@ -67,8 +67,8 @@ func TestWatch(t *testing.T) {
 	}
 
 	// FileCreated
-	if err := ioutil.WriteFile(testFile, data, 0644); err != nil {
-		t.Fatalf("Error writing to file %s: %s", testFile, err)
+	if err := ioutil.WriteFile(file, dataOrig, 0644); err != nil {
+		t.Fatalf("Error writing to file %s: %s", file, err)
 	}
 	time.Sleep(100 * time.Millisecond)
 	if got, exp := set.String("font_face"), "Monospace"; got != exp {

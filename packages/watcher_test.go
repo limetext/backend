@@ -13,26 +13,25 @@ import (
 
 func TestWatchDir(t *testing.T) {
 	// The backend libraries expect absolute paths
-	testPath, testPathErr := filepath.Abs("testdata/file")
-
-	if testPathErr != nil {
-		t.Fatalf("Couldn't get absolute path for testdata/file: %s", testPathErr)
+	path, err := filepath.Abs("testdata/file")
+	if err != nil {
+		t.Fatalf("Couldn't get absolute path for %s: %s", path, err)
 	}
 
-	pkg := &dummyPackage{path: testPath}
-	rec := &Record{func(s string) bool { return s == testPath },
+	pkg := &dummyPackage{path: path}
+	rec := &Record{func(s string) bool { return s == path },
 		func(s string) Package { return pkg }}
 
 	Register(rec)
 	defer Unregister(rec)
-	watchDir(filepath.Dir(testPath))
+	watchDir(filepath.Dir(path))
 
-	if _, err := os.Create(testPath); err != nil {
-		t.Fatalf("Error creating '%s' file: %s", testPath, err)
+	if _, err := os.Create(path); err != nil {
+		t.Fatalf("Error creating '%s' file: %s", path, err)
 	}
-	defer os.Remove(testPath)
-	time.Sleep(500 * time.Millisecond)
+	defer os.Remove(path)
+	time.Sleep(100 * time.Millisecond)
 	if !pkg.IsLoaded() {
-		t.Error("Expected package loaded")
+		t.Error("Expected package to be loaded")
 	}
 }
