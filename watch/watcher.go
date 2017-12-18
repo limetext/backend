@@ -199,17 +199,14 @@ func (w *Watcher) unWatch(name string) error {
 
 func (w *Watcher) removeWatch(name string) error {
 	log.Finest("removing watcher from %s", name)
-	notify.Stop(w.fsEvent)
+	// TODO
+	// notify.Stop(w.fsEvent) would stop ALL watchers, and the only way for
+	// unwatching is notify.Stop(). So we won't unwatch from the notify for
+	// now, just we will remove it from Watcher struct untill there is a
+	// better solution
 	w.watchers = util.Remove(w.watchers, name)
 	if util.Exists(w.dirs, name) {
 		w.removeDir(name)
-	}
-	// notify.Stop(w.fsEvent) would stop ALL watchers,
-	// so after stoping we should rewatch all watcheds
-	for watchPath := range w.watched {
-		if err := notify.Watch(watchPath, w.fsEvent, notify.All); err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -246,53 +243,49 @@ func (w *Watcher) observe() {
 				w.fsEvent = nil
 				return
 			}
-			func() {
-				log.Finest("watcher event %s", ev)
-				w.Lock()
-				defer w.Unlock()
-				path := ev.Path()
-				w.apply(path, ev.Event())
-				// currently fsnotify pushs remove event for files
-				// inside directory when a directory is removed but
-				// when the directory is renamed there is no event for
-				// files inside directory
-				if ev.Event()&notify.Rename != 0 && util.Exists(w.dirs, path) {
-					for p, _ := range w.watched {
-						if filepath.Dir(p) == path {
-							w.apply(p, ev.Event())
-						}
-					}
-				}
-				dir := filepath.Dir(path)
-				// The watcher will be removed if the file is deleted
-				// so we need to watch the parent directory for when the
-				// file is created again
-				if ev.Event()&notify.Remove != 0 {
-					w.watchers = util.Remove(w.watchers, path)
-					w.Unlock()
-					w.Watch(dir, nil)
-					w.Lock()
-				}
-				// If the event is create we will apply FileCreated callback
-				// for the parent directory to because when new file is created
-				// inside directory we won't get any event for the watched directory.
-				// we need this feature to detect new packages(plugins, settings, etc)
-				if cbs, exist := w.watched[dir]; ev.Event()&notify.Create != 0 && exist {
-					for _, cb := range cbs {
-						if c, ok := cb.(FileCreatedCallback); ok {
-							w.Unlock()
-							c.FileCreated(path)
-							w.Lock()
-						}
-					}
-				}
+			w.parseEv(ev)
+		}
+	}
+}
 
-			}()
-			// case err, ok := <-w.wchr.Errors:
-			// 	if !ok {
-			// 		break
-			// 	}
-			// 	log.Warn("Watcher error: %s", err)
+func (w *Watcher) parseEv(ev notify.EventInfo) {
+	log.Finest("watcher event %s", ev)
+	w.Lock()
+	defer w.Unlock()
+	path := ev.Path()
+	w.apply(path, ev.Event())
+	// currently fsnotify pushs remove event for files
+	// inside directory when a directory is removed but
+	// when the directory is renamed there is no event for
+	// files inside directory
+	if ev.Event()&notify.Rename != 0 && util.Exists(w.dirs, path) {
+		for p, _ := range w.watched {
+			if filepath.Dir(p) == path {
+				w.apply(p, ev.Event())
+			}
+		}
+	}
+	dir := filepath.Dir(path)
+	// The watcher will be removed if the file is deleted
+	// so we need to watch the parent directory for when the
+	// file is created again
+	if ev.Event()&notify.Remove != 0 {
+		w.watchers = util.Remove(w.watchers, path)
+		w.Unlock()
+		w.Watch(dir, nil)
+		w.Lock()
+	}
+	// If the event is create we will apply FileCreated callback
+	// for the parent directory to because when new file is created
+	// inside directory we won't get any event for the watched directory.
+	// we need this feature to detect new packages(plugins, settings, etc)
+	if cbs, exist := w.watched[dir]; ev.Event()&notify.Create != 0 && exist {
+		for _, cb := range cbs {
+			if c, ok := cb.(FileCreatedCallback); ok {
+				w.Unlock()
+				c.FileCreated(path)
+				w.Lock()
+			}
 		}
 	}
 }

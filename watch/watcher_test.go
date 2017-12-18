@@ -46,9 +46,6 @@ func testWatched(t *testing.T, watched map[string][]interface{}, expWatched []st
 			t.Errorf("Expected %s exist in watched", absp)
 		}
 	}
-	// if !reflect.DeepEqual(test.expWatchers, watcher.watchers) {
-	// 	t.Errorf("Test %d: Expected watchers %v, but got %v", i, test.expWatchers, watcher.watchers)
-	// }
 }
 
 func testWatchers(t *testing.T, watchers []string, expWatchers []string) {
@@ -64,9 +61,6 @@ func testWatchers(t *testing.T, watchers []string, expWatchers []string) {
 			t.Errorf("Expected watchers %s to be %s", watchers[i], absp)
 		}
 	}
-	// if !reflect.DeepEqual(test.expWatchers, watcher.watchers) {
-	// 	t.Errorf("Test %d: Expected watchers %v, but got %v", i, test.expWatchers, watcher.watchers)
-	// }
 }
 
 func TestNewWatcher(t *testing.T) {
@@ -203,9 +197,6 @@ func TestFlushDir(t *testing.T) {
 	defer watcher.Close()
 	d := newDummy(name)
 	watch(t, watcher, name, d)
-	// if !reflect.DeepEqual(watcher.watchers, []string{name}) {
-	// 	t.Errorf("Expected watchers equal to %v, but got %v", []string{name}, watcher.watchers)
-	// }
 	testWatchers(t, watcher.dirs, []string{})
 	testWatchers(t, watcher.watchers, []string{name})
 	watcher.flushDir(dir)
@@ -252,14 +243,8 @@ func TestUnWatchDirectory(t *testing.T) {
 	d := newDummy(absname)
 	watch(t, watcher, name, d)
 	watch(t, watcher, dir, nil)
-	// if !reflect.DeepEqual(watcher.watchers, []string{"testdata"}) {
-	// 	t.Fatalf("Expected watchers be equal to %s, but got %s", []string{"testdata"}, watcher.watchers)
-	// }
 	testWatchers(t, watcher.watchers, []string{dir})
 	unwatch(t, watcher, dir, nil)
-	// if !reflect.DeepEqual(watcher.watchers, []string{name}) {
-	// 	t.Errorf("Expected watchers be equal to %s, but got %s", []string{name}, watcher.watchers)
-	// }
 	testWatchers(t, watcher.watchers, []string{name})
 }
 
@@ -275,9 +260,6 @@ func TestUnWatchOneOfSubscribers(t *testing.T) {
 		t.Fatalf("Expected watched[%s] length be %d, but got %d", name, 2, len(watcher.watched[name]))
 	}
 	unwatch(t, watcher, name, d1)
-	// if !reflect.DeepEqual(watcher.watchers, []string{name}) {
-	// 	t.Errorf("Expected watchers be equal to %s, but got %s", []string{name}, watcher.watchers)
-	// }
 	testWatchers(t, watcher.watchers, []string{name})
 	if len(watcher.watched[name]) != 1 {
 		t.Errorf("Expected watched[%s] length be %d, but got %d", name, 1, len(watcher.watched[name]))
@@ -325,22 +307,10 @@ func TestRemoveDir(t *testing.T) {
 	d := newDummy(name)
 	watch(t, watcher, dir, d)
 	watch(t, watcher, name, d)
-	// if !reflect.DeepEqual(watcher.watchers, []string{dir}) {
-	// 	t.Errorf("Expected watchers be equal to %s, but got %s", []string{dir}, watcher.watchers)
-	// }
 	testWatchers(t, watcher.watchers, []string{dir})
-	// if !reflect.DeepEqual(watcher.dirs, []string{dir}) {
-	// 	t.Errorf("Expected dirs be equal to %s, but got %s", []string{dir}, watcher.dirs)
-	// }
 	testWatchers(t, watcher.dirs, []string{dir})
 	watcher.removeDir(dir)
-	// if !reflect.DeepEqual(watcher.dirs, []string{}) {
-	// 	t.Errorf("Expected dirs be empty but got %v", watcher.dirs)
-	// }
 	testWatchers(t, watcher.dirs, []string{})
-	// if !reflect.DeepEqual(watcher.watchers, []string{dir, name}) {
-	// 	t.Errorf("Expected watchers be equal to %s, but got %s", []string{name}, watcher.watchers)
-	// }
 	testWatchers(t, watcher.watchers, []string{dir, name})
 }
 
@@ -373,9 +343,6 @@ func TestCreateEvent(t *testing.T) {
 	d := newDummy(absname)
 	watch(t, watcher, name, d)
 
-	// if !reflect.DeepEqual(watcher.watchers, []string{"testdata"}) {
-	// 	t.Errorf("Expected watchers be equal to %v, but got %v", []string{"testdata"}, watcher.watchers)
-	// }
 	testWatchers(t, watcher.watchers, []string{"testdata"})
 
 	if f, err := os.Create(name); err != nil {
