@@ -7,6 +7,7 @@ package backend
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"sync"
@@ -442,16 +443,15 @@ func (e *Editor) AddColorScheme(path string, cs ColorScheme) {
 }
 
 func (e *Editor) GetColorScheme(path string) ColorScheme {
-	if path == "" {
-		return defaultScheme()
+	if scheme := e.colorSchemes[path]; scheme != nil {
+		return scheme
+	} else if abs, err := filepath.Abs(path); err == nil {
+		if scheme = e.colorSchemes[abs]; scheme != nil {
+			return scheme
+		}
 	}
-
-	scheme := e.colorSchemes[path]
-	if scheme == nil {
-		log.Error("No color scheme %s in editor falling back to default color scheme", path)
-		return defaultScheme()
-	}
-	return scheme
+	log.Error("No color scheme %s in editor falling back to default color scheme", path)
+	return defaultScheme()
 }
 
 // TODO: should generate sth like sublime text color schemes menu
