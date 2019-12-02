@@ -27,6 +27,8 @@ type logger struct {
 }
 
 func NewLogger() Logger {
+	log4go.CallerSkip += 1
+
 	return &logger{make(log4go.Logger)}
 }
 
