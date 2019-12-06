@@ -701,7 +701,7 @@ func (v *View) isClosed() bool {
 func (v *View) Close() bool {
 	OnPreClose.Call(v)
 	if v.IsDirty() {
-		close_anyway := GetEditor().Frontend().OkCancelDialog("File has been modified since last save, close anyway?", "Close")
+		close_anyway := GetEditor().Frontend().OkCancelDialog("File has been modified since last save, close anyway?", "Yes")
 		if !close_anyway {
 			return false
 		}

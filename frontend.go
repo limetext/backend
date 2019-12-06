@@ -11,11 +11,11 @@ import "github.com/limetext/text"
 type Frontend interface {
 	// Probe the frontend for the currently
 	// visible region of the given view.
-	VisibleRegion(v *View) text.Region
+	VisibleRegion(*View) text.Region
 
 	// Make the frontend show the specified region of the
 	// given view.
-	Show(v *View, r text.Region)
+	Show(*View, text.Region)
 
 	// Sets the status message shown in the status bar
 	StatusMessage(string)
