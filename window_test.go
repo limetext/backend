@@ -175,9 +175,19 @@ func TestOpenFile(t *testing.T) {
 	defer w.Close()
 	for i, test := range tests {
 		v := w.OpenFile(test.in, 0644)
+
 		if out := v.FileName(); out != test.exp {
 			t.Errorf("Test %d: Expected view file name %s, but got %s", i, test.exp, out)
 		}
+		if l := v.Sel().Len(); l != 1 {
+			t.Errorf("Test %d: Expected one selection after openning file, but got %d",
+				i, l)
+		}
+		if r := v.Sel().Get(0); r.A != 0 || r.B != 0 {
+			t.Errorf("Test %d: Expected initial selection on (0, 0), but got %s",
+				i, r)
+		}
+
 		v.Close()
 	}
 }

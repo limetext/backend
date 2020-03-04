@@ -1,17 +1,17 @@
 precommit: fmt license test
 
 test:
-	@go test -race $$(go list ./... | grep -v vendor)
+	@go test -race ./...
 fmt:
-	@go fmt $$(go list ./... | grep -v vendor)
+	@go fmt ./...
 license:
 	@go run $(GOPATH)/src/github.com/limetext/tasks/gen_license.go
 fast_test:
-	@go test $$(go list ./... | grep -v vendor)
+	@go test ./...
 
 check_fmt:
-ifneq ($(shell gofmt -l ./ | grep -v vendor | grep -v testdata),)
-	$(error code not fmted, run make fmt. $(shell gofmt -l ./ | grep -v vendor | grep -v testdata))
+ifneq ($(shell gofmt -l ./ | grep -v testdata),)
+	$(error code not fmted, run make fmt. $(shell gofmt -l ./ | grep -v testdata))
 endif
 
 check_license:
@@ -19,10 +19,6 @@ check_license:
 
 tasks:
 	go get -d -u github.com/limetext/tasks
-
-glide:
-	go get -v -u github.com/Masterminds/glide
-	glide install
 
 cover_dep:
 	go get -v -u github.com/mattn/goveralls
@@ -39,7 +35,7 @@ travis_test: test cover report_cover
 
 cover:
 	@echo "mode: count" > coverage.cov; \
-	for pkg in $$(go list "./..." | grep -v /vendor/); do \
+	for pkg in $$(go list "./..."); do \
 		go test -covermode=count -coverprofile=tmp.cov $$pkg; \
 		sed 1d tmp.cov >> coverage.cov; \
 		rm tmp.cov; \

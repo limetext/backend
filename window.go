@@ -37,8 +37,8 @@ func (w *Window) NewFile() *View {
 	v := w.views[len(w.views)-1]
 
 	v.setBuffer(text.NewBuffer())
-	v.selection.Clear()
-	v.selection.Add(text.Region{A: 0, B: 0})
+	v.Sel().Clear()
+	v.Sel().Add(text.Region{A: 0, B: 0})
 	v.Settings().Set("lime.last_save_change_count", v.ChangeCount())
 
 	OnNew.Call(v)
@@ -87,8 +87,8 @@ func (w *Window) OpenFile(filename string, flags int) *View {
 		v.Insert(e, 0, string(d))
 	}
 	v.EndEdit(e)
-	v.selection.Clear()
-	v.selection.Add(text.Region{A: 0, B: 0})
+	v.Sel().Clear()
+	v.Sel().Add(text.Region{A: 0, B: 0})
 	v.Settings().Set("lime.last_save_change_count", v.ChangeCount())
 	v.SetScratch(false)
 

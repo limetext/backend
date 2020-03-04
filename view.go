@@ -63,6 +63,9 @@ func newView(w *Window) *View {
 		platformSettings: new(text.HasSettings),
 		userSettings:     new(text.HasSettings),
 	}
+	v.Sel().AddOnChange("selection modified", func() {
+		OnSelectionModified.Call(v)
+	})
 	// Initializing keybidings hierarchy
 	// project <- syntax default <- syntax platform <- syntax user <- buffer
 	v.defaultSettings.Settings().SetParent(v.window.Project())
@@ -128,8 +131,7 @@ func (v *View) flush(position, delta int) {
 
 		e := util.Prof.Enter("view.flush")
 		defer e.Exit()
-		// TODO(.): issue #211
-		v.selection.Adjust(position, delta)
+		v.Sel().Adjust(position, delta)
 		if v.syntax != nil {
 			v.syntax.Adjust(position, delta)
 		}
@@ -420,8 +422,6 @@ func (v *View) EndEdit(edit *Edit) {
 		return
 	}
 
-	var selection_modified bool
-
 	if l := len(v.editstack) - 1; i != l {
 		// TODO(.): See TODO in BeginEdit
 		log.Error("This edit wasn't last in the stack... %d !=  %d: %v, %v", i, l, edit, v.editstack)
@@ -434,9 +434,6 @@ func (v *View) EndEdit(edit *Edit) {
 		sel_same := reflect.DeepEqual(*v.Sel(), current_edit.savedSel)
 		buf_same := v.ChangeCount() == current_edit.savedCount
 		eq := (sel_same && buf_same && current_edit.composite.Len() == 0)
-		if !eq && !sel_same {
-			selection_modified = true
-		}
 		if v.IsScratch() || current_edit.bypassUndo || eq {
 			continue
 		}
@@ -460,9 +457,6 @@ func (v *View) EndEdit(edit *Edit) {
 	}
 	// Pop this Edit and all the children off the Edit stack.
 	v.editstack = v.editstack[:i]
-	if selection_modified {
-		OnSelectionModified.Call(v)
-	}
 }
 
 // Sets the scratch property of the view.
@@ -676,7 +670,7 @@ func (v *View) Transform(viewport text.Region) render.Recipe {
 		rr[k] = *v.Clone()
 	}
 	rs := render.ViewRegions{Flags: render.SELECTION}
-	rs.Regions.AddAll(v.selection.Regions())
+	rs.Regions.AddAll(v.Sel().Regions())
 	rr["lime.selection"] = rs
 	return render.Transform(scheme, rr, viewport)
 }
