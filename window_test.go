@@ -7,6 +7,8 @@ package backend
 import (
 	"path/filepath"
 	"testing"
+
+	"github.com/limetext/text"
 )
 
 func TestWindowNewFile(t *testing.T) {
@@ -173,6 +175,10 @@ func TestOpenFile(t *testing.T) {
 
 	w := GetEditor().NewWindow()
 	defer w.Close()
+	OnSelectionModified.Add(func(v *View) {
+		v.Transform(text.Region{0, 0})
+	})
+
 	for i, test := range tests {
 		v := w.OpenFile(test.in, 0644)
 

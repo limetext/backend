@@ -125,13 +125,13 @@ func (v *View) Inserted(changed_buffer text.Buffer, region_inserted text.Region,
 // triggers the "OnModified" event, and adds a reparse request
 // to the parse go-routine.
 func (v *View) flush(position, delta int) {
+	v.Sel().Adjust(position, delta)
 	func() {
 		v.lock.Lock()
 		defer v.lock.Unlock()
 
 		e := util.Prof.Enter("view.flush")
 		defer e.Exit()
-		v.Sel().Adjust(position, delta)
 		if v.syntax != nil {
 			v.syntax.Adjust(position, delta)
 		}
@@ -1023,10 +1023,10 @@ func (v *View) SetFileName(n string) error {
 	if err := v.buffer.SetFileName(n); err != nil {
 		return err
 	}
-	if ext := path.Ext(n); ext == "" {
-		return nil
-	} else if file := GetEditor().fileTypeSyntax(ext[1:]); file != "" {
-		v.SetSyntaxFile(file)
+	if ext := path.Ext(n); ext != "" {
+		if file := GetEditor().fileTypeSyntax(ext[1:]); file != "" {
+			v.SetSyntaxFile(file)
+		}
 	}
 	return nil
 }
