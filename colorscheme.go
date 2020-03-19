@@ -39,7 +39,8 @@ func defaultScheme() ColorScheme {
 	if colorscheme == nil {
 		colorscheme = &scheme{
 			render.Settings{
-				Background: render.Colour{255, 255, 255, 1},
+				Background: render.Colour{0, 0, 0, 1},
+				Foreground: render.Colour{255, 255, 255, 1},
 			},
 		}
 	}
