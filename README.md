@@ -9,4 +9,4 @@
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/limetext/lime)
 
-This is the backend code for [Lime](http://limetext.org/). For more information about the project, please see [limetext/lime](https://github.com/limetext/lime).
+This is the backend code for Lime. For more information about the project, please see [limetext/lime](https://github.com/limetext/lime).
